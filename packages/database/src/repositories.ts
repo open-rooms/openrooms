@@ -1,16 +1,10 @@
 /**
- * Repository Implementations using Prisma
+ * Repository Implementations using Kysely
+ * Clean, type-safe, deterministic SQL
  */
 
-import {
-  PrismaClient,
-  Room as PrismaRoom,
-  Workflow as PrismaWorkflow,
-  WorkflowNode as PrismaWorkflowNode,
-  Agent as PrismaAgent,
-  ExecutionLog as PrismaExecutionLog,
-  Memory as PrismaMemory,
-} from '@openrooms/database';
+import { sql } from 'kysely';
+import { getDb } from './db';
 import {
   RoomRepository,
   WorkflowRepository,
@@ -35,483 +29,672 @@ import {
   ExecutionLog,
   Memory,
   MemoryEntry,
-  MemoryType,
   UUID,
   RoomStatus,
+  WorkflowStatus,
+  AgentRole,
+  AgentStatus,
+  ExecutionLogLevel,
+  MemoryType,
 } from '@openrooms/core';
 
-export class PrismaRoomRepository implements RoomRepository {
-  constructor(private readonly prisma: PrismaClient) {}
+// ============================================================================
+// Room Repository
+// ============================================================================
 
+export class KyselyRoomRepository implements RoomRepository {
   async create(data: CreateRoomData): Promise<Room> {
-    const room = await this.prisma.room.create({
-      data: {
+    const db = getDb();
+
+    const room = await db
+      .insertInto('rooms')
+      .values({
+        id: sql`gen_random_uuid()`,
         name: data.name,
-        description: data.description,
+        description: data.description || null,
         workflowId: data.workflowId,
-        config: data.config ?? {},
-        metadata: data.metadata ?? {},
-      },
-    });
+        config: JSON.stringify(data.config || {}),
+        metadata: JSON.stringify(data.metadata || {}),
+        updatedAt: new Date(),
+      })
+      .returningAll()
+      .executeTakeFirstOrThrow();
 
     return this.mapRoom(room);
   }
 
   async findById(id: UUID): Promise<Room | null> {
-    const room = await this.prisma.room.findUnique({
-      where: { id },
-    });
+    const db = getDb();
+
+    const room = await db
+      .selectFrom('rooms')
+      .selectAll()
+      .where('id', '=', id)
+      .executeTakeFirst();
 
     return room ? this.mapRoom(room) : null;
   }
 
   async findAll(filters?: RoomFilters): Promise<Room[]> {
-    const rooms = await this.prisma.room.findMany({
-      where: {
-        status: filters?.status,
-        workflowId: filters?.workflowId,
-      },
-      take: filters?.limit,
-      skip: filters?.offset,
-      orderBy: { createdAt: 'desc' },
-    });
+    const db = getDb();
 
+    let query = db.selectFrom('rooms').selectAll();
+
+    if (filters?.status) {
+      query = query.where('status', '=', filters.status);
+    }
+
+    if (filters?.workflowId) {
+      query = query.where('workflowId', '=', filters.workflowId);
+    }
+
+    query = query.orderBy('createdAt', 'desc');
+
+    if (filters?.limit) {
+      query = query.limit(filters.limit);
+    }
+
+    if (filters?.offset) {
+      query = query.offset(filters.offset);
+    }
+
+    const rooms = await query.execute();
     return rooms.map((r) => this.mapRoom(r));
   }
 
   async update(id: UUID, data: UpdateRoomData): Promise<Room> {
-    const room = await this.prisma.room.update({
-      where: { id },
-      data: {
-        name: data.name,
-        description: data.description,
-        status: data.status,
-        currentNodeId: data.currentNodeId,
-        config: data.config,
-        metadata: data.metadata,
-      },
-    });
+    const db = getDb();
+
+    const updateData: any = {
+      updatedAt: new Date(),
+    };
+
+    if (data.name !== undefined) updateData.name = data.name;
+    if (data.description !== undefined) updateData.description = data.description;
+    if (data.status !== undefined) updateData.status = data.status;
+    if (data.currentNodeId !== undefined)
+      updateData.currentNodeId = data.currentNodeId;
+    if (data.config !== undefined)
+      updateData.config = JSON.stringify(data.config);
+    if (data.metadata !== undefined)
+      updateData.metadata = JSON.stringify(data.metadata);
+
+    const room = await db
+      .updateTable('rooms')
+      .set(updateData)
+      .where('id', '=', id)
+      .returningAll()
+      .executeTakeFirstOrThrow();
 
     return this.mapRoom(room);
   }
 
   async delete(id: UUID): Promise<void> {
-    await this.prisma.room.delete({
-      where: { id },
-    });
+    const db = getDb();
+    await db.deleteFrom('rooms').where('id', '=', id).execute();
   }
 
   async updateStatus(id: UUID, status: RoomStatus): Promise<void> {
-    await this.prisma.room.update({
-      where: { id },
-      data: { status },
-    });
+    const db = getDb();
+    await db
+      .updateTable('rooms')
+      .set({ status, updatedAt: new Date() })
+      .where('id', '=', id)
+      .execute();
   }
 
-  private mapRoom(room: PrismaRoom): Room {
+  async setCurrentNode(id: UUID, nodeId: UUID | null): Promise<void> {
+    const db = getDb();
+    await db
+      .updateTable('rooms')
+      .set({ currentNodeId: nodeId, updatedAt: new Date() })
+      .where('id', '=', id)
+      .execute();
+  }
+
+  private mapRoom(row: any): Room {
     return {
-      id: room.id,
-      name: room.name,
-      description: room.description ?? undefined,
-      status: room.status as RoomStatus,
-      workflowId: room.workflowId,
-      currentNodeId: room.currentNodeId ?? undefined,
-      config: room.config as Room['config'],
-      metadata: room.metadata as Room['metadata'],
-      createdAt: room.createdAt.toISOString(),
-      updatedAt: room.updatedAt.toISOString(),
-      startedAt: room.startedAt?.toISOString(),
-      completedAt: room.completedAt?.toISOString(),
+      id: row.id,
+      name: row.name,
+      description: row.description,
+      status: row.status as RoomStatus,
+      workflowId: row.workflowId,
+      currentNodeId: row.currentNodeId,
+      config: typeof row.config === 'string' ? JSON.parse(row.config) : row.config,
+      metadata:
+        typeof row.metadata === 'string'
+          ? JSON.parse(row.metadata)
+          : row.metadata,
+      createdAt: row.createdAt,
+      updatedAt: row.updatedAt,
+      startedAt: row.startedAt,
+      completedAt: row.completedAt,
     };
   }
 }
 
-export class PrismaWorkflowRepository implements WorkflowRepository {
-  constructor(private readonly prisma: PrismaClient) {}
+// ============================================================================
+// Workflow Repository
+// ============================================================================
 
+export class KyselyWorkflowRepository implements WorkflowRepository {
   async create(data: CreateWorkflowData): Promise<Workflow> {
-    const workflow = await this.prisma.workflow.create({
-      data: {
+    const db = getDb();
+
+    const workflow = await db
+      .insertInto('workflows')
+      .values({
+        id: sql`gen_random_uuid()`,
         name: data.name,
-        description: data.description,
+        description: data.description || null,
+        version: 1,
+        status: 'DRAFT',
         initialNodeId: data.initialNodeId,
-        metadata: data.metadata ?? {},
-      },
-    });
+        metadata: JSON.stringify(data.metadata || {}),
+        updatedAt: new Date(),
+      })
+      .returningAll()
+      .executeTakeFirstOrThrow();
 
     return this.mapWorkflow(workflow);
   }
 
   async findById(id: UUID): Promise<Workflow | null> {
-    const workflow = await this.prisma.workflow.findUnique({
-      where: { id },
-    });
+    const db = getDb();
+
+    const workflow = await db
+      .selectFrom('workflows')
+      .selectAll()
+      .where('id', '=', id)
+      .executeTakeFirst();
 
     return workflow ? this.mapWorkflow(workflow) : null;
   }
 
   async findAll(): Promise<Workflow[]> {
-    const workflows = await this.prisma.workflow.findMany({
-      orderBy: { createdAt: 'desc' },
-    });
+    const db = getDb();
+
+    const workflows = await db
+      .selectFrom('workflows')
+      .selectAll()
+      .orderBy('createdAt', 'desc')
+      .execute();
 
     return workflows.map((w) => this.mapWorkflow(w));
   }
 
   async update(id: UUID, data: UpdateWorkflowData): Promise<Workflow> {
-    const workflow = await this.prisma.workflow.update({
-      where: { id },
-      data: {
-        name: data.name,
-        description: data.description,
-        metadata: data.metadata,
-      },
-    });
+    const db = getDb();
+
+    const updateData: any = {
+      updatedAt: new Date(),
+    };
+
+    if (data.name !== undefined) updateData.name = data.name;
+    if (data.description !== undefined) updateData.description = data.description;
+    if (data.metadata !== undefined)
+      updateData.metadata = JSON.stringify(data.metadata);
+
+    const workflow = await db
+      .updateTable('workflows')
+      .set(updateData)
+      .where('id', '=', id)
+      .returningAll()
+      .executeTakeFirstOrThrow();
 
     return this.mapWorkflow(workflow);
   }
 
   async delete(id: UUID): Promise<void> {
-    await this.prisma.workflow.delete({
-      where: { id },
-    });
+    const db = getDb();
+    await db.deleteFrom('workflows').where('id', '=', id).execute();
   }
 
   async getNodes(workflowId: UUID): Promise<WorkflowNode[]> {
-    const nodes = await this.prisma.workflowNode.findMany({
-      where: { workflowId },
-      orderBy: { createdAt: 'asc' },
-    });
+    const db = getDb();
 
-    return nodes.map((n) => this.mapNode(n));
+    const nodes = await db
+      .selectFrom('workflow_nodes')
+      .selectAll()
+      .where('workflowId', '=', workflowId)
+      .orderBy('createdAt')
+      .execute();
+
+    return nodes.map((n) => this.mapNode(n, workflowId));
   }
 
   async getNode(nodeId: UUID): Promise<WorkflowNode | null> {
-    const node = await this.prisma.workflowNode.findUnique({
-      where: { id: nodeId },
-    });
+    const db = getDb();
 
-    return node ? this.mapNode(node) : null;
+    const node = await db
+      .selectFrom('workflow_nodes')
+      .selectAll()
+      .where('nodeId', '=', nodeId)
+      .executeTakeFirst();
+
+    return node ? this.mapNode(node, node.workflowId) : null;
   }
 
-  private mapWorkflow(workflow: PrismaWorkflow): Workflow {
+  private mapWorkflow(row: any): Workflow {
     return {
-      id: workflow.id,
-      name: workflow.name,
-      description: workflow.description ?? undefined,
-      version: workflow.version,
-      status: workflow.status as Workflow['status'],
-      initialNodeId: workflow.initialNodeId,
-      metadata: workflow.metadata as Workflow['metadata'],
-      createdAt: workflow.createdAt.toISOString(),
-      updatedAt: workflow.updatedAt.toISOString(),
+      id: row.id,
+      name: row.name,
+      description: row.description,
+      version: row.version,
+      status: row.status as WorkflowStatus,
+      initialNodeId: row.initialNodeId,
+      metadata:
+        typeof row.metadata === 'string'
+          ? JSON.parse(row.metadata)
+          : row.metadata,
+      createdAt: row.createdAt,
+      updatedAt: row.updatedAt,
     };
   }
 
-  private mapNode(node: PrismaWorkflowNode): WorkflowNode {
+  private mapNode(row: any, workflowId: string): WorkflowNode {
     return {
-      id: node.id,
-      workflowId: node.workflowId,
-      type: node.type as WorkflowNode['type'],
-      name: node.name,
-      description: node.description ?? undefined,
-      config: node.config as WorkflowNode['config'],
-      transitions: node.transitions as WorkflowNode['transitions'],
-      retryPolicy: node.retryPolicy as WorkflowNode['retryPolicy'],
-      timeout: node.timeout ?? undefined,
-      metadata: node.metadata as WorkflowNode['metadata'],
-      createdAt: node.createdAt.toISOString(),
-      updatedAt: node.updatedAt.toISOString(),
+      id: row.nodeId,
+      workflowId,
+      type: row.type,
+      name: row.name,
+      description: row.description,
+      config: typeof row.config === 'string' ? JSON.parse(row.config) : row.config,
+      transitions: [],
+      metadata: {},
+      createdAt: row.createdAt,
+      updatedAt: row.updatedAt,
     };
   }
 }
 
-export class PrismaAgentRepository implements AgentRepository {
-  constructor(private readonly prisma: PrismaClient) {}
+// ============================================================================
+// Agent Repository
+// ============================================================================
 
+export class KyselyAgentRepository implements AgentRepository {
   async create(data: CreateAgentData): Promise<Agent> {
-    const agent = await this.prisma.agent.create({
-      data: {
+    const db = getDb();
+
+    const agent = await db
+      .insertInto('agents')
+      .values({
+        id: sql`gen_random_uuid()`,
         roomId: data.roomId,
         name: data.name,
-        description: data.description,
-        config: data.config,
-        metadata: data.metadata ?? {},
-      },
-    });
+        role: data.role,
+        status: (data.status as AgentStatus) || 'IDLE',
+        model: data.model,
+        systemPrompt: data.systemPrompt || null,
+        config: JSON.stringify(data.config || {}),
+        updatedAt: new Date(),
+      })
+      .returningAll()
+      .executeTakeFirstOrThrow();
 
     return this.mapAgent(agent);
   }
 
   async findById(id: UUID): Promise<Agent | null> {
-    const agent = await this.prisma.agent.findUnique({
-      where: { id },
-    });
+    const db = getDb();
+
+    const agent = await db
+      .selectFrom('agents')
+      .selectAll()
+      .where('id', '=', id)
+      .executeTakeFirst();
 
     return agent ? this.mapAgent(agent) : null;
   }
 
   async findByRoomId(roomId: UUID): Promise<Agent[]> {
-    const agents = await this.prisma.agent.findMany({
-      where: { roomId },
-    });
+    const db = getDb();
+
+    const agents = await db
+      .selectFrom('agents')
+      .selectAll()
+      .where('roomId', '=', roomId)
+      .orderBy('createdAt')
+      .execute();
 
     return agents.map((a) => this.mapAgent(a));
   }
 
   async update(id: UUID, data: UpdateAgentData): Promise<Agent> {
-    const agent = await this.prisma.agent.update({
-      where: { id },
-      data: {
-        name: data.name,
-        description: data.description,
-        config: data.config,
-        metadata: data.metadata,
-      },
-    });
+    const db = getDb();
+
+    const updateData: any = {
+      updatedAt: new Date(),
+    };
+
+    if (data.name !== undefined) updateData.name = data.name;
+    if (data.status !== undefined) updateData.status = data.status;
+    if (data.systemPrompt !== undefined)
+      updateData.systemPrompt = data.systemPrompt;
+    if (data.config !== undefined)
+      updateData.config = JSON.stringify(data.config);
+
+    const agent = await db
+      .updateTable('agents')
+      .set(updateData)
+      .where('id', '=', id)
+      .returningAll()
+      .executeTakeFirstOrThrow();
 
     return this.mapAgent(agent);
   }
 
   async delete(id: UUID): Promise<void> {
-    await this.prisma.agent.delete({
-      where: { id },
-    });
+    const db = getDb();
+    await db.deleteFrom('agents').where('id', '=', id).execute();
   }
 
-  private mapAgent(agent: PrismaAgent): Agent {
+  private mapAgent(row: any): Agent {
     return {
-      id: agent.id,
-      roomId: agent.roomId,
-      name: agent.name,
-      description: agent.description ?? undefined,
-      config: agent.config as Agent['config'],
-      metadata: agent.metadata as Agent['metadata'],
-      createdAt: agent.createdAt.toISOString(),
-      updatedAt: agent.updatedAt.toISOString(),
+      id: row.id,
+      roomId: row.roomId,
+      name: row.name,
+      role: row.role as AgentRole,
+      status: row.status as AgentStatus,
+      model: row.model,
+      systemPrompt: row.systemPrompt,
+      config: typeof row.config === 'string' ? JSON.parse(row.config) : row.config,
+      createdAt: row.createdAt,
+      updatedAt: row.updatedAt,
     };
   }
 }
 
-export class PrismaExecutionLogRepository implements ExecutionLogRepository {
-  constructor(private readonly prisma: PrismaClient) {}
+// ============================================================================
+// Execution Log Repository
+// ============================================================================
 
+export class KyselyExecutionLogRepository implements ExecutionLogRepository {
   async create(data: CreateLogData): Promise<ExecutionLog> {
-    const log = await this.prisma.executionLog.create({
-      data: {
+    const db = getDb();
+
+    const log = await db
+      .insertInto('execution_logs')
+      .values({
+        id: sql`gen_random_uuid()`,
         roomId: data.roomId,
         workflowId: data.workflowId,
-        nodeId: data.nodeId,
-        agentId: data.agentId,
-        eventType: data.eventType as any,
-        level: data.level as any,
+        nodeId: data.nodeId || null,
+        eventType: data.eventType,
+        level: (data.level as ExecutionLogLevel) || 'INFO',
         message: data.message,
-        data: data.data,
-        error: data.error,
-        duration: data.duration,
-        metadata: data.metadata ?? {},
-      },
-    });
+        data: JSON.stringify(data.data || {}),
+      })
+      .returningAll()
+      .executeTakeFirstOrThrow();
 
     return this.mapLog(log);
   }
 
-  async findByRoomId(roomId: UUID, options?: LogQueryOptions): Promise<ExecutionLog[]> {
-    const logs = await this.prisma.executionLog.findMany({
-      where: {
-        roomId,
-        level: options?.level as any,
-        timestamp: {
-          gte: options?.startTime ? new Date(options.startTime) : undefined,
-          lte: options?.endTime ? new Date(options.endTime) : undefined,
-        },
-      },
-      take: options?.limit,
-      skip: options?.offset,
-      orderBy: { timestamp: 'desc' },
-    });
+  async findByRoom(
+    roomId: UUID,
+    options?: LogQueryOptions
+  ): Promise<ExecutionLog[]> {
+    const db = getDb();
 
+    let query = db
+      .selectFrom('execution_logs')
+      .selectAll()
+      .where('roomId', '=', roomId);
+
+    if (options?.level) {
+      query = query.where('level', '=', options.level);
+    }
+
+    if (options?.eventType) {
+      query = query.where('eventType', '=', options.eventType);
+    }
+
+    query = query.orderBy('createdAt', 'desc');
+
+    if (options?.limit) {
+      query = query.limit(options.limit);
+    }
+
+    if (options?.offset) {
+      query = query.offset(options.offset);
+    }
+
+    const logs = await query.execute();
     return logs.map((l) => this.mapLog(l));
   }
 
-  async findByNodeId(nodeId: UUID): Promise<ExecutionLog[]> {
-    const logs = await this.prisma.executionLog.findMany({
-      where: { nodeId },
-      orderBy: { timestamp: 'desc' },
-    });
+  async findByWorkflow(
+    workflowId: UUID,
+    options?: LogQueryOptions
+  ): Promise<ExecutionLog[]> {
+    const db = getDb();
 
+    let query = db
+      .selectFrom('execution_logs')
+      .selectAll()
+      .where('workflowId', '=', workflowId);
+
+    if (options?.level) {
+      query = query.where('level', '=', options.level);
+    }
+
+    if (options?.eventType) {
+      query = query.where('eventType', '=', options.eventType);
+    }
+
+    query = query.orderBy('createdAt', 'desc');
+
+    if (options?.limit) {
+      query = query.limit(options.limit);
+    }
+
+    if (options?.offset) {
+      query = query.offset(options.offset);
+    }
+
+    const logs = await query.execute();
     return logs.map((l) => this.mapLog(l));
   }
 
-  async findByEventType(roomId: UUID, eventType: string): Promise<ExecutionLog[]> {
-    const logs = await this.prisma.executionLog.findMany({
-      where: {
-        roomId,
-        eventType: eventType as any,
-      },
-      orderBy: { timestamp: 'desc' },
-    });
+  async deleteOlderThan(date: Date): Promise<number> {
+    const db = getDb();
 
-    return logs.map((l) => this.mapLog(l));
+    const result = await db
+      .deleteFrom('execution_logs')
+      .where('createdAt', '<', date)
+      .executeTakeFirst();
+
+    return Number(result.numDeletedRows);
   }
 
-  async deleteByRoomId(roomId: UUID): Promise<void> {
-    await this.prisma.executionLog.deleteMany({
-      where: { roomId },
-    });
-  }
-
-  private mapLog(log: PrismaExecutionLog): ExecutionLog {
+  private mapLog(row: any): ExecutionLog {
     return {
-      id: log.id,
-      roomId: log.roomId,
-      workflowId: log.workflowId,
-      nodeId: log.nodeId ?? undefined,
-      agentId: log.agentId ?? undefined,
-      eventType: log.eventType as ExecutionLog['eventType'],
-      level: log.level as ExecutionLog['level'],
-      message: log.message,
-      data: log.data as ExecutionLog['data'],
-      error: log.error as ExecutionLog['error'],
-      timestamp: log.timestamp.toISOString(),
-      duration: log.duration ?? undefined,
-      metadata: log.metadata as ExecutionLog['metadata'],
+      id: row.id,
+      roomId: row.roomId,
+      workflowId: row.workflowId,
+      nodeId: row.nodeId,
+      eventType: row.eventType,
+      level: row.level as ExecutionLogLevel,
+      message: row.message,
+      data: typeof row.data === 'string' ? JSON.parse(row.data) : row.data,
+      createdAt: row.createdAt,
     };
   }
 }
 
-export class PrismaMemoryRepository implements MemoryRepository {
-  constructor(private readonly prisma: PrismaClient) {}
+// ============================================================================
+// Memory Repository
+// ============================================================================
 
+export class KyselyMemoryRepository implements MemoryRepository {
   async create(data: CreateMemoryData): Promise<Memory> {
-    const memory = await this.prisma.memory.create({
-      data: {
-        roomId: data.roomId,
-        conversationHistory: data.conversationHistory ?? [],
-        context: data.context ?? {},
-      },
-    });
+    const db = getDb();
 
-    return this.mapMemory(memory);
+    const memory = await db
+      .insertInto('memories')
+      .values({
+        id: sql`gen_random_uuid()`,
+        roomId: data.roomId,
+        type: data.type,
+        config: JSON.stringify(data.config || {}),
+        updatedAt: new Date(),
+      })
+      .returningAll()
+      .executeTakeFirstOrThrow();
+
+    return this.mapMemory(memory, []);
   }
 
   async findByRoomId(roomId: UUID): Promise<Memory | null> {
-    const memory = await this.prisma.memory.findUnique({
-      where: { roomId },
-      include: { entries: true },
-    });
+    const db = getDb();
 
-    return memory ? this.mapMemory(memory) : null;
+    const memory = await db
+      .selectFrom('memories')
+      .selectAll()
+      .where('roomId', '=', roomId)
+      .executeTakeFirst();
+
+    if (!memory) return null;
+
+    const entries = await db
+      .selectFrom('memory_entries')
+      .selectAll()
+      .where('memoryId', '=', memory.id)
+      .orderBy('createdAt')
+      .execute();
+
+    return this.mapMemory(memory, entries);
   }
 
   async update(id: UUID, data: UpdateMemoryData): Promise<Memory> {
-    const memory = await this.prisma.memory.update({
-      where: { id },
-      data: {
-        conversationHistory: data.conversationHistory,
-        context: data.context,
-      },
-    });
+    const db = getDb();
 
-    return this.mapMemory(memory);
+    const updateData: any = {
+      updatedAt: new Date(),
+    };
+
+    if (data.config !== undefined) {
+      updateData.config = JSON.stringify(data.config);
+    }
+
+    await db.updateTable('memories').set(updateData).where('id', '=', id).execute();
+
+    const memory = await db
+      .selectFrom('memories')
+      .selectAll()
+      .where('id', '=', id)
+      .executeTakeFirstOrThrow();
+
+    const entries = await db
+      .selectFrom('memory_entries')
+      .selectAll()
+      .where('memoryId', '=', id)
+      .orderBy('createdAt')
+      .execute();
+
+    return this.mapMemory(memory, entries);
+  }
+
+  async delete(id: UUID): Promise<void> {
+    const db = getDb();
+    await db.deleteFrom('memories').where('id', '=', id).execute();
   }
 
   async addEntry(
-    roomId: UUID,
-    entry: Omit<MemoryEntry, 'id' | 'createdAt'>
+    memoryId: UUID,
+    key: string,
+    value: any,
+    embedding?: number[]
   ): Promise<MemoryEntry> {
-    // Ensure memory exists
-    let memory = await this.prisma.memory.findUnique({
-      where: { roomId },
-    });
+    const db = getDb();
 
-    if (!memory) {
-      memory = await this.prisma.memory.create({
-        data: {
-          roomId,
-          conversationHistory: [],
-          context: {},
-        },
-      });
-    }
+    const entry = await db
+      .insertInto('memory_entries')
+      .values({
+        id: sql`gen_random_uuid()`,
+        memoryId,
+        key,
+        value: JSON.stringify(value),
+        embedding: embedding || [],
+        updatedAt: new Date(),
+      })
+      .returningAll()
+      .executeTakeFirstOrThrow();
 
-    const memoryEntry = await this.prisma.memoryEntry.create({
-      data: {
-        memoryId: memory.id,
-        roomId: entry.roomId,
-        type: entry.type as any,
-        key: entry.key,
-        value: entry.value,
-        embedding: entry.embedding,
-        ttl: entry.ttl,
-        metadata: entry.metadata,
-        expiresAt: entry.expiresAt ? new Date(entry.expiresAt) : undefined,
-      },
-    });
+    return this.mapEntry(entry);
+  }
 
+  async getEntry(memoryId: UUID, key: string): Promise<MemoryEntry | null> {
+    const db = getDb();
+
+    const entry = await db
+      .selectFrom('memory_entries')
+      .selectAll()
+      .where('memoryId', '=', memoryId)
+      .where('key', '=', key)
+      .executeTakeFirst();
+
+    return entry ? this.mapEntry(entry) : null;
+  }
+
+  async removeEntry(memoryId: UUID, key: string): Promise<void> {
+    const db = getDb();
+    await db
+      .deleteFrom('memory_entries')
+      .where('memoryId', '=', memoryId)
+      .where('key', '=', key)
+      .execute();
+  }
+
+  async searchEntries(
+    memoryId: UUID,
+    searchQuery: string,
+    limit?: number
+  ): Promise<MemoryEntry[]> {
+    const db = getDb();
+
+    const entries = await db
+      .selectFrom('memory_entries')
+      .selectAll()
+      .where('memoryId', '=', memoryId)
+      .where((eb) =>
+        eb.or([
+          eb('key', 'ilike', `%${searchQuery}%`),
+          sql`value::text ilike ${`%${searchQuery}%`}`,
+        ])
+      )
+      .orderBy('createdAt', 'desc')
+      .limit(limit || 10)
+      .execute();
+
+    return entries.map((e) => this.mapEntry(e));
+  }
+
+  private mapMemory(memoryRow: any, entryRows: any[]): Memory {
     return {
-      id: memoryEntry.id,
-      roomId: memoryEntry.roomId,
-      type: memoryEntry.type as MemoryType,
-      key: memoryEntry.key,
-      value: memoryEntry.value,
-      embedding: memoryEntry.embedding,
-      ttl: memoryEntry.ttl ?? undefined,
-      metadata: memoryEntry.metadata as MemoryEntry['metadata'],
-      createdAt: memoryEntry.createdAt.toISOString(),
-      expiresAt: memoryEntry.expiresAt?.toISOString(),
+      id: memoryRow.id,
+      roomId: memoryRow.roomId,
+      type: memoryRow.type as MemoryType,
+      entries: entryRows.map((e) => this.mapEntry(e)),
+      config:
+        typeof memoryRow.config === 'string'
+          ? JSON.parse(memoryRow.config)
+          : memoryRow.config,
+      createdAt: memoryRow.createdAt,
+      updatedAt: memoryRow.updatedAt,
     };
   }
 
-  async getEntries(roomId: UUID, type?: MemoryType): Promise<MemoryEntry[]> {
-    const entries = await this.prisma.memoryEntry.findMany({
-      where: {
-        roomId,
-        type: type as any,
-      },
-      orderBy: { createdAt: 'desc' },
-    });
-
-    return entries.map((e) => ({
-      id: e.id,
-      roomId: e.roomId,
-      type: e.type as MemoryType,
-      key: e.key,
-      value: e.value,
-      embedding: e.embedding,
-      ttl: e.ttl ?? undefined,
-      metadata: e.metadata as MemoryEntry['metadata'],
-      createdAt: e.createdAt.toISOString(),
-      expiresAt: e.expiresAt?.toISOString(),
-    }));
-  }
-
-  async deleteByRoomId(roomId: UUID): Promise<void> {
-    await this.prisma.memory.delete({
-      where: { roomId },
-    });
-  }
-
-  private mapMemory(memory: PrismaMemory & { entries?: any[] }): Memory {
+  private mapEntry(row: any): MemoryEntry {
     return {
-      id: memory.id,
-      roomId: memory.roomId,
-      conversationHistory: memory.conversationHistory as Memory['conversationHistory'],
-      context: memory.context as Memory['context'],
-      entries: (memory.entries ?? []).map((e: any) => ({
-        id: e.id,
-        roomId: e.roomId,
-        type: e.type,
-        key: e.key,
-        value: e.value,
-        embedding: e.embedding,
-        ttl: e.ttl ?? undefined,
-        metadata: e.metadata,
-        createdAt: e.createdAt.toISOString(),
-        expiresAt: e.expiresAt?.toISOString(),
-      })),
-      createdAt: memory.createdAt.toISOString(),
-      updatedAt: memory.updatedAt.toISOString(),
+      id: row.id,
+      memoryId: row.memoryId,
+      key: row.key,
+      value: typeof row.value === 'string' ? JSON.parse(row.value) : row.value,
+      embedding: row.embedding,
+      createdAt: row.createdAt,
+      updatedAt: row.updatedAt,
     };
   }
 }

@@ -2,7 +2,9 @@
  * OpenRooms API Server
  */
 
-import 'dotenv/config';
+// MUST BE FIRST - Load environment variables before any other imports
+import './env';
+
 import Fastify from 'fastify';
 import cors from '@fastify/cors';
 import helmet from '@fastify/helmet';
@@ -18,16 +20,6 @@ async function main() {
   const fastify = Fastify({
     logger: {
       level: process.env.LOG_LEVEL ?? 'info',
-      transport:
-        process.env.NODE_ENV === 'development'
-          ? {
-              target: 'pino-pretty',
-              options: {
-                translateTime: 'HH:MM:ss Z',
-                ignore: 'pid,hostname',
-              },
-            }
-          : undefined,
     },
   });
 
@@ -39,10 +31,10 @@ async function main() {
   await fastify.register(helmet);
 
   // Routes
-  await fastify.register(healthRoutes, { prefix: '/api' }, container);
-  await fastify.register(roomRoutes, { prefix: '/api' }, container);
-  await fastify.register(workflowRoutes, { prefix: '/api' }, container);
-  await fastify.register(toolRoutes, { prefix: '/api' }, container);
+  await fastify.register((instance) => healthRoutes(instance, container), { prefix: '/api' });
+  await fastify.register((instance) => roomRoutes(instance, container), { prefix: '/api' });
+  await fastify.register((instance) => workflowRoutes(instance, container), { prefix: '/api' });
+  await fastify.register((instance) => toolRoutes(instance, container), { prefix: '/api' });
 
   // Root endpoint
   fastify.get('/', async () => {

@@ -15,12 +15,11 @@ import {
   ToolRegistry,
 } from '@openrooms/core';
 import {
-  prisma,
-  PrismaRoomRepository,
-  PrismaWorkflowRepository,
-  PrismaAgentRepository,
-  PrismaExecutionLogRepository,
-  PrismaMemoryRepository,
+  KyselyRoomRepository,
+  KyselyWorkflowRepository,
+  KyselyAgentRepository,
+  KyselyExecutionLogRepository,
+  KyselyMemoryRepository,
   DefaultLoggingService,
 } from '@openrooms/database';
 import {
@@ -58,11 +57,11 @@ export function createContainer(): Container {
   const redis = new Redis(process.env.REDIS_URL ?? 'redis://localhost:6379');
 
   // Repositories
-  const roomRepository = new PrismaRoomRepository(prisma);
-  const workflowRepository = new PrismaWorkflowRepository(prisma);
-  const agentRepository = new PrismaAgentRepository(prisma);
-  const executionLogRepository = new PrismaExecutionLogRepository(prisma);
-  const memoryRepository = new PrismaMemoryRepository(prisma);
+  const roomRepository = new KyselyRoomRepository();
+  const workflowRepository = new KyselyWorkflowRepository();
+  const agentRepository = new KyselyAgentRepository();
+  const executionLogRepository = new KyselyExecutionLogRepository();
+  const memoryRepository = new KyselyMemoryRepository();
 
   // Services
   const loggingService = new DefaultLoggingService(executionLogRepository);
