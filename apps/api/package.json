@@ -1,0 +1,30 @@
+{
+  "name": "@openrooms/api",
+  "version": "0.1.0",
+  "main": "./src/index.ts",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "lint": "tsc --noEmit",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@openrooms/core": "workspace:*",
+    "@openrooms/database": "workspace:*",
+    "@openrooms/engine": "workspace:*",
+    "@openrooms/worker": "workspace:*",
+    "@openrooms/tools": "workspace:*",
+    "@openrooms/llm": "workspace:*",
+    "@fastify/cors": "^8.4.2",
+    "@fastify/helmet": "^11.1.1",
+    "fastify": "^4.25.2",
+    "ioredis": "^5.3.2",
+    "dotenv": "^16.3.1"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.6",
+    "tsx": "^4.7.0",
+    "typescript": "^5.3.3"
+  }
+}
