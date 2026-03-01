@@ -170,8 +170,21 @@ export default function HomePage() {
                   href={app.href}
                   className="group block"
                 >
-                  <Card className="min-h-[220px] rounded-lg border border-[#DED8D2] bg-white hover:bg-[#FBF7F2] transition-colors duration-150 ease-in-out cursor-pointer">
-                    <CardContent className="p-5 h-full flex flex-col">
+                  <Card className="min-h-[220px] rounded-lg border-2 border-[#C9C3BD] bg-white hover:border-[#B8B2AC] transition-all duration-150 ease-in-out cursor-pointer overflow-hidden">
+                    {/* Terminal-style header bar */}
+                    <div className="h-8 bg-[#F3EDE7] border-b border-[#DED8D2] flex items-center px-3">
+                      <div className="flex items-center gap-2">
+                        {/* Running status indicator */}
+                        <div className="relative">
+                          <div className="w-2 h-2 rounded-full bg-[#D9480F]"></div>
+                          <div className="absolute inset-0 w-2 h-2 rounded-full bg-[#D9480F] opacity-30 animate-pulse"></div>
+                        </div>
+                        <span className="text-[10px] font-medium text-gray-500 uppercase tracking-wider">{app.name}</span>
+                      </div>
+                    </div>
+                    
+                    {/* Content area with subtle inset shadow */}
+                    <CardContent className="p-5 h-[calc(100%-2rem)] flex flex-col bg-[#FDFCFB] shadow-[inset_0_1px_2px_rgba(0,0,0,0.04)]">
                       <div className="mb-5">
                         <Icon className="w-14 h-14" />
                       </div>
