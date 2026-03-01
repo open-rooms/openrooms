@@ -171,35 +171,38 @@ export default function HomePage() {
                   className="group block"
                 >
                   <Card className="min-h-[220px] rounded-lg border-2 border-[#C9C3BD] bg-white hover:border-[#B8B2AC] transition-all duration-150 ease-in-out cursor-pointer overflow-hidden">
-                    {/* Terminal-style header bar */}
-                    <div className="h-8 bg-[#F3EDE7] border-b border-[#DED8D2] flex items-center px-3">
+                    {/* Terminal-style header bar - darker for separation */}
+                    <div className="h-8 bg-[#E8E2DC] border-b border-[#C9C3BD] flex items-center px-3">
                       <div className="flex items-center gap-2">
-                        {/* Running status indicator */}
+                        {/* Running status LED with warm glow */}
                         <div className="relative">
-                          <div className="w-2 h-2 rounded-full bg-[#D9480F]"></div>
-                          <div className="absolute inset-0 w-2 h-2 rounded-full bg-[#D9480F] opacity-30 animate-pulse"></div>
+                          <div className="w-2 h-2 rounded-full bg-[#D9480F] shadow-[0_0_6px_rgba(217,72,15,0.5)]"></div>
+                          <div className="absolute inset-0 w-2 h-2 rounded-full bg-[#D9480F] opacity-50 animate-[pulse_2.5s_ease-in-out_infinite]"></div>
                         </div>
-                        <span className="text-[10px] font-medium text-gray-500 uppercase tracking-wider">{app.name}</span>
+                        <span className="text-[10px] font-medium text-gray-600 uppercase tracking-[0.08em]">agent://{app.id}</span>
                       </div>
                     </div>
                     
-                    {/* Content area with subtle inset shadow */}
-                    <CardContent className="p-5 h-[calc(100%-2rem)] flex flex-col bg-[#FDFCFB] shadow-[inset_0_1px_2px_rgba(0,0,0,0.04)]">
-                      <div className="mb-5">
+                    {/* Content area - screen surface with depth */}
+                    <CardContent className="p-5 h-[calc(100%-2rem)] flex flex-col bg-gradient-to-b from-[#FDFCFB] to-[#FEFEFE] shadow-[inset_0_2px_4px_rgba(0,0,0,0.06)] relative">
+                      {/* Subtle scan line texture */}
+                      <div className="absolute inset-0 bg-[linear-gradient(transparent_50%,rgba(0,0,0,0.01)_50%)] bg-[length:100%_4px] pointer-events-none opacity-30"></div>
+                      
+                      <div className="mb-5 relative z-10">
                         <Icon className="w-14 h-14" />
                       </div>
                       
-              <h3 className="text-lg font-medium text-[#111111] mb-2 tracking-tight">
+              <h3 className="text-lg font-medium text-[#111111] mb-2 tracking-tight relative z-10">
                         {app.name}
                       </h3>
                       
               {/* Description */}
-              <p className="text-sm text-gray-600 font-normal mb-5">
+              <p className="text-sm text-gray-600 font-normal mb-5 relative z-10">
                         {app.description}
                       </p>
                       
               {/* Arrow indicator */}
-              <div className="mt-auto flex items-center gap-2 text-sm font-medium text-gray-600 group-hover:text-[#F54E00] transition-colors duration-120 ease-in-out">
+              <div className="mt-auto flex items-center gap-2 text-sm font-medium text-gray-600 group-hover:text-[#F54E00] transition-colors duration-120 ease-in-out relative z-10">
                         <span>Open</span>
                         <ChevronRightIcon className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-120 ease-in-out" />
                       </div>
