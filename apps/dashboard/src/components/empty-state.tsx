@@ -26,7 +26,7 @@ export function EmptyState({ icon, title, description, action }: EmptyStateProps
         {title}
       </h3>
       
-      <p className="text-sm text-gray-600 mb-6 max-w-sm font-medium">
+      <p className="text-sm text-gray-600 mb-6 max-w-sm">
         {description}
       </p>
       
@@ -34,14 +34,14 @@ export function EmptyState({ icon, title, description, action }: EmptyStateProps
         action.href ? (
           <a
             href={action.href}
-            className="inline-flex items-center gap-2 px-6 py-2.5 bg-white text-text-primary font-bold rounded-lg hover:shadow-md transition-shadow duration-200 border border-neutral-200 shadow-sm"
+            className="inline-flex items-center gap-2 px-4 py-2 bg-[#F54E00] text-white font-medium rounded-md hover:bg-[#E24600] active:bg-[#D03D00] transition-colors duration-120 ease-in-out"
           >
             {action.label}
           </a>
         ) : (
           <button
             onClick={action.onClick}
-            className="inline-flex items-center gap-2 px-6 py-2.5 bg-white text-text-primary font-bold rounded-lg hover:shadow-md transition-shadow duration-200 border border-neutral-200 shadow-sm"
+            className="inline-flex items-center gap-2 px-4 py-2 bg-[#F54E00] text-white font-medium rounded-md hover:bg-[#E24600] active:bg-[#D03D00] transition-colors duration-120 ease-in-out"
           >
             {action.label}
           </button>

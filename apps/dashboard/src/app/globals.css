@@ -4,20 +4,20 @@
 
 @layer base {
   :root {
-    /* Semantic color tokens - Default theme */
-    --color-bg: 0 0% 98%;
-    --color-surface: 0 0% 100%;
-    --color-surface-active: 0 0% 96%;
-    --color-border: 0 0% 90%;
-    --color-text-primary: 0 0% 10%;
-    --color-text-secondary: 0 0% 45%;
-    --color-accent: 24 100% 55%;
-    --color-accent-soft: 24 100% 97%;
+    /* Semantic color tokens - Warm neutral devtools-style */
+    --color-bg: 30 25% 96%; /* #F8F3EE warm neutral */
+    --color-surface: 0 0% 100%; /* #FFFFFF */
+    --color-surface-active: 30 20% 97%; /* #FBF7F2 warm gray */
+    --color-border: 30 12% 87%; /* #DED8D2 warm border */
+    --color-text-primary: 0 0% 7%; /* #111111 */
+    --color-text-secondary: 0 0% 40%; /* Gray 600 */
+    --color-accent: 16 100% 48%; /* #F54E00 orange-red for buttons/active only */
+    --color-accent-soft: 16 100% 97%;
     --color-accent-foreground: 0 0% 100%;
 
-    /* Fixed OpenRooms brand color (not themeable) */
-    --color-brand: 24 100% 55%;
-    --color-brand-soft: 24 100% 97%;
+    /* Fixed OpenRooms brand color (only for buttons/active states) */
+    --color-brand: 16 100% 48%; /* #F54E00 */
+    --color-brand-soft: 16 100% 97%;
     --color-brand-foreground: 0 0% 100%;
 
     /* Legacy variables for backwards compatibility */
@@ -107,7 +107,7 @@
     @apply border-border;
   }
   body {
-    @apply bg-bg text-text-primary antialiased;
+    @apply bg-[#F8F3EE] text-text-primary antialiased;
   }
 }
 

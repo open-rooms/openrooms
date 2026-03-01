@@ -128,7 +128,7 @@ export default function HomePage() {
   if (!mounted) return null
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#F5F1EB] via-[#F8F4EE] to-[#FAF6F0] relative">
+    <div className="min-h-screen bg-[#F8F3EE] relative">
       {/* OS-style top bar */}
       <div className="fixed top-0 left-0 right-0 h-8 bg-white/90 backdrop-blur-xl border-b border-black/10 flex items-center px-4 z-50 shadow-sm">
         <div className="flex items-center gap-2">
@@ -147,20 +147,20 @@ export default function HomePage() {
         {/* Header Section - 48px spacing below */}
         <header className="mb-12">
           <div className="flex items-center gap-4">
-            {/* Agent Icon - Direct render with brand color */}
-            <AgentIcon className="w-16 h-16" />
+            {/* Agent Icon - Colorful teal bot */}
+            <AgentIcon className="w-12 h-12" />
             <div>
-              <h1 className="text-6xl font-black tracking-tight text-brand">
+              <h1 className="text-4xl font-semibold tracking-tight text-gray-900">
                 OpenRooms
               </h1>
-              <p className="text-base text-text-secondary font-bold tracking-wide mt-2">AI Agent Control Plane</p>
+              <p className="text-xs text-gray-600 font-normal tracking-wide mt-1">AI Agent Control Plane</p>
             </div>
           </div>
         </header>
 
         {/* Apps Grid - CSS Grid with 3/2/1 responsive columns, 32px gap */}
         <section className="mb-16">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {apps.map((app) => {
               const Icon = app.icon
               
@@ -170,27 +170,25 @@ export default function HomePage() {
                   href={app.href}
                   className="group block"
                 >
-                  <Card className="min-h-[220px] rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200 cursor-pointer border border-neutral-200 bg-white">
-                    <CardContent className="p-6 h-full flex flex-col">
-                      {/* Icon - Direct SVG render */}
-                      <div className="mb-6">
-                        <Icon className="w-16 h-16" />
+                  <Card className="min-h-[220px] rounded-lg border border-[#DED8D2] bg-white hover:bg-[#FBF7F2] transition-colors duration-150 ease-in-out cursor-pointer">
+                    <CardContent className="p-5 h-full flex flex-col">
+                      <div className="mb-5">
+                        <Icon className="w-14 h-14" />
                       </div>
                       
-                      {/* App name */}
-                      <h3 className="text-2xl font-black text-text-primary mb-3 tracking-tight">
+              <h3 className="text-lg font-medium text-[#111111] mb-2 tracking-tight">
                         {app.name}
                       </h3>
                       
-                      {/* Description */}
-                      <p className="text-sm text-text-secondary font-semibold mb-6">
+              {/* Description */}
+              <p className="text-sm text-gray-600 font-normal mb-5">
                         {app.description}
                       </p>
                       
-                      {/* Arrow indicator - Uses theme accent */}
-                      <div className="mt-auto flex items-center gap-2 text-sm font-bold text-text-secondary group-hover:text-accent transition-colors duration-200">
+              {/* Arrow indicator */}
+              <div className="mt-auto flex items-center gap-2 text-sm font-medium text-gray-600 group-hover:text-[#F54E00] transition-colors duration-120 ease-in-out">
                         <span>Open</span>
-                        <ChevronRightIcon className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-200" />
+                        <ChevronRightIcon className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-120 ease-in-out" />
                       </div>
                     </CardContent>
                   </Card>
@@ -200,12 +198,11 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* Quick Actions Section - Section divider added */}
-        <section className="pt-12 border-t border-neutral-200">
-          <h2 className="text-3xl font-black text-gray-900 mb-8 tracking-tight">Quick Actions</h2>
+        <section className="pt-12 border-t border-[#DED8D2]">
+          <h2 className="text-xl font-semibold text-[#111111] mb-6 tracking-tight">Quick Actions</h2>
           
-          {/* 4 column grid for quick actions, 32px gap */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+          {/* 4 column grid for quick actions, reduced gap */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {quickActions.map((action) => {
               const Icon = action.icon
               
@@ -215,26 +212,24 @@ export default function HomePage() {
                   href={action.href}
                   className="group block"
                 >
-                  <Card className="min-h-[220px] rounded-lg bg-white border border-neutral-200 shadow-sm hover:shadow-md transition-shadow duration-200 cursor-pointer">
-                    <CardContent className="p-6 h-full flex flex-col relative">
-                      {/* Icon - Direct SVG render */}
+                  <Card className="min-h-[220px] rounded-lg border border-[#DED8D2] bg-white hover:bg-[#FBF7F2] transition-colors duration-150 ease-in-out cursor-pointer">
+                    <CardContent className="p-5 h-full flex flex-col relative">
                       <div className="mb-4">
                         <Icon className="w-12 h-12" />
                       </div>
                       
                       {/* Title */}
-                      <h3 className="text-2xl font-black text-text-primary mb-2 tracking-tight">
+                      <h3 className="text-xl font-semibold text-[#111111] mb-2 tracking-tight">
                         {action.title}
                       </h3>
                       
-                      {/* Description */}
-                      <p className="text-sm text-text-secondary font-semibold mb-4">
+                      <p className="text-sm text-gray-600 font-normal mb-4">
                         {action.description}
                       </p>
                       
                       {/* CTA Button */}
                       <div className="mt-auto">
-                        <div className="inline-flex items-center gap-2 px-4 py-2 bg-surface-active text-text-primary rounded-xl font-black text-sm hover:bg-surface transition-colors duration-200 shadow-sm">
+                        <div className="inline-flex items-center gap-2 px-4 py-2 bg-[#F54E00] text-white rounded-md font-medium text-sm hover:bg-[#E24600] active:bg-[#D03D00] transition-colors duration-120 ease-in-out">
                           <span>Open</span>
                           <ChevronRightIcon className="w-4 h-4" />
                         </div>
@@ -250,7 +245,7 @@ export default function HomePage() {
 
       {/* Bottom dock - Professional spacing with gap-6 (24px) */}
       <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-50">
-        <div className="bg-surface/95 backdrop-blur-2xl border-2 border-border rounded-3xl shadow-2xl px-6 py-5 flex items-center gap-6">
+        <div className="bg-white border border-[#E5E7EB] rounded-xl px-6 py-4 flex items-center gap-6">
           {apps.map((app) => {
             const Icon = app.icon
             return (
@@ -259,8 +254,8 @@ export default function HomePage() {
                 href={app.href}
                 className="group relative flex-shrink-0"
               >
-                <div className="transition-all duration-200 ease-out hover:scale-110 hover:-translate-y-2 cursor-pointer">
-                  <Icon className="w-16 h-16" />
+                <div className="transition-all duration-150 ease-in-out cursor-pointer hover:bg-[#F1EBE6] rounded-lg p-2 -m-2">
+                  <Icon className="w-12 h-12 opacity-100 hover:opacity-90 transition-opacity duration-120" />
                 </div>
                 {/* Tooltip */}
                 <div className="absolute -top-14 left-1/2 -translate-x-1/2 px-4 py-2 bg-text-primary text-accent-foreground text-xs font-bold rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap pointer-events-none shadow-xl">

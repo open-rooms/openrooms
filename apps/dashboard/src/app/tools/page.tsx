@@ -63,7 +63,7 @@ export default function ToolsPage() {
                 return (
                   <Card 
                     key={tool.id} 
-                    className="border border-neutral-200 bg-white shadow-sm hover:shadow-md transition-shadow duration-200 rounded-lg"
+                    className="border border-[#E5E7EB] bg-white hover:bg-[#FBF7F2] transition-colors duration-150 ease-in-out rounded-lg"
                   >
                     <CardHeader>
                       <div className="flex items-start justify-between mb-4">
@@ -105,7 +105,7 @@ export default function ToolsPage() {
                         )}
                       </div>
 
-                      <div className="pt-4 border-t border-neutral-200 space-y-2">
+                      <div className="pt-4 border-t border-[#E5E7EB] space-y-2">
                         <div className="flex items-center justify-between text-xs">
                           <span className="text-text-secondary">Timeout</span>
                           <span className="text-text-primary font-mono">{tool.timeout}ms</span>

@@ -103,14 +103,14 @@ export function StatCard({
   return (
     <div
       className={cn(
-        'group relative overflow-hidden rounded-lg border border-neutral-200 bg-white shadow-sm hover:shadow-md p-6 transition-shadow duration-300',
+        'group relative overflow-hidden rounded-lg border border-[#E7E2DC] bg-white hover:shadow-md p-6 transition-shadow duration-300',
         className
       )}
     >
-      <div className="flex items-start justify-between mb-4">
+      <div className="flex items-start justify-between mb-3">
         <div className="flex-1">
-          <p className="text-xs font-black tracking-wider text-gray-400 uppercase mb-2">{title}</p>
-          <h3 className={cn('text-4xl font-black tracking-tight bg-gradient-to-r bg-clip-text text-transparent', colors.gradient)}>
+          <p className="text-xs font-medium tracking-wider text-gray-500 uppercase mb-2">{title}</p>
+          <h3 className={cn('text-3xl font-semibold tracking-tight bg-gradient-to-r bg-clip-text text-transparent', colors.gradient)}>
             {displayValue}{suffix}
           </h3>
         </div>
@@ -135,7 +135,7 @@ export function StatCard({
             <span>{change.value}%</span>
           </div>
           {change.label && (
-            <span className="text-xs text-gray-500 font-bold">{change.label}</span>
+            <span className="text-xs text-gray-500 font-medium">{change.label}</span>
           )}
         </div>
       )}

@@ -90,7 +90,7 @@ export default function LogsPage() {
                   <button
                     key={level}
                     onClick={() => setSelectedLevel(level)}
-                    className={`flex-1 px-4 py-2 text-sm font-semibold rounded-xl transition-colors duration-200 ${
+                    className={`flex-1 px-4 py-2 text-sm font-semibold rounded-xl transition-colors duration-150 ease-in-out ${
                       selectedLevel === level
                         ? 'bg-brand text-brand-foreground'
                         : 'bg-surface-active text-text-secondary hover:bg-surface-active/80'
@@ -106,7 +106,7 @@ export default function LogsPage() {
 
           {/* Logs Table */}
           <div className="pt-8 border-t border-neutral-200">
-            <Card className="border border-neutral-200 bg-white shadow-sm hover:shadow-md transition-shadow duration-200 rounded-lg">
+            <Card className="border border-[#DED8D2] bg-white hover:bg-[#FBF7F2] transition-colors duration-150 ease-in-out rounded-lg">
             <CardHeader>
               <div className="flex items-center justify-between">
                 <div>
@@ -134,7 +134,7 @@ export default function LogsPage() {
                   {filteredLogs.slice(0, 100).map((log, idx) => (
                     <div
                       key={idx}
-                      className={`flex items-center gap-4 px-4 py-3 border-b border-neutral-200 last:border-0 hover:bg-surface-active font-mono text-sm transition-colors duration-200 ${
+                      className={`flex items-center gap-4 px-4 py-3 border-b border-[#DED8D2] last:border-0 hover:bg-[#FBF7F2] font-mono text-sm transition-colors duration-150 ease-in-out ${
                         log.level === 'ERROR'
                           ? 'bg-red-50'
                           : log.level === 'WARN'

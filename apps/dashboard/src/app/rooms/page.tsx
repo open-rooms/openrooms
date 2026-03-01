@@ -65,12 +65,12 @@ export default function RoomsPage() {
       <div className="p-8">
         <div className="max-w-7xl mx-auto space-y-10">
           {/* Filter Tabs */}
-          <div className="flex items-center gap-2 border-b border-neutral-200 pb-2">
+          <div className="flex items-center gap-2 border-b border-[#DED8D2] pb-2">
             {Object.entries(statusCounts).map(([status, count]) => (
               <button
                 key={status}
                 onClick={() => setFilter(status)}
-                className={`px-4 py-2 text-sm font-semibold transition-colors duration-200 border-b-2 ${
+                className={`px-4 py-2 text-sm font-semibold transition-colors duration-150 ease-in-out border-b-2 ${
                   filter === status
                     ? 'border-brand text-text-primary'
                     : 'border-transparent text-text-secondary hover:text-text-primary'
@@ -99,11 +99,11 @@ export default function RoomsPage() {
                   href={`/rooms/${room.id}`}
                   className="block"
                 >
-                  <Card className="border border-neutral-200 bg-white shadow-sm hover:shadow-md transition-shadow duration-200 rounded-lg group">
+                  <Card className="border border-[#DED8D2] bg-white hover:bg-[#FAFAF9] transition-colors duration-150 ease-in-out rounded-lg group">
                     <CardContent className="p-6">
                       <div className="flex items-start justify-between gap-4">
                         <div className="flex items-start gap-4 flex-1 min-w-0">
-                          <RoomsIcon className="w-12 h-12" />
+                          <RoomsIcon className="w-12 h-12 text-gray-600" />
                           
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-3 mb-2">
@@ -140,7 +140,7 @@ export default function RoomsPage() {
                         </div>
 
                         <div className="flex items-center gap-2">
-                          <ChevronRightIcon className="w-5 h-5 text-text-secondary group-hover:text-text-primary transition-colors duration-200" />
+                          <ChevronRightIcon className="w-5 h-5 text-text-secondary group-hover:text-text-primary transition-colors duration-150 ease-in-out" />
                         </div>
                       </div>
                     </CardContent>

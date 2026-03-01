@@ -102,7 +102,7 @@ export default function RoomDetailPage() {
         <div className="max-w-7xl mx-auto space-y-10">
           {/* Status and Info Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-8">
-            <Card className="border border-neutral-200 bg-white shadow-sm hover:shadow-md transition-shadow duration-200 rounded-lg">
+            <Card className="border border-[#E5E7EB] bg-white hover:bg-[#FBF7F2] transition-colors duration-150 ease-in-out rounded-lg">
               <CardHeader className="pb-3">
                 <CardDescription>Status</CardDescription>
                 <div className="flex items-center gap-3">
@@ -117,21 +117,21 @@ export default function RoomDetailPage() {
               </CardHeader>
             </Card>
 
-            <Card className="border border-neutral-200 bg-white shadow-sm hover:shadow-md transition-shadow duration-200 rounded-lg">
+            <Card className="border border-[#E5E7EB] bg-white hover:bg-[#FBF7F2] transition-colors duration-150 ease-in-out rounded-lg">
               <CardHeader className="pb-3">
                 <CardDescription>Created</CardDescription>
                 <CardTitle className="text-base font-mono">{formatDate(room.createdAt)}</CardTitle>
               </CardHeader>
             </Card>
 
-            <Card className="border border-neutral-200 bg-white shadow-sm hover:shadow-md transition-shadow duration-200 rounded-lg">
+            <Card className="border border-[#E5E7EB] bg-white hover:bg-[#FBF7F2] transition-colors duration-150 ease-in-out rounded-lg">
               <CardHeader className="pb-3">
                 <CardDescription>Updated</CardDescription>
                 <CardTitle className="text-base font-mono">{formatDate(room.updatedAt)}</CardTitle>
               </CardHeader>
             </Card>
 
-            <Card className="border border-neutral-200 bg-white shadow-sm hover:shadow-md transition-shadow duration-200 rounded-lg">
+            <Card className="border border-[#E5E7EB] bg-white hover:bg-[#FBF7F2] transition-colors duration-150 ease-in-out rounded-lg">
               <CardHeader className="pb-3">
                 <CardDescription>Workflow ID</CardDescription>
                 <CardTitle className="text-sm truncate font-mono">{room.workflowId.slice(0, 16)}...</CardTitle>
@@ -140,13 +140,13 @@ export default function RoomDetailPage() {
           </div>
 
           {/* Tabs */}
-          <div className="pt-8 border-t border-neutral-200">
-            <div className="flex items-center gap-2 border-b border-neutral-200 mb-6">
+          <div className="pt-8 border-t border-[#E5E7EB]">
+            <div className="flex items-center gap-2 border-b border-[#E5E7EB] mb-6">
             {(['logs', 'memory', 'timeline'] as const).map((tab) => (
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
-              className={`px-4 py-2 text-sm font-semibold transition-colors duration-200 border-b-2 ${
+              className={`px-4 py-2 text-sm font-semibold transition-colors duration-150 ease-in-out border-b-2 ${
                 activeTab === tab
                   ? 'border-brand text-text-primary'
                   : 'border-transparent text-text-secondary hover:text-text-primary'
@@ -159,7 +159,7 @@ export default function RoomDetailPage() {
 
           {/* Tab Content */}
           {activeTab === 'logs' && (
-            <Card className="border border-neutral-200 bg-white shadow-sm hover:shadow-md transition-shadow duration-200 rounded-lg">
+            <Card className="border border-[#E5E7EB] bg-white hover:bg-[#FBF7F2] transition-colors duration-150 ease-in-out rounded-lg">
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <div>
@@ -183,7 +183,7 @@ export default function RoomDetailPage() {
                       {logs.map((log, idx) => (
                         <div
                           key={idx}
-                          className={`flex gap-4 px-3 py-2 rounded-lg hover:bg-background transition-colors duration-200 ${
+                          className={`flex gap-4 px-3 py-2 rounded-lg hover:bg-background transition-colors duration-150 ease-in-out ${
                             log.level === 'ERROR'
                               ? 'text-red-600 bg-red-50'
                               : log.level === 'WARN'
@@ -211,7 +211,7 @@ export default function RoomDetailPage() {
           )}
 
           {activeTab === 'memory' && (
-            <Card className="border border-neutral-200 bg-white shadow-sm hover:shadow-md transition-shadow duration-200 rounded-lg">
+            <Card className="border border-[#E5E7EB] bg-white hover:bg-[#FBF7F2] transition-colors duration-150 ease-in-out rounded-lg">
               <CardHeader>
                 <CardTitle>Memory State</CardTitle>
                 <CardDescription>Room memory and context</CardDescription>
@@ -225,7 +225,7 @@ export default function RoomDetailPage() {
           )}
 
           {activeTab === 'timeline' && (
-            <Card className="border border-neutral-200 bg-white shadow-sm hover:shadow-md transition-shadow duration-200 rounded-lg">
+            <Card className="border border-[#E5E7EB] bg-white hover:bg-[#FBF7F2] transition-colors duration-150 ease-in-out rounded-lg">
               <CardHeader>
                 <CardTitle>Execution Timeline</CardTitle>
                 <CardDescription>Node execution flow</CardDescription>
@@ -240,7 +240,7 @@ export default function RoomDetailPage() {
 
           {/* Configuration */}
           {room.description && (
-            <Card className="border border-neutral-200 bg-white shadow-sm hover:shadow-md transition-shadow duration-200 rounded-lg">
+            <Card className="border border-[#E5E7EB] bg-white hover:bg-[#FBF7F2] transition-colors duration-150 ease-in-out rounded-lg">
               <CardHeader>
                 <CardTitle>Description</CardTitle>
               </CardHeader>

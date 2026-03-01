@@ -63,10 +63,10 @@ export default function WorkflowsPage() {
                   href={`/workflows/${workflow.id}`}
                   className="block"
                 >
-                  <Card className="border border-neutral-200 bg-white shadow-sm hover:shadow-md transition-shadow duration-200 rounded-lg h-full group">
+                  <Card className="border border-[#E5E7EB] bg-white hover:bg-[#FBF7F2] transition-colors duration-150 ease-in-out rounded-lg h-full group">
                     <CardContent className="p-6">
                       <div className="flex items-start gap-4 mb-4">
-                        <CustomWorkflowIcon className="w-12 h-12" />
+                        <CustomWorkflowIcon className="w-12 h-12 text-gray-600" />
                         <div className="flex-1 min-w-0">
                           <h3 className="text-lg font-semibold text-text-primary truncate mb-2">
                             {workflow.name}
@@ -103,7 +103,7 @@ export default function WorkflowsPage() {
                         </div>
                       </div>
 
-                      <div className="mt-4 pt-4 border-t border-neutral-200">
+                      <div className="mt-4 pt-4 border-t border-[#E5E7EB]">
                         <div className="flex items-center justify-between text-sm font-semibold text-brand group-hover:text-brand/80 transition-colors">
                           <span>View Workflow</span>
                           <ChevronRightIcon className="w-4 h-4" />

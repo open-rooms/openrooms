@@ -24,13 +24,13 @@ export function Sidebar() {
   const pathname = usePathname()
 
   return (
-    <aside className="fixed left-0 top-0 bottom-0 w-64 bg-surface border-r border-border flex flex-col">
-      {/* Logo - Agent icon direct render */}
-      <div className="h-16 flex items-center px-6 border-b border-border">
+    <aside className="fixed left-0 top-0 bottom-0 w-64 bg-white border-r border-[#DED8D2] flex flex-col">
+      {/* Logo - Colorful Agent icon */}
+      <div className="h-16 flex items-center px-6 border-b border-[#DED8D2]">
         <Link href="/dashboard" className="flex items-center gap-3 group">
-          <AgentIcon className="w-10 h-10" />
+          <AgentIcon className="w-8 h-8" />
           <div>
-            <span className="text-lg font-black text-brand">
+            <span className="text-base font-semibold text-gray-900">
               OpenRooms
             </span>
           </div>
@@ -48,10 +48,10 @@ export function Sidebar() {
               key={item.name}
               href={item.href}
               className={cn(
-                'flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-semibold transition-colors duration-200',
+                'flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-colors duration-150 ease-in-out',
                 isActive
-                  ? 'bg-surface-active text-text-primary'
-                  : 'text-text-secondary hover:bg-surface-active hover:text-text-primary'
+                  ? 'bg-[#FBF7F2] text-gray-900'
+                  : 'text-gray-600 hover:bg-[#FBF7F2] hover:text-gray-900'
               )}
             >
               <Icon className="w-5 h-5 flex-shrink-0" />
@@ -61,18 +61,18 @@ export function Sidebar() {
         })}
       </nav>
 
-      {/* User Section - Uses brand color */}
-      <div className="p-4 border-t border-border">
-        <div className="flex items-center gap-3 px-4 py-2.5 rounded-xl bg-surface-active hover:bg-surface-active/80 transition-colors duration-200 cursor-pointer">
+      {/* User Section */}
+      <div className="p-4 border-t border-[#DED8D2]">
+        <div className="flex items-center gap-3 px-4 py-2.5 rounded-lg bg-[#FBF7F2] hover:bg-[#F1EBE6] transition-colors duration-150 ease-in-out cursor-pointer">
           <div className="relative">
-            <div className="w-8 h-8 bg-brand rounded-full flex items-center justify-center text-sm font-black text-brand-foreground">
+            <div className="w-8 h-8 bg-[#F54E00] rounded-full flex items-center justify-center text-sm font-black text-white">
               U
             </div>
-            <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-500 rounded-full border-2 border-surface" />
+            <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-500 rounded-full border-2 border-white" />
           </div>
           <div className="flex-1 min-w-0">
-            <div className="text-sm font-semibold text-text-primary truncate">User</div>
-            <div className="text-xs text-text-secondary truncate">workspace-1</div>
+            <div className="text-sm font-semibold text-gray-900 truncate">User</div>
+            <div className="text-xs text-gray-600 truncate">workspace-1</div>
           </div>
         </div>
       </div>

@@ -98,14 +98,14 @@ export default function DashboardPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-8">
             {/* Total Rooms - Uses brand color */}
             <Card 
-              className="border border-neutral-200 bg-white shadow-sm hover:shadow-md transition-shadow duration-200 rounded-lg"
+              className="border border-[#DED8D2] bg-white hover:bg-[#FBF7F2] transition-colors duration-150 ease-in-out rounded-lg"
             >
               <CardHeader className="pb-2">
                 <div className="flex items-center justify-between mb-2">
                   <CardDescription>Total Rooms</CardDescription>
                   <ActivityIcon className="w-10 h-10" />
                 </div>
-                <CardTitle className="text-4xl font-bold">
+                <CardTitle className="text-3xl font-semibold">
                   {stats.totalRooms}
                 </CardTitle>
               </CardHeader>
@@ -126,7 +126,7 @@ export default function DashboardPage() {
               >
                 <div className="flex items-center justify-between mb-2">
                   <CardDescription>Running</CardDescription>
-                  <PlayIcon className="w-10 h-10" />
+                  <PlayIcon className="w-10 h-10 text-gray-600" />
                 </div>
                 <CardTitle className="text-4xl font-bold text-blue-600">
                   {stats.runningRooms}
@@ -142,7 +142,7 @@ export default function DashboardPage() {
             </Card>
 
             {/* Success Rate */}
-            <Card className="border border-neutral-200 bg-white shadow-sm hover:shadow-md transition-shadow duration-200 rounded-lg">
+            <Card className="border border-[#DED8D2] bg-white hover:bg-[#FBF7F2] transition-colors duration-150 ease-in-out rounded-lg">
               <CardHeader className="pb-2">
                 <div className="flex items-center justify-between mb-2">
                   <CardDescription>Success Rate</CardDescription>
@@ -169,11 +169,11 @@ export default function DashboardPage() {
             </Card>
 
             {/* Workflows */}
-            <Card className="border border-neutral-200 bg-white shadow-sm hover:shadow-md transition-shadow duration-200 rounded-lg">
+            <Card className="border border-[#DED8D2] bg-white hover:bg-[#FBF7F2] transition-colors duration-150 ease-in-out rounded-lg">
               <CardHeader className="pb-2">
                 <div className="flex items-center justify-between mb-2">
                   <CardDescription>Workflows</CardDescription>
-                  <svg className="w-10 h-10 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-10 h-10 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                   </svg>
                 </div>
@@ -188,11 +188,11 @@ export default function DashboardPage() {
           </div>
 
           {/* Recent Activity */}
-          <div className="pt-8 border-t border-neutral-200">
+          <div className="pt-8 border-t border-[#E7E2DC]">
             <h2 className="text-xl font-bold text-text-primary mb-6">Recent Activity</h2>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             {/* Recent Rooms */}
-            <Card className="border border-neutral-200 bg-white shadow-sm hover:shadow-md transition-shadow duration-200 rounded-lg">
+            <Card className="border border-[#DED8D2] bg-white hover:bg-[#FBF7F2] transition-colors duration-150 ease-in-out rounded-lg">
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <div>
@@ -201,7 +201,7 @@ export default function DashboardPage() {
                   </div>
                   <Link
                     href="/rooms"
-                    className="text-sm text-brand hover:text-brand/80 font-semibold flex items-center gap-1 group transition-colors duration-200"
+                    className="text-sm text-brand hover:text-brand/80 font-semibold flex items-center gap-1 group transition-colors duration-150 ease-in-out"
                   >
                     <span>View all</span>
                     <ChevronRightIcon className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-200" />
@@ -219,7 +219,7 @@ export default function DashboardPage() {
                       <Link
                         key={room.id}
                         href={`/rooms/${room.id}`}
-                        className="block p-4 rounded-lg border border-neutral-200 bg-white hover:shadow-sm transition-shadow duration-200 group"
+                        className="block p-4 rounded-lg border border-[#DED8D2] bg-white hover:bg-[#FBF7F2] transition-colors duration-150 ease-in-out group"
                       >
                         <div className="flex items-center justify-between">
                           <div className="flex-1 min-w-0">
@@ -244,7 +244,7 @@ export default function DashboardPage() {
             </Card>
 
             {/* Workflows */}
-            <Card className="border border-neutral-200 bg-white shadow-sm hover:shadow-md transition-shadow duration-200 rounded-lg">
+            <Card className="border border-[#DED8D2] bg-white hover:bg-[#FBF7F2] transition-colors duration-150 ease-in-out rounded-lg">
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <div>
@@ -253,7 +253,7 @@ export default function DashboardPage() {
                   </div>
                   <Link
                     href="/workflows"
-                    className="text-sm text-brand hover:text-brand/80 font-semibold flex items-center gap-1 group transition-colors duration-200"
+                    className="text-sm text-brand hover:text-brand/80 font-semibold flex items-center gap-1 group transition-colors duration-150 ease-in-out"
                   >
                     <span>View all</span>
                     <ChevronRightIcon className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-200" />
@@ -271,7 +271,7 @@ export default function DashboardPage() {
                       <Link
                         key={workflow.id}
                         href={`/workflows/${workflow.id}`}
-                        className="block p-4 rounded-lg border border-neutral-200 bg-white hover:shadow-sm transition-shadow duration-200 group"
+                        className="block p-4 rounded-lg border border-[#DED8D2] bg-white hover:bg-[#FBF7F2] transition-colors duration-150 ease-in-out group"
                       >
                         <div className="flex items-center gap-3 mb-2">
                           <div className="text-xl">
