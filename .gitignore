@@ -39,3 +39,23 @@ prisma/migrations
 
 # Redis
 dump.rdb
+
+# Session documentation (exclude from git)
+*_UNLOCKED.md
+*_ARCHITECTURE.md
+*_STATE.md
+*_BRAND.md
+*_SYSTEM.md
+*_UI.md
+*_COMPLETE.md
+*_SHOWCASE.md
+*_REFACTOR.md
+*_REFERENCE.md
+*_SUMMARY.md
+*_THEMING.md
+*_COLORS_APPLIED.md
+*_INTEGRATION.md
+WORKING.md
+
+# Test utilities
+test-db-connection.ts

@@ -1,0 +1,45 @@
+export function DashboardIcon({ className = "w-6 h-6" }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 96 96"
+      className={className}
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <rect
+        x="18"
+        y="24"
+        width="60"
+        height="40"
+        rx="10"
+        fill="#C4B5FD"
+        stroke="#000"
+        strokeWidth="2.5"
+      />
+      <rect
+        x="30"
+        y="38"
+        width="12"
+        height="12"
+        rx="3"
+        fill="#000"
+      />
+      <rect
+        x="48"
+        y="38"
+        width="18"
+        height="6"
+        rx="2"
+        fill="#000"
+      />
+      <rect
+        x="48"
+        y="48"
+        width="18"
+        height="6"
+        rx="2"
+        fill="#000"
+      />
+    </svg>
+  )
+}

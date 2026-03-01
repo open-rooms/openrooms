@@ -2,26 +2,160 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --foreground-rgb: 0, 0, 0;
-  --background-start-rgb: 255, 255, 255;
-  --background-end-rgb: 255, 255, 255;
-}
-
-@media (prefers-color-scheme: dark) {
+@layer base {
   :root {
-    --foreground-rgb: 255, 255, 255;
-    --background-start-rgb: 17, 24, 39;
-    --background-end-rgb: 17, 24, 39;
+    /* Semantic color tokens - Default theme */
+    --color-bg: 0 0% 98%;
+    --color-surface: 0 0% 100%;
+    --color-surface-active: 0 0% 96%;
+    --color-border: 0 0% 90%;
+    --color-text-primary: 0 0% 10%;
+    --color-text-secondary: 0 0% 45%;
+    --color-accent: 24 100% 55%;
+    --color-accent-soft: 24 100% 97%;
+    --color-accent-foreground: 0 0% 100%;
+
+    /* Fixed OpenRooms brand color (not themeable) */
+    --color-brand: 24 100% 55%;
+    --color-brand-soft: 24 100% 97%;
+    --color-brand-foreground: 0 0% 100%;
+
+    /* Legacy variables for backwards compatibility */
+    --background: var(--color-bg);
+    --foreground: var(--color-text-primary);
+    --card: var(--color-surface);
+    --card-foreground: var(--color-text-primary);
+    --popover: var(--color-surface);
+    --popover-foreground: var(--color-text-primary);
+    --primary: var(--color-brand);
+    --primary-foreground: var(--color-brand-foreground);
+    --secondary: var(--color-surface-active);
+    --secondary-foreground: var(--color-text-primary);
+    --muted: var(--color-surface-active);
+    --muted-foreground: var(--color-text-secondary);
+    --accent: var(--color-accent);
+    --accent-foreground: var(--color-accent-foreground);
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+    --border: var(--color-border);
+    --input: var(--color-border);
+    --ring: var(--color-accent);
+    --radius: 0.75rem;
+  }
+
+  /* Page-level themes - Applied via data-page-theme attribute */
+  
+  /* Dashboard - Orange */
+  [data-page-theme="dashboard"] {
+    --color-accent: 24 100% 55%;
+    --color-accent-soft: 24 100% 97%;
+    --color-accent-foreground: 0 0% 100%;
+    --ring: var(--color-accent);
+  }
+
+  /* Workflows - Blue */
+  [data-page-theme="workflows"] {
+    --color-accent: 217 91% 60%;
+    --color-accent-soft: 217 91% 97%;
+    --color-accent-foreground: 0 0% 100%;
+    --ring: var(--color-accent);
+  }
+
+  /* Rooms - Purple */
+  [data-page-theme="rooms"] {
+    --color-accent: 271 81% 56%;
+    --color-accent-soft: 271 81% 97%;
+    --color-accent-foreground: 0 0% 100%;
+    --ring: var(--color-accent);
+  }
+
+  /* Tools - Green */
+  [data-page-theme="tools"] {
+    --color-accent: 142 76% 45%;
+    --color-accent-soft: 142 76% 97%;
+    --color-accent-foreground: 0 0% 100%;
+    --ring: var(--color-accent);
+  }
+
+  /* Logs - Gray */
+  [data-page-theme="logs"] {
+    --color-accent: 240 5% 50%;
+    --color-accent-soft: 240 5% 97%;
+    --color-accent-foreground: 0 0% 100%;
+    --ring: var(--color-accent);
+  }
+
+  /* Home - Orange (same as brand) */
+  [data-page-theme="home"] {
+    --color-accent: 24 100% 55%;
+    --color-accent-soft: 24 100% 97%;
+    --color-accent-foreground: 0 0% 100%;
+    --ring: var(--color-accent);
+  }
+
+  /* Settings - Slate */
+  [data-page-theme="settings"] {
+    --color-accent: 215 20% 45%;
+    --color-accent-soft: 215 20% 97%;
+    --color-accent-foreground: 0 0% 100%;
+    --ring: var(--color-accent);
   }
 }
 
-body {
-  color: rgb(var(--foreground-rgb));
-  background: linear-gradient(
-      to bottom,
-      transparent,
-      rgb(var(--background-end-rgb))
-    )
-    rgb(var(--background-start-rgb));
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-bg text-text-primary antialiased;
+  }
+}
+
+@layer utilities {
+  .animate-slide-in {
+    animation: slideIn 0.3s ease-out;
+  }
+
+  @keyframes slideIn {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .animate-fade-in {
+    animation: fadeIn 0.5s ease-out;
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: hsl(var(--color-surface-active));
+}
+
+::-webkit-scrollbar-thumb {
+  background: hsl(var(--color-border));
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--color-text-secondary) / 0.3);
 }

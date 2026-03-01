@@ -1,39 +1,51 @@
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'
 
-export async function fetchRooms() {
-  const res = await fetch(`${API_URL}/api/rooms`, { cache: 'no-store' });
-  if (!res.ok) throw new Error('Failed to fetch rooms');
-  return res.json();
+export async function apiRequest<T>(
+  endpoint: string,
+  options?: RequestInit
+): Promise<T> {
+  const response = await fetch(`${API_URL}${endpoint}`, {
+    ...options,
+    headers: {
+      'Content-Type': 'application/json',
+      ...options?.headers,
+    },
+  })
+
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({ message: response.statusText }))
+    throw new Error(error.message || `API Error: ${response.status}`)
+  }
+
+  return response.json()
 }
 
-export async function fetchRoom(id: string) {
-  const res = await fetch(`${API_URL}/api/rooms/${id}`, { cache: 'no-store' });
-  if (!res.ok) throw new Error('Failed to fetch room');
-  return res.json();
-}
+export const api = {
+  // Health
+  getHealth: () => apiRequest<{ status: string; redis: string; database: string }>('/api/health'),
 
-export async function fetchRoomLogs(id: string) {
-  const res = await fetch(`${API_URL}/api/rooms/${id}/logs`, { cache: 'no-store' });
-  if (!res.ok) throw new Error('Failed to fetch logs');
-  return res.json();
-}
-
-export async function runRoom(id: string) {
-  const res = await fetch(`${API_URL}/api/rooms/${id}/run`, {
+  // Rooms
+  getRooms: () => apiRequest<{ rooms: any[]; count: number }>('/api/rooms'),
+  getRoom: (id: string) => apiRequest<any>(`/api/rooms/${id}`),
+  createRoom: (data: any) => apiRequest<any>('/api/rooms', {
     method: 'POST',
-  });
-  if (!res.ok) throw new Error('Failed to run room');
-  return res.json();
-}
+    body: JSON.stringify(data),
+  }),
+  updateRoom: (id: string, data: any) => apiRequest<any>(`/api/rooms/${id}`, {
+    method: 'PATCH',
+    body: JSON.stringify(data),
+  }),
+  runRoom: (id: string) => apiRequest<any>(`/api/rooms/${id}/run`, { method: 'POST' }),
+  getRoomLogs: (id: string) => apiRequest<{ logs: any[]; count: number }>(`/api/rooms/${id}/logs`),
 
-export async function fetchWorkflows() {
-  const res = await fetch(`${API_URL}/api/workflows`, { cache: 'no-store' });
-  if (!res.ok) throw new Error('Failed to fetch workflows');
-  return res.json();
-}
+  // Workflows
+  getWorkflows: () => apiRequest<{ workflows: any[]; count: number }>('/api/workflows'),
+  getWorkflow: (id: string) => apiRequest<any>(`/api/workflows/${id}`),
+  createWorkflow: (data: any) => apiRequest<any>('/api/workflows', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  }),
 
-export async function fetchTools() {
-  const res = await fetch(`${API_URL}/api/tools`, { cache: 'no-store' });
-  if (!res.ok) throw new Error('Failed to fetch tools');
-  return res.json();
+  // Tools
+  getTools: () => apiRequest<{ tools: any[]; count: number }>('/api/tools'),
 }

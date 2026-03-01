@@ -1,0 +1,53 @@
+export function LiveActivityIcon({ className = "w-6 h-6" }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 96 96"
+      className={className}
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <circle
+        cx="30"
+        cy="48"
+        r="8"
+        fill="#6EE7B7"
+        stroke="#000"
+        strokeWidth="2.5"
+      />
+      <circle
+        cx="66"
+        cy="36"
+        r="8"
+        fill="#6EE7B7"
+        stroke="#000"
+        strokeWidth="2.5"
+      />
+      <circle
+        cx="66"
+        cy="60"
+        r="8"
+        fill="#6EE7B7"
+        stroke="#000"
+        strokeWidth="2.5"
+      />
+      <line
+        x1="38"
+        y1="48"
+        x2="58"
+        y2="36"
+        stroke="#000"
+        strokeWidth="2.5"
+        strokeLinecap="round"
+      />
+      <line
+        x1="38"
+        y1="48"
+        x2="58"
+        y2="60"
+        stroke="#000"
+        strokeWidth="2.5"
+        strokeLinecap="round"
+      />
+    </svg>
+  )
+}
