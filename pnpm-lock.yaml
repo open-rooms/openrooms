@@ -101,6 +101,22 @@ importers:
         specifier: ^5.3.3
         version: 5.9.3
 
+  packages/control-plane:
+    dependencies:
+      '@openrooms/core':
+        specifier: workspace:*
+        version: link:../core
+      '@openrooms/execution':
+        specifier: workspace:*
+        version: link:../execution
+      '@openrooms/infrastructure-database':
+        specifier: workspace:*
+        version: link:../infrastructure/database
+    devDependencies:
+      typescript:
+        specifier: ^5.3.3
+        version: 5.9.3
+
   packages/core:
     dependencies:
       zod:
@@ -151,6 +167,38 @@ importers:
       '@types/node':
         specifier: ^20.10.6
         version: 20.19.35
+      typescript:
+        specifier: ^5.3.3
+        version: 5.9.3
+
+  packages/execution:
+    dependencies:
+      '@openrooms/core':
+        specifier: workspace:*
+        version: link:../core
+      '@openrooms/infrastructure-database':
+        specifier: workspace:*
+        version: link:../infrastructure/database
+    devDependencies:
+      typescript:
+        specifier: ^5.3.3
+        version: 5.9.3
+
+  packages/infrastructure/database:
+    dependencies:
+      '@openrooms/core':
+        specifier: workspace:*
+        version: link:../../core
+      kysely:
+        specifier: ^0.27.0
+        version: 0.27.6
+      pg:
+        specifier: ^8.11.3
+        version: 8.19.0
+    devDependencies:
+      '@types/pg':
+        specifier: ^8.10.9
+        version: 8.16.0
       typescript:
         specifier: ^5.3.3
         version: 5.9.3

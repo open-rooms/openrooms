@@ -1,0 +1,17 @@
+{
+  "name": "@openrooms/execution",
+  "version": "0.1.0",
+  "private": true,
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@openrooms/core": "workspace:*",
+    "@openrooms/infrastructure-database": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "^5.3.3"
+  }
+}
