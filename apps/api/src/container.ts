@@ -24,12 +24,13 @@ import {
 } from '@openrooms/database';
 import {
   WorkflowExecutionEngine,
-  RedisStateManager,
   createDefaultNodeExecutors,
-} from '@openrooms/engine';
-import { DefaultToolRegistry, BUILTIN_TOOLS } from '@openrooms/tools';
-import { LLMService, OpenAIProvider } from '@openrooms/llm';
-import { BullMQJobQueue, WorkerManager } from '@openrooms/worker';
+} from '@openrooms/execution';
+import { RedisStateManager } from '@openrooms/infrastructure-redis';
+import { DefaultToolRegistry, BUILTIN_TOOLS } from '@openrooms/execution';
+import { LLMService, OpenAIProvider } from '@openrooms/execution';
+import { BullMQJobQueue } from '@openrooms/infrastructure-queue';
+import { WorkerManager } from '@openrooms/execution';
 
 export interface Container {
   // Repositories

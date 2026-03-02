@@ -1,0 +1,16 @@
+{
+  "extends": ["next", "turbo", "prettier"],
+  "rules": {
+    "no-restricted-imports": [
+      "error",
+      {
+        "patterns": [
+          {
+            "group": ["@openrooms/execution/workflow-engine", "@openrooms/execution/workers"],
+            "message": "Control plane should not import execution runtime directly"
+          }
+        ]
+      }
+    ]
+  }
+}

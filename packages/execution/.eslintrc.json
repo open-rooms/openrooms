@@ -1,0 +1,16 @@
+{
+  "extends": ["next", "turbo", "prettier"],
+  "rules": {
+    "no-restricted-imports": [
+      "error",
+      {
+        "patterns": [
+          {
+            "group": ["@openrooms/control-plane"],
+            "message": "Execution layer cannot import control-plane"
+          }
+        ]
+      }
+    ]
+  }
+}
