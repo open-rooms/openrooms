@@ -25,6 +25,12 @@ import {
   NodeNotFoundError,
   InvalidStateTransitionError,
   ExecutionTimeoutError,
+  StepExecutionRecord,
+  generateIdempotencyKey,
+  generateExecutionId,
+  shouldSkipExecution,
+  enforceTransition,
+  STATE_TRANSITION_RULES,
 } from '@openrooms/core';
 
 export interface ExecutionEngineConfig {
@@ -86,6 +92,7 @@ export class WorkflowExecutionEngine implements WorkflowEngine {
             variables: {},
             executionStack: [],
             attempts: new Map(),
+            executedSteps: new Map(),
             startTime: new Date().toISOString(),
             lastUpdateTime: new Date().toISOString(),
           };
@@ -93,7 +100,16 @@ export class WorkflowExecutionEngine implements WorkflowEngine {
           await this.stateManager.setState(roomId, state);
         }
 
-        // Update room status
+        // Update room status with FSM validation
+        try {
+          enforceTransition(room.status, RoomStatus.RUNNING);
+        } catch (error) {
+          return {
+            success: false,
+            error: error instanceof Error ? error : new Error(String(error)),
+          };
+        }
+        
         await this.roomRepository.updateStatus(roomId, RoomStatus.RUNNING);
         await this.log(roomId, ExecutionEventType.ROOM_STARTED, 'Room execution started', {});
 
@@ -101,10 +117,12 @@ export class WorkflowExecutionEngine implements WorkflowEngine {
         const result = await this.executeWorkflow(roomId, state);
 
         if (result.success) {
+          enforceTransition(RoomStatus.RUNNING, RoomStatus.COMPLETED);
           await this.roomRepository.updateStatus(roomId, RoomStatus.COMPLETED);
           await this.log(roomId, ExecutionEventType.ROOM_COMPLETED, 'Room execution completed', {});
           await this.stateManager.deleteState(roomId);
         } else {
+          enforceTransition(RoomStatus.RUNNING, RoomStatus.FAILED);
           await this.roomRepository.updateStatus(roomId, RoomStatus.FAILED);
           await this.log(roomId, ExecutionEventType.ROOM_FAILED, 'Room execution failed', {
             error: result.error.message,
@@ -135,13 +153,75 @@ export class WorkflowExecutionEngine implements WorkflowEngine {
         return { success: false, error: new NodeNotFoundError(nodeId) };
       }
 
+      // Get current state for idempotency check
+      const state = await this.stateManager.getState(roomId);
+      if (!state) {
+        return { success: false, error: new Error(`State not found for room ${roomId}`) };
+      }
+
+      const attempt = state.attempts.get(nodeId) ?? 0;
+
+      // Check if this step should be skipped (already completed)
+      if (shouldSkipExecution(state.executedSteps, nodeId, attempt)) {
+        const record = state.executedSteps.get(nodeId);
+        await this.log(roomId, ExecutionEventType.NODE_EXECUTED, `Node already executed (idempotent skip): ${node.name}`, {
+          nodeId,
+          executionId: record?.executionId,
+          idempotencyKey: record?.idempotencyKey,
+        });
+        
+        // Return cached result if available
+        if (record?.status === 'COMPLETED') {
+          return { success: true, data: undefined };
+        }
+        
+        // If running, return error to prevent duplicate execution
+        return {
+          success: false,
+          error: new Error('Node is already running'),
+        };
+      }
+
+      // Generate idempotency key and execution ID
+      const timestamp = new Date().toISOString();
+      const idempotencyKey = generateIdempotencyKey(roomId, nodeId, attempt, timestamp);
+      const executionId = generateExecutionId();
+
+      // Create step execution record
+      const stepRecord: StepExecutionRecord = {
+        stepId: executionId,
+        nodeId,
+        executionId,
+        status: 'RUNNING',
+        startedAt: timestamp,
+        attempt,
+        idempotencyKey,
+      };
+
+      // Store step record BEFORE execution (transactional)
+      state.executedSteps.set(nodeId, stepRecord);
+      await this.stateManager.setState(roomId, state);
+
       await this.log(roomId, ExecutionEventType.NODE_ENTERED, `Entering node: ${node.name}`, {
         nodeId,
         nodeType: node.type,
+        executionId,
+        idempotencyKey,
+        attempt,
       });
 
       const executor = this.nodeExecutors.get(node.type);
       if (!executor) {
+        // Mark as failed
+        stepRecord.status = 'FAILED';
+        stepRecord.completedAt = new Date().toISOString();
+        stepRecord.error = {
+          code: 'NO_EXECUTOR',
+          message: `No executor found for node type: ${node.type}`,
+        };
+        state.executedSteps.set(nodeId, stepRecord);
+        await this.stateManager.setState(roomId, state);
+
         return {
           success: false,
           error: new Error(`No executor found for node type: ${node.type}`),
@@ -158,19 +238,40 @@ export class WorkflowExecutionEngine implements WorkflowEngine {
       const result = await executor.execute(context);
       const duration = Date.now() - startTime;
 
+      // Update step record with result
+      stepRecord.completedAt = new Date().toISOString();
+      
       if (result.success) {
+        stepRecord.status = 'COMPLETED';
+        stepRecord.result = result.data;
+        
         await this.log(roomId, ExecutionEventType.NODE_EXECUTED, `Node executed successfully: ${node.name}`, {
           nodeId,
           duration,
+          executionId,
+          idempotencyKey,
           output: result.data,
         });
       } else {
+        stepRecord.status = 'FAILED';
+        stepRecord.error = {
+          code: 'EXECUTION_FAILED',
+          message: result.error.message,
+          stack: result.error.stack,
+        };
+        
         await this.log(roomId, ExecutionEventType.NODE_FAILED, `Node execution failed: ${node.name}`, {
           nodeId,
           duration,
+          executionId,
+          idempotencyKey,
           error: result.error.message,
         }, LogLevel.ERROR);
       }
+
+      // Persist final step record (transactional)
+      state.executedSteps.set(nodeId, stepRecord);
+      await this.stateManager.setState(roomId, state);
 
       return result;
     } catch (error) {
@@ -217,6 +318,20 @@ export class WorkflowExecutionEngine implements WorkflowEngine {
 
   async pauseRoom(roomId: UUID): Promise<Result<void>> {
     try {
+      const room = await this.roomRepository.findById(roomId);
+      if (!room) {
+        return { success: false, error: new RoomNotFoundError(roomId) };
+      }
+
+      // Validate transition
+      if (!STATE_TRANSITION_RULES.canPause(room.status)) {
+        return {
+          success: false,
+          error: new InvalidStateTransitionError(room.status, RoomStatus.PAUSED),
+        };
+      }
+
+      enforceTransition(room.status, RoomStatus.PAUSED);
       await this.roomRepository.updateStatus(roomId, RoomStatus.PAUSED);
       await this.log(roomId, ExecutionEventType.ROOM_PAUSED, 'Room execution paused', {});
       return { success: true, data: undefined };
@@ -230,6 +345,20 @@ export class WorkflowExecutionEngine implements WorkflowEngine {
 
   async resumeRoom(roomId: UUID): Promise<Result<void>> {
     try {
+      const room = await this.roomRepository.findById(roomId);
+      if (!room) {
+        return { success: false, error: new RoomNotFoundError(roomId) };
+      }
+
+      // Validate transition
+      if (!STATE_TRANSITION_RULES.canResume(room.status)) {
+        return {
+          success: false,
+          error: new InvalidStateTransitionError(room.status, RoomStatus.RUNNING),
+        };
+      }
+
+      enforceTransition(room.status, RoomStatus.RUNNING);
       await this.roomRepository.updateStatus(roomId, RoomStatus.RUNNING);
       await this.log(roomId, ExecutionEventType.ROOM_RESUMED, 'Room execution resumed', {});
       return { success: true, data: undefined };
@@ -243,6 +372,20 @@ export class WorkflowExecutionEngine implements WorkflowEngine {
 
   async cancelRoom(roomId: UUID): Promise<Result<void>> {
     try {
+      const room = await this.roomRepository.findById(roomId);
+      if (!room) {
+        return { success: false, error: new RoomNotFoundError(roomId) };
+      }
+
+      // Validate transition
+      if (!STATE_TRANSITION_RULES.canCancel(room.status)) {
+        return {
+          success: false,
+          error: new InvalidStateTransitionError(room.status, RoomStatus.CANCELLED),
+        };
+      }
+
+      enforceTransition(room.status, RoomStatus.CANCELLED);
       await this.roomRepository.updateStatus(roomId, RoomStatus.CANCELLED);
       await this.stateManager.deleteState(roomId);
       await this.log(roomId, ExecutionEventType.ROOM_FAILED, 'Room execution cancelled', {});

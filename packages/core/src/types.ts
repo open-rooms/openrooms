@@ -327,8 +327,22 @@ export interface RoomState {
   variables: JSONObject;
   executionStack: UUID[]; // Node execution stack for nested states
   attempts: Map<UUID, number>; // Retry attempts per node
+  executedSteps: Map<UUID, StepExecutionRecord>; // Idempotency tracking
   startTime: ISO8601DateTime;
   lastUpdateTime: ISO8601DateTime;
+}
+
+export interface StepExecutionRecord {
+  stepId: UUID;
+  nodeId: UUID;
+  executionId: UUID; // Unique ID for this specific execution attempt
+  status: 'PENDING' | 'RUNNING' | 'COMPLETED' | 'FAILED';
+  startedAt: ISO8601DateTime;
+  completedAt?: ISO8601DateTime;
+  result?: JSONValue;
+  error?: ErrorDetails;
+  attempt: number;
+  idempotencyKey: string; // Hash of node + attempt + timestamp
 }
 
 // ============================================================================

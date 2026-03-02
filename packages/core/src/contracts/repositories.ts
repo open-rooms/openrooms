@@ -133,12 +133,35 @@ export interface LogQueryOptions {
 }
 
 export interface ExecutionLogRepository {
+  /**
+   * Append a new log entry (append-only, no updates or deletes)
+   */
   create(data: CreateLogData): Promise<ExecutionLog>;
+  
+  /**
+   * Find logs by filters (read-only operations)
+   */
   findByRoomId(roomId: UUID, options?: LogQueryOptions): Promise<ExecutionLog[]>;
   findByNodeId(nodeId: UUID, options?: LogQueryOptions): Promise<ExecutionLog[]>;
   findByEventType(roomId: UUID, eventType: string): Promise<ExecutionLog[]>;
+  
+  /**
+   * Count logs (for pagination)
+   */
   count(roomId: UUID, options?: LogQueryOptions): Promise<number>;
+  
+  /**
+   * NOTE: deleteByRoomId is DEPRECATED and should only be used for cleanup
+   * In production, logs should be immutable and archived, not deleted
+   * 
+   * @deprecated Use archival strategies instead
+   */
   deleteByRoomId(roomId: UUID): Promise<void>;
+  
+  /**
+   * No update() method - logs are append-only and immutable
+   * This enforces audit trail integrity for compliance
+   */
 }
 
 // ============================================================================
