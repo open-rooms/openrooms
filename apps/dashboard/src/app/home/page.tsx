@@ -128,7 +128,7 @@ export default function HomePage() {
   if (!mounted) return null
 
   return (
-    <div className="min-h-screen bg-[#F8F3EE] relative">
+    <div className="min-h-screen bg-[#FCF2E8] relative">
       {/* OS-style top bar */}
       <div className="fixed top-0 left-0 right-0 h-8 bg-white/90 backdrop-blur-xl border-b border-black/10 flex items-center px-4 z-50 shadow-sm">
         <div className="flex items-center gap-2">
@@ -170,9 +170,9 @@ export default function HomePage() {
                   href={app.href}
                   className="group block"
                 >
-                  <Card className="min-h-[220px] rounded-lg border-2 border-[#C9C3BD] bg-white hover:border-[#B8B2AC] transition-all duration-150 ease-in-out cursor-pointer overflow-hidden">
-                    {/* Terminal-style header bar - darker for separation */}
-                    <div className="h-8 bg-[#E8E2DC] border-b border-[#C9C3BD] flex items-center px-3">
+                  <Card className="min-h-[220px] rounded-lg border-2 border-[#E8DCC8] bg-[#FBF6ED] hover:border-[#DCC9B0] transition-all duration-150 ease-in-out cursor-pointer overflow-hidden">
+                    {/* Terminal-style header bar - darker brownish for separation */}
+                    <div className="h-8 bg-[#F2E6D6] border-b border-[#E8DCC8] flex items-center px-3">
                       <div className="flex items-center gap-2">
                         {/* Running status LED with warm glow */}
                         <div className="relative">
@@ -184,7 +184,7 @@ export default function HomePage() {
                     </div>
                     
                     {/* Content area - screen surface with depth */}
-                    <CardContent className="p-5 h-[calc(100%-2rem)] flex flex-col bg-gradient-to-b from-[#FDFCFB] to-[#FEFEFE] shadow-[inset_0_2px_4px_rgba(0,0,0,0.06)] relative">
+                    <CardContent className="p-5 h-[calc(100%-2rem)] flex flex-col bg-gradient-to-b from-[#FFFBF5] to-[#FFF8EE] shadow-[inset_0_2px_4px_rgba(0,0,0,0.06)] relative">
                       {/* Subtle scan line texture */}
                       <div className="absolute inset-0 bg-[linear-gradient(transparent_50%,rgba(0,0,0,0.01)_50%)] bg-[length:100%_4px] pointer-events-none opacity-30"></div>
                       

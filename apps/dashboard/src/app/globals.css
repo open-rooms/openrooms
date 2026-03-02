@@ -4,10 +4,10 @@
 
 @layer base {
   :root {
-    /* Semantic color tokens - Warm neutral devtools-style */
-    --color-bg: 30 25% 96%; /* #F8F3EE warm neutral */
+    /* Semantic color tokens - Warm brownish/peachy neutral */
+    --color-bg: 30 50% 97%; /* #FCF2E8 brownish peachy */
     --color-surface: 0 0% 100%; /* #FFFFFF */
-    --color-surface-active: 30 20% 97%; /* #FBF7F2 warm gray */
+    --color-surface-active: 30 40% 97%; /* #FBF7F2 warm gray */
     --color-border: 30 12% 87%; /* #DED8D2 warm border */
     --color-text-primary: 0 0% 7%; /* #111111 */
     --color-text-secondary: 0 0% 40%; /* Gray 600 */
@@ -107,7 +107,7 @@
     @apply border-border;
   }
   body {
-    @apply bg-[#F8F3EE] text-text-primary antialiased;
+    @apply bg-[#FCF2E8] text-text-primary antialiased;
   }
 }
 
