@@ -1,0 +1,13 @@
+{
+  "name": "@openrooms/agent-runtime",
+  "version": "0.3.0",
+  "description": "OpenRooms autonomous agent runtime with policy enforcement and observability",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "dependencies": {
+    "@openrooms/core": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "^5.3.3"
+  }
+}
