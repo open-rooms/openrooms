@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { Header } from '@/components/header'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
-import { RuntimeIcon, CpuIcon, DatabaseIcon, ZapIcon } from '@/components/icons'
+import { RuntimeIcon, CpuIcon, DatabaseIcon, ZapIcon, RuntimeMonitorIcon, WorkersIcon, JobQueueIcon } from '@/components/icons'
 
 export default function RuntimePage() {
   const [metrics, setMetrics] = useState({
@@ -212,7 +212,7 @@ export default function RuntimePage() {
           <Card className="border border-[#D4C4A8] bg-[#F5F1E8]">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <span className="text-2xl">📋</span>
+                <JobQueueIcon className="w-8 h-8" />
                 Job Queue
               </CardTitle>
               <CardDescription>{metrics.queuedJobs} pending jobs</CardDescription>

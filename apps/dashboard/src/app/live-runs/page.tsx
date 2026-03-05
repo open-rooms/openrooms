@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { Header } from '@/components/header'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { LiveRunsIcon, PlayIcon, CheckCircleIcon, AlertCircleIcon, ClockIcon } from '@/components/icons'
+import { LiveRunsIcon, PlayIcon, CheckCircleIcon, AlertCircleIcon, ClockIcon, LiveActivityIcon, ExecutionTraceIcon } from '@/components/icons'
 
 interface ExecutionEvent {
   id: string
@@ -153,7 +153,7 @@ export default function LiveRunsPage() {
           <Card className="border border-[#D4C4A8] bg-[#F5F1E8]">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <span className="text-2xl">📡</span>
+                <LiveActivityIcon className="w-8 h-8" />
                 Event Stream
                 <div className="flex items-center gap-2 ml-auto">
                   <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" />

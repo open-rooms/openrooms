@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { Header } from '@/components/header'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
-import { SettingsIcon, CheckCircleIcon, AlertCircleIcon, DatabaseIcon } from '@/components/icons'
+import { SettingsIcon, CheckCircleIcon, AlertCircleIcon, SystemHealthIcon, DatabaseFilledIcon, RedisCacheIcon, WorkersIcon, AgentRuntimeIcon, ResourceLimitsIcon, PoliciesIcon } from '@/components/icons'
 
 export default function ControlPlanePage() {
   const [systemHealth, setSystemHealth] = useState({
@@ -14,10 +14,10 @@ export default function ControlPlanePage() {
   })
 
   const services = [
-    { name: 'PostgreSQL Database', status: 'Connected', version: '16.0', icon: '🗄️', color: 'text-emerald-600' },
-    { name: 'Redis Cache', status: 'Online', version: '7.2', icon: '⚡', color: 'text-blue-600' },
-    { name: 'BullMQ Workers', status: 'Active', version: '5.1.0', icon: '⚙️', color: 'text-purple-600' },
-    { name: 'Agent Runtime', status: 'Running', version: '0.3.0', icon: '🤖', color: 'text-orange-600' },
+    { name: 'PostgreSQL Database', status: 'Connected', version: '16.0', IconComponent: DatabaseIcon, color: 'text-emerald-600' },
+    { name: 'Redis Cache', status: 'Online', version: '7.2', IconComponent: RedisCacheIcon, color: 'text-blue-600' },
+    { name: 'BullMQ Workers', status: 'Active', version: '5.1.0', IconComponent: WorkersIcon, color: 'text-purple-600' },
+    { name: 'Agent Runtime', status: 'Running', version: '0.3.0', IconComponent: AgentRuntimeIcon, color: 'text-orange-600' },
   ]
 
   const configuration = [
@@ -74,18 +74,20 @@ export default function ControlPlanePage() {
           <Card className="border border-[#D4C4A8] bg-[#F5F1E8]">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <span className="text-2xl">🔌</span>
+                <WorkersIcon className="w-8 h-8" />
                 Connected Services
               </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
-                {services.map((service, idx) => (
-                  <div key={idx} className="flex items-center justify-between p-4 bg-white rounded-lg border border-[#D4C4A8] hover:shadow-md transition-all">
-                    <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center text-2xl">
-                        {service.icon}
-                      </div>
+                {services.map((service, idx) => {
+                  const ServiceIcon = service.IconComponent
+                  return (
+                    <div key={idx} className="flex items-center justify-between p-4 bg-white rounded-lg border border-[#D4C4A8] hover:shadow-md transition-all">
+                      <div className="flex items-center gap-4">
+                        <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center">
+                          <ServiceIcon className="w-10 h-10" />
+                        </div>
                       <div>
                         <h4 className="font-semibold text-sm">{service.name}</h4>
                         <div className="flex items-center gap-4 text-xs text-text-secondary mt-1">
@@ -142,7 +144,7 @@ export default function ControlPlanePage() {
           <Card className="border border-[#D4C4A8] bg-[#F5F1E8]">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <span className="text-2xl">📊</span>
+                <ResourceLimitsIcon className="w-8 h-8" />
                 Resource Limits & Policies
               </CardTitle>
             </CardHeader>

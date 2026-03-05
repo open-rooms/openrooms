@@ -226,3 +226,22 @@ export const APIIntegrationIcon = ({ className = "w-6 h-6" }: { className?: stri
 
 // Export automation icons
 export { ScheduledTaskIcon, EventTriggerIcon, WebhookIcon, QueueConsumerIcon } from './icons/automation-icons'
+
+// Export system icons
+export { 
+  SystemHealthIcon, 
+  DatabaseIcon as DatabaseFilledIcon,
+  RedisCacheIcon, 
+  WorkersIcon, 
+  APIIcon, 
+  AgentRuntimeIcon, 
+  ResourceLimitsIcon, 
+  PoliciesIcon,
+  AgentListIcon,
+  WorkflowListIcon,
+  RuntimeMonitorIcon,
+  JobQueueIcon,
+  ToolRegistryIcon,
+  LiveActivityIcon,
+  ExecutionTraceIcon
+} from './icons/system-icons'
