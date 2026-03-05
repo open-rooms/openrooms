@@ -1,24 +1,55 @@
 # OpenRooms
 
-AI agent orchestration infrastructure for coordinating autonomous systems across models, APIs and blockchain environments.
+Orchestration infrastructure for autonomous AI systems. Provides deterministic execution, policy enforcement, and multi-model LLM integration across distributed environments.
+
+## Core Capabilities
+
+- **Agent Runtime**: Autonomous execution with reasoning trace capture
+- **Policy Enforcement**: Tool permissions, resource limits, cost controls
+- **Deterministic Execution**: Idempotency, FSM validation, crash recovery
+- **Multi-Model Support**: OpenAI, Anthropic, extensible provider system
+- **Async Worker Pool**: BullMQ-based job processing
+- **API Authentication**: Key-based access control with rate limiting
+- **Observability**: Append-only trace logs, execution metrics
 
 ## Architecture
 
-**Layered package structure:**
-- `@openrooms/core` - Types, interfaces, contracts
-- `@openrooms/execution` - Workflow engine, node executors, tools, LLM
+### Package Structure
+
+- `@openrooms/core` - Core types and contracts
+- `@openrooms/agent-runtime` - Agent execution loop and lifecycle
+- `@openrooms/execution` - LLM providers, policy enforcement, tool execution
+- `@openrooms/database` - PostgreSQL schema and migrations
 - `@openrooms/infrastructure-*` - Database, Redis, Queue implementations
-- `@openrooms/control-plane` - Control plane services
 
-**Repository pattern:**
-- All routes use repositories (`roomRepository`, `workflowRepository`)
-- No direct database access in API routes
-- Contracts defined in core package
+### System Components
 
-**Node executors:**
-- All 7 types implemented (START, END, WAIT, AGENT_TASK, TOOL_EXECUTION, DECISION, PARALLEL)
-- Dependencies properly injected
-- LLM and tool integration functional
+```
+┌─────────────┐
+│   API       │ ← Fastify REST API
+└──────┬──────┘
+       │
+       v
+┌─────────────┐
+│  Job Queue  │ ← BullMQ (Redis)
+└──────┬──────┘
+       │
+       v
+┌─────────────┐
+│  Workers    │ ← Agent execution pool
+└──────┬──────┘
+       │
+       v
+┌─────────────┐
+│  Runtime    │ ← Perceive → Reason → Execute → Log
+└──────┬──────┘
+       │
+       ├─→ LLM Providers (OpenAI, Anthropic)
+       ├─→ Tool Registry
+       ├─→ Policy Enforcer
+       ├─→ Trace Logger
+       └─→ Memory Manager
+```
 
 ## Determinism and Runtime Guarantees
 
@@ -54,46 +85,80 @@ DATABASE_URL=postgresql://rooms_test:rooms_test_pass@localhost:5433/rooms_test p
 
 Expected: 12 tests pass (3 runtime guarantees + 7 integration + 2 determinism)
 
-## Development
+## Quick Start
 
-**Prerequisites:**
-- Node.js 18+
+### Prerequisites
+
+- Node.js 20+
 - pnpm 8+
-- Docker (for Postgres and Redis)
+- Docker
+- PostgreSQL 14+
+- Redis 7+
 
-**Setup:**
+### Installation
+
 ```bash
 pnpm install
 docker-compose up -d
-pnpm db:push
+docker exec -i rooms-postgres psql -U postgres -d openrooms < packages/database/schema.sql
 ```
 
-**Run services:**
+### Environment Configuration
+
+```bash
+# apps/api/.env
+DATABASE_URL=postgresql://postgres:postgres@localhost:5432/openrooms
+REDIS_URL=redis://localhost:6379
+OPENAI_API_KEY=sk-...
+ANTHROPIC_API_KEY=sk-ant-...
+PORT=3001
+```
+
+### Run Services
+
 ```bash
 pnpm dev              # All services
-pnpm dev:api          # API only
-pnpm dev:dashboard    # Dashboard only
+pnpm dev:api          # API only (port 3001)
+pnpm dev:dashboard    # Dashboard only (port 3000)
 ```
 
-**Run tests:**
+### API Usage
+
 ```bash
-pnpm test             # All tests
-pnpm test:api         # API tests only
+# Health check
+curl http://localhost:3001/api/health
+
+# Create agent
+curl -X POST http://localhost:3001/api/agents \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "ResearchAgent",
+    "goal": "Market intelligence",
+    "allowedTools": ["search_*"],
+    "policyConfig": {
+      "maxLoopIterations": 10,
+      "maxTokensPerRequest": 4000
+    }
+  }'
+
+# Execute agent
+curl -X POST http://localhost:3001/api/agents/{id}/execute \
+  -H "Content-Type: application/json" \
+  -d '{"roomId": "uuid", "maxIterations": 10}'
 ```
 
-## Infrastructure
+## Documentation
 
-**Database:** PostgreSQL 14+  
-**Cache/Queue:** Redis 7+  
-**Message Queue:** BullMQ  
-**API Framework:** Express  
-**UI Framework:** Next.js 14
+- [`docs/agent-runtime.md`](docs/agent-runtime.md) - Agent system architecture
+- [`docs/api-authentication.md`](docs/api-authentication.md) - API key management
+- [`docs/runtime-guarantees.md`](docs/runtime-guarantees.md) - Determinism implementation
+- [`docs/database-schema.md`](docs/database-schema.md) - Schema reference
+- [`docs/api.md`](docs/api.md) - API endpoints
 
-## Status
+## Technology Stack
 
-✅ Core execution engine operational  
-✅ Runtime guarantees validated  
-✅ Deterministic workflow execution  
-✅ Platform UI infrastructure  
-
-Last updated: 2026-03-05
+- **API**: Fastify, TypeScript
+- **Database**: PostgreSQL, Kysely ORM
+- **Queue**: BullMQ, Redis
+- **LLM**: OpenAI, Anthropic SDKs
+- **UI**: Next.js, React, Tailwind CSS
