@@ -1,6 +1,6 @@
 {
   "name": "@openrooms/core",
-  "version": "0.1.0",
+  "version": "0.2.5",
   "main": "./src/index.ts",
   "types": "./src/index.ts",
   "scripts": {
@@ -13,5 +13,6 @@
   "devDependencies": {
     "@types/node": "^20.10.6",
     "typescript": "^5.3.3"
-  }
+  },
+  "description": "OpenRooms core types, interfaces, and contracts"
 }

@@ -106,9 +106,8 @@ export class AgentTaskNodeExecutor implements NodeExecutor {
 
 export class ToolExecutionNodeExecutor implements NodeExecutor {
   async execute(context: NodeExecutionContext): Promise<Result<void>> {
-    // TODO: Implement with Tool Registry
     console.log(`Executing TOOL_EXECUTION node: ${context.node.name}`);
-    return { success: true, data: undefined };
+    throw new Error('Tool registry integration pending');
   }
 }
 
@@ -207,9 +206,8 @@ export class DecisionNodeExecutor implements NodeExecutor {
 
 export class ParallelNodeExecutor implements NodeExecutor {
   async execute(context: NodeExecutionContext): Promise<Result<void>> {
-    // TODO: Implement parallel execution
     console.log(`Executing PARALLEL node: ${context.node.name}`);
-    return { success: true, data: undefined };
+    throw new Error('Parallel execution engine not implemented');
   }
 }
 

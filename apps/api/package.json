@@ -1,6 +1,7 @@
 {
   "name": "@openrooms/api",
-  "version": "0.1.0",
+  "version": "0.2.5",
+  "description": "OpenRooms API server - runtime execution and orchestration endpoints",
   "main": "./src/index.ts",
   "scripts": {
     "dev": "tsx watch src/index.ts",

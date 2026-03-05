@@ -1,6 +1,7 @@
 {
   "name": "@openrooms/dashboard",
-  "version": "0.1.0",
+  "version": "0.2.5",
+  "description": "OpenRooms control plane interface - infrastructure management UI",
   "private": true,
   "scripts": {
     "dev": "next dev",
