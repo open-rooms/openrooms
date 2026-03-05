@@ -12,15 +12,17 @@ describe('Room Execution Integration', () => {
   let container: Container;
   let testRoomId: string;
   let testWorkflowId: string;
+  let testNodeId: string;
 
   beforeAll(async () => {
     container = createContainer();
     
-    // Create test workflow
+    // Create test workflow with valid UUID for initialNodeId
+    testNodeId = crypto.randomUUID();
     const workflow = await container.workflowRepository.create({
       name: 'Test Workflow',
       description: 'Integration test workflow',
-      initialNodeId: 'start-node',
+      initialNodeId: testNodeId,
       metadata: {},
     });
     testWorkflowId = workflow.id;
@@ -101,10 +103,11 @@ describe('Room Execution Integration', () => {
     const logsAfter = await container.loggingService.getLogs(testRoomId);
     expect(logsAfter.length).toBe(initialCount + 1);
     
-    // Verify last log matches what we wrote
-    const lastLog = logsAfter[logsAfter.length - 1];
-    expect(lastLog).toBeDefined();
-    expect(lastLog!.message).toBe('Test log entry');
+    // Verify our log was appended (logs ordered by timestamp desc, so it's first)
+    const ourLog = logsAfter.find(log => log.message === 'Test log entry');
+    expect(ourLog).toBeDefined();
+    expect(ourLog!.eventType).toBe('STATE_UPDATED');
+    expect(ourLog!.level).toBe('INFO');
   });
 
   test('state mutations go through state manager contract', async () => {
@@ -114,7 +117,7 @@ describe('Room Execution Integration', () => {
       // Initialize state
       await container.stateManager.setState(testRoomId, {
         roomId: testRoomId,
-        currentNodeId: 'start-node',
+        currentNodeId: testNodeId,
         status: RoomStatus.RUNNING,
         variables: { testVar: 'value' },
         executionStack: [],

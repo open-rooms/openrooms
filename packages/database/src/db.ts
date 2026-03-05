@@ -17,14 +17,9 @@ export function getDb(): Kysely<Database> {
       throw new Error('DATABASE_URL environment variable is not set');
     }
     
-    // Parse connection string manually to avoid pg parsing issues
     const dialect = new PostgresDialect({
       pool: new Pool({
-        host: '127.0.0.1',
-        port: 5432,
-        user: 'postgres',
-        password: 'postgres',
-        database: 'openrooms',
+        connectionString: connString,
         max: 20,
         idleTimeoutMillis: 30000,
         connectionTimeoutMillis: 2000,
@@ -33,7 +28,6 @@ export function getDb(): Kysely<Database> {
 
     db = new Kysely<Database>({
       dialect,
-      // Remove logging for cleaner output
     });
   }
 
