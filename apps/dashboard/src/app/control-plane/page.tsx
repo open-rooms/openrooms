@@ -14,7 +14,7 @@ export default function ControlPlanePage() {
   })
 
   const services = [
-    { name: 'PostgreSQL Database', status: 'Connected', version: '16.0', IconComponent: DatabaseIcon, color: 'text-emerald-600' },
+    { name: 'PostgreSQL Database', status: 'Connected', version: '16.0', IconComponent: DatabaseFilledIcon, color: 'text-emerald-600' },
     { name: 'Redis Cache', status: 'Online', version: '7.2', IconComponent: RedisCacheIcon, color: 'text-blue-600' },
     { name: 'BullMQ Workers', status: 'Active', version: '5.1.0', IconComponent: WorkersIcon, color: 'text-purple-600' },
     { name: 'Agent Runtime', status: 'Running', version: '0.3.0', IconComponent: AgentRuntimeIcon, color: 'text-orange-600' },
