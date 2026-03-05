@@ -182,3 +182,44 @@ export const PlusIcon = ({ className = "w-6 h-6" }: { className?: string }) => (
     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
   </svg>
 )
+
+// Workflow Template Icons
+export const SequentialWorkflowIcon = ({ className = "w-6 h-6" }: { className?: string }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <rect x="5" y="3" width="14" height="18" rx="3" stroke="#8B7FF5" strokeWidth="2.5" fill="none"/>
+    <line x1="8" y1="8" x2="16" y2="8" stroke="#8B7FF5" strokeWidth="2.5" strokeLinecap="round"/>
+    <line x1="8" y1="12" x2="16" y2="12" stroke="#8B7FF5" strokeWidth="2.5" strokeLinecap="round"/>
+    <line x1="8" y1="16" x2="13" y2="16" stroke="#8B7FF5" strokeWidth="2.5" strokeLinecap="round"/>
+  </svg>
+)
+
+export const ParallelWorkflowIcon = ({ className = "w-6 h-6" }: { className?: string }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="6" cy="12" r="2.5" stroke="#2BB673" strokeWidth="2.5" fill="none"/>
+    <circle cx="18" cy="6" r="2.5" stroke="#2BB673" strokeWidth="2.5" fill="none"/>
+    <circle cx="18" cy="18" r="2.5" stroke="#2BB673" strokeWidth="2.5" fill="none"/>
+    <path d="M8.5 12 L15.5 6" stroke="#2BB673" strokeWidth="2.5" strokeLinecap="round"/>
+    <path d="M8.5 12 L15.5 18" stroke="#2BB673" strokeWidth="2.5" strokeLinecap="round"/>
+  </svg>
+)
+
+export const AgentDecisionIcon = ({ className = "w-6 h-6" }: { className?: string }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <rect x="6" y="6" width="12" height="12" rx="4" stroke="#22C7A9" strokeWidth="2.5" fill="none"/>
+    <circle cx="10" cy="11" r="1.5" fill="#22C7A9"/>
+    <circle cx="14" cy="11" r="1.5" fill="#22C7A9"/>
+    <path d="M10 14 Q12 15.5 14 14" stroke="#22C7A9" strokeWidth="2" strokeLinecap="round" fill="none"/>
+    <path d="M12 3 L12 6" stroke="#22C7A9" strokeWidth="2.5" strokeLinecap="round"/>
+    <circle cx="12" cy="2" r="1" fill="#22C7A9"/>
+  </svg>
+)
+
+export const APIIntegrationIcon = ({ className = "w-6 h-6" }: { className?: string }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <rect x="14" y="8" width="6" height="8" rx="2" stroke="#F59E0B" strokeWidth="2.5" fill="none"/>
+    <line x1="17" y1="11" x2="17" y2="13" stroke="#F59E0B" strokeWidth="2.5" strokeLinecap="round"/>
+    <path d="M14 12 L10 12" stroke="#F59E0B" strokeWidth="2.5" strokeLinecap="round"/>
+    <circle cx="7" cy="12" r="2.5" stroke="#F59E0B" strokeWidth="2.5" fill="none"/>
+    <line x1="4" y1="12" x2="2" y2="12" stroke="#F59E0B" strokeWidth="2.5" strokeLinecap="round"/>
+  </svg>
+)

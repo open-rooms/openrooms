@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { Header } from '@/components/header'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
-import { WorkflowIcon, PlayIcon, ChevronRightIcon, PlusIcon } from '@/components/icons'
+import { WorkflowIcon, PlayIcon, ChevronRightIcon, PlusIcon, SequentialWorkflowIcon, ParallelWorkflowIcon, AgentDecisionIcon, APIIntegrationIcon } from '@/components/icons'
 
 interface Workflow {
   id: string
@@ -53,30 +53,30 @@ export default function WorkflowsPage() {
     {
       name: 'Simple Sequential',
       description: 'Linear workflow with sequential step execution',
-      icon: '📝',
+      icon: SequentialWorkflowIcon,
       nodes: 5,
-      color: 'bg-blue-100 border-blue-300'
+      color: 'bg-purple-50 border-purple-200 hover:border-purple-400'
     },
     {
       name: 'Parallel Processing',
       description: 'Execute multiple branches concurrently',
-      icon: '⚡',
+      icon: ParallelWorkflowIcon,
       nodes: 8,
-      color: 'bg-purple-100 border-purple-300'
+      color: 'bg-emerald-50 border-emerald-200 hover:border-emerald-400'
     },
     {
       name: 'Agent Decision',
       description: 'LLM-driven conditional branching',
-      icon: '🤖',
+      icon: AgentDecisionIcon,
       nodes: 10,
-      color: 'bg-emerald-100 border-emerald-300'
+      color: 'bg-teal-50 border-teal-200 hover:border-teal-400'
     },
     {
       name: 'API Integration',
       description: 'External API calls with retry logic',
-      icon: '🔌',
+      icon: APIIntegrationIcon,
       nodes: 6,
-      color: 'bg-orange-100 border-orange-300'
+      color: 'bg-orange-50 border-orange-200 hover:border-orange-400'
     },
   ]
 
@@ -102,25 +102,30 @@ export default function WorkflowsPage() {
               Quick Start Templates
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
-              {templates.map((template, idx) => (
-                <Card key={idx} className={`border-2 ${template.color} hover:shadow-lg hover:-translate-y-1 transition-all duration-200 cursor-pointer`}>
-                  <CardHeader>
-                    <div className="flex items-center gap-3 mb-2">
-                      <span className="text-4xl">{template.icon}</span>
-                      <CardTitle className="text-lg">{template.name}</CardTitle>
-                    </div>
-                    <CardDescription className="text-sm">{template.description}</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs font-semibold text-gray-600">{template.nodes} nodes</span>
-                      <button className="text-xs px-3 py-1 bg-[#F54E00] text-white rounded font-bold hover:bg-[#E24600] transition-colors">
-                        Use Template
-                      </button>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
+              {templates.map((template, idx) => {
+                const IconComponent = template.icon
+                return (
+                  <Card key={idx} className={`border-2 ${template.color} hover:shadow-lg hover:-translate-y-1 transition-all duration-200 cursor-pointer`}>
+                    <CardHeader>
+                      <div className="flex items-center gap-3 mb-2">
+                        <div className="w-12 h-12 flex items-center justify-center">
+                          <IconComponent className="w-10 h-10" />
+                        </div>
+                        <CardTitle className="text-lg">{template.name}</CardTitle>
+                      </div>
+                      <CardDescription className="text-sm">{template.description}</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-semibold text-gray-600">{template.nodes} nodes</span>
+                        <button className="text-xs px-3 py-1 bg-[#F54E00] text-white rounded font-bold hover:bg-[#E24600] transition-colors">
+                          Use Template
+                        </button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )
+              })}
             </div>
           </div>
 
