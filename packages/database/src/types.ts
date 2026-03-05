@@ -83,7 +83,10 @@ export interface ExecutionLogTable {
   level: string;
   message: string;
   data: ColumnType<Record<string, any>, string, string>;
-  createdAt: Generated<Timestamp>;
+  error: ColumnType<Record<string, any> | null, string | null, string | null>;
+  timestamp: Generated<Timestamp>;
+  duration: number | null;
+  metadata: ColumnType<Record<string, any>, string, string>;
 }
 
 export interface MemoryTable {

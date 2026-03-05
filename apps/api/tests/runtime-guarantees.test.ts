@@ -7,7 +7,7 @@
  * C. Crash recovery prevents duplication
  */
 
-import { describe, test, expect, beforeAll } from '@jest/globals';
+import { describe, test, expect, beforeAll, afterAll } from '@jest/globals';
 import { createContainer } from '../src/container';
 import { RoomStatus, enforceTransition, InvalidStateTransitionError } from '@openrooms/core';
 
@@ -25,9 +25,13 @@ describe('CRITICAL Runtime Guarantees', () => {
   });
 
   afterAll(async () => {
-    // Cleanup
+    // Cleanup resources to prevent open handles
     await container.workflowRepository.delete(testWorkflowId).catch(() => {});
-    container.redis.disconnect();
+    
+    // Disconnect Redis
+    if (container.redis) {
+      container.redis.disconnect();
+    }
   });
 
   // =========================================================================

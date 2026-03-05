@@ -32,7 +32,11 @@ describe('Deterministic Workflow Execution', () => {
 
   afterAll(async () => {
     await container.workflowRepository.delete(testWorkflowId).catch(() => {});
-    container.redis.disconnect();
+    
+    // Disconnect Redis
+    if (container.redis) {
+      container.redis.disconnect();
+    }
   });
 
   test('workflow produces identical state and logs across 5 executions', async () => {
@@ -79,7 +83,7 @@ describe('Deterministic Workflow Execution', () => {
       await container.loggingService.log({
         roomId: room.id,
         workflowId: testWorkflowId,
-        eventType: 'WORKFLOW_STARTED',
+        eventType: 'ROOM_STARTED',
         level: 'INFO',
         message: 'Starting deterministic workflow execution',
         metadata: { runNumber: i },
@@ -135,7 +139,7 @@ describe('Deterministic Workflow Execution', () => {
       await container.loggingService.log({
         roomId: room.id,
         workflowId: testWorkflowId,
-        eventType: 'WORKFLOW_COMPLETED',
+        eventType: 'ROOM_COMPLETED',
         level: 'INFO',
         message: 'Workflow execution completed',
         metadata: {},

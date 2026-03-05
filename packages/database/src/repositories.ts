@@ -416,17 +416,15 @@ export class KyselyExecutionLogRepository implements ExecutionLogRepository {
         id: sql`gen_random_uuid()`,
         roomId: data.roomId,
         workflowId: data.workflowId,
-        nodeId: data.nodeId || null,
-        agentId: data.agentId || null,
+        nodeId: data.nodeId ?? null,
+        agentId: data.agentId ?? null,
         eventType: data.eventType,
-        level: data.level,
+        level: data.level || 'INFO',
         message: data.message,
-        data: JSON.stringify({
-          ...data.data,
-          error: data.error,
-          duration: data.duration,
-          metadata: data.metadata,
-        }),
+        data: JSON.stringify(data.data || {}),
+        error: data.error ? JSON.stringify(data.error) : null,
+        duration: data.duration ?? null,
+        metadata: JSON.stringify(data.metadata || {}),
       })
       .returningAll()
       .executeTakeFirstOrThrow();
@@ -447,14 +445,14 @@ export class KyselyExecutionLogRepository implements ExecutionLogRepository {
     }
 
     if (options?.startTime) {
-      query = query.where('createdAt', '>=', new Date(options.startTime));
+      query = query.where('timestamp', '>=', new Date(options.startTime));
     }
 
     if (options?.endTime) {
-      query = query.where('createdAt', '<=', new Date(options.endTime));
+      query = query.where('timestamp', '<=', new Date(options.endTime));
     }
 
-    query = query.orderBy('createdAt', 'desc');
+    query = query.orderBy('timestamp', 'desc');
 
     if (options?.limit) {
       query = query.limit(options.limit);
@@ -475,7 +473,7 @@ export class KyselyExecutionLogRepository implements ExecutionLogRepository {
       .selectFrom('execution_logs')
       .selectAll()
       .where('nodeId', '=', nodeId)
-      .orderBy('createdAt', 'desc')
+      .orderBy('timestamp', 'desc')
       .execute();
 
     return results.map(r => this.mapLog(r));
@@ -489,7 +487,7 @@ export class KyselyExecutionLogRepository implements ExecutionLogRepository {
       .selectAll()
       .where('roomId', '=', roomId)
       .where('eventType', '=', eventType)
-      .orderBy('createdAt', 'desc')
+      .orderBy('timestamp', 'desc')
       .execute();
 
     return results.map(r => this.mapLog(r));
@@ -506,7 +504,8 @@ export class KyselyExecutionLogRepository implements ExecutionLogRepository {
 
   private mapLog(row: any): ExecutionLog {
     const data = typeof row.data === 'string' ? JSON.parse(row.data) : row.data || {};
-    const { error, duration, metadata, ...restData } = data;
+    const error = row.error ? (typeof row.error === 'string' ? JSON.parse(row.error) : row.error) : undefined;
+    const metadata = row.metadata ? (typeof row.metadata === 'string' ? JSON.parse(row.metadata) : row.metadata) : {};
 
     return {
       id: row.id,
@@ -517,11 +516,11 @@ export class KyselyExecutionLogRepository implements ExecutionLogRepository {
       eventType: row.eventType,
       level: row.level,
       message: row.message,
-      data: restData,
+      data,
       error,
-      duration,
-      metadata: metadata || {},
-      timestamp: row.createdAt instanceof Date ? row.createdAt.toISOString() : row.createdAt,
+      duration: row.duration || undefined,
+      metadata,
+      timestamp: row.timestamp instanceof Date ? row.timestamp.toISOString() : row.timestamp,
     };
   }
 }

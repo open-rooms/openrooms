@@ -32,7 +32,11 @@ describe('Room Execution Integration', () => {
       await container.roomRepository.delete(testRoomId).catch(() => {});
     }
     await container.workflowRepository.delete(testWorkflowId).catch(() => {});
-    container.redis.disconnect();
+    
+    // Disconnect Redis
+    if (container.redis) {
+      container.redis.disconnect();
+    }
   });
 
   test('creates room via repository', async () => {
@@ -88,7 +92,7 @@ describe('Room Execution Integration', () => {
     await container.loggingService.log({
       roomId: testRoomId,
       workflowId: testWorkflowId,
-      eventType: 'TEST_EVENT',
+      eventType: 'STATE_UPDATED',
       level: 'INFO',
       message: 'Test log entry',
       metadata: {},
@@ -99,7 +103,8 @@ describe('Room Execution Integration', () => {
     
     // Verify last log matches what we wrote
     const lastLog = logsAfter[logsAfter.length - 1];
-    expect(lastLog.message).toBe('Test log entry');
+    expect(lastLog).toBeDefined();
+    expect(lastLog!.message).toBe('Test log entry');
   });
 
   test('state mutations go through state manager contract', async () => {
