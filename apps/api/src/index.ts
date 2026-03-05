@@ -19,12 +19,17 @@ import { createAPIKeyMiddleware } from './middleware/api-key-auth';
 import { createAgentWorker } from './workers/agent-worker';
 
 async function main() {
+  console.log('[Server] Starting OpenRooms API...');
+  
+  console.log('[Server] Creating container...');
   const container = createContainer();
+  console.log('[Server] Container created successfully');
 
   const fastify = Fastify({
     logger: {
       level: process.env.LOG_LEVEL ?? 'info',
     },
+    pluginTimeout: 60000, // Increase timeout to 60 seconds for debugging
   });
 
   // Plugins
@@ -39,12 +44,24 @@ async function main() {
   fastify.decorate('apiKeyAuth', apiKeyAuth);
 
   // Routes
+  console.log('[Server] Registering routes...');
   await fastify.register((instance) => healthRoutes(instance, container), { prefix: '/api' });
+  console.log('[Server] Health routes registered');
+  
   await fastify.register((instance) => roomRoutes(instance, container), { prefix: '/api' });
+  console.log('[Server] Room routes registered');
+  
   await fastify.register((instance) => workflowRoutes(instance, container), { prefix: '/api' });
+  console.log('[Server] Workflow routes registered');
+  
   await fastify.register((instance) => toolRoutes(instance, container), { prefix: '/api' });
+  console.log('[Server] Tool routes registered');
+  
   await fastify.register((instance) => agentRoutes(instance, container), { prefix: '/api' });
+  console.log('[Server] Agent routes registered');
+  
   await fastify.register((instance) => apiKeyRoutes(instance, container), { prefix: '/api' });
+  console.log('[Server] API key routes registered');
 
   // Root endpoint
   fastify.get('/', async () => {
