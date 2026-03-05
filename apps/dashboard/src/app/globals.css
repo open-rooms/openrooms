@@ -11,6 +11,17 @@
     --card-bg: #F5F1E8;
     --card-hover: #FFFFFF;
     --border: #D4C4A8;
+    
+    /* Module colors for hover activation */
+    --module-dashboard: #8B7FF5;
+    --module-rooms: #B08968;
+    --module-workflows: #2BB673;
+    --module-automation: #F59E0B;
+    --module-live-runs: #F59E0B;
+    --module-tools: #22C7A9;
+    --module-agents: #8B7FF5;
+    --module-runtime: #4A90E2;
+    --module-control-plane: #4A90E2;
   }
 }
 
@@ -122,5 +133,78 @@
   /* Smooth transitions */
   * {
     transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  /* Module card hover activation system */
+  .module-card {
+    transition:
+      border-color 150ms ease,
+      background 150ms ease,
+      transform 120ms ease;
+  }
+
+  .module-card:hover {
+    transform: translateY(-2px);
+  }
+
+  .module-card:hover svg {
+    transform: scale(1.08);
+    transition: transform 120ms ease;
+  }
+
+  /* Dashboard */
+  .module-card[data-module="dashboard"]:hover {
+    border-color: #8B7FF5;
+    background: rgba(139, 127, 245, 0.06);
+  }
+
+  /* Rooms */
+  .module-card[data-module="rooms"]:hover {
+    border-color: #B08968;
+    background: rgba(176, 137, 104, 0.06);
+  }
+
+  /* Workflows */
+  .module-card[data-module="workflows"]:hover {
+    border-color: #2BB673;
+    background: rgba(43, 182, 115, 0.06);
+  }
+
+  /* Automation */
+  .module-card[data-module="automation"]:hover {
+    border-color: #F59E0B;
+    background: rgba(245, 158, 11, 0.06);
+  }
+
+  /* Live Runs / Logs */
+  .module-card[data-module="live-runs"]:hover,
+  .module-card[data-module="logs"]:hover {
+    border-color: #F59E0B;
+    background: rgba(245, 158, 11, 0.06);
+  }
+
+  /* Tools */
+  .module-card[data-module="tools"]:hover {
+    border-color: #22C7A9;
+    background: rgba(34, 199, 169, 0.06);
+  }
+
+  /* Agents */
+  .module-card[data-module="agents"]:hover {
+    border-color: #8B7FF5;
+    background: rgba(139, 127, 245, 0.06);
+  }
+
+  /* Runtime */
+  .module-card[data-module="runtime"]:hover {
+    border-color: #4A90E2;
+    background: rgba(74, 144, 226, 0.06);
+  }
+
+  /* Control Plane / Settings */
+  .module-card[data-module="control-plane"]:hover,
+  .module-card[data-module="settings"]:hover {
+    border-color: #4A90E2;
+    background: rgba(74, 144, 226, 0.06);
   }
 }

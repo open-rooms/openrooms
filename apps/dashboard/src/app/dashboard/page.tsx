@@ -98,7 +98,8 @@ export default function DashboardPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-8 animate-slide-up">
             {/* Total Rooms - Uses brand color */}
             <Card 
-              className="border border-[#D4C4A8] bg-[#F5F1E8] hover:bg-white transition-all duration-200 ease-in-out rounded-lg hover:shadow-md hover:-translate-y-1"
+              className="module-card border border-[#D4C4A8] bg-[#F5F1E8] rounded-lg"
+              data-module="rooms"
             >
               <CardHeader className="pb-2">
                 <div className="flex items-center justify-between mb-2">
@@ -142,7 +143,7 @@ export default function DashboardPage() {
             </Card>
 
             {/* Success Rate */}
-            <Card className="border border-[#D4C4A8] bg-[#F5F1E8] hover:bg-white hover:shadow-md hover:-translate-y-1 transition-all duration-200 ease-in-out rounded-lg">
+            <Card className="module-card border border-[#D4C4A8] bg-[#F5F1E8] rounded-lg" data-module="dashboard">
               <CardHeader className="pb-2">
                 <div className="flex items-center justify-between mb-2">
                   <CardDescription>Success Rate</CardDescription>
@@ -192,7 +193,7 @@ export default function DashboardPage() {
             <h2 className="text-xl font-bold text-text-primary mb-6">Recent Activity</h2>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             {/* Recent Rooms */}
-            <Card className="border border-[#D4C4A8] bg-[#F5F1E8] hover:bg-white transition-all duration-200 ease-in-out rounded-lg hover:shadow-md">
+            <Card className="module-card border border-[#D4C4A8] bg-[#F5F1E8] rounded-lg" data-module="rooms">
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <div>

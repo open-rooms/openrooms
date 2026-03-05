@@ -185,10 +185,12 @@ export default function HomePage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 md:gap-6 mb-8">
             {apps.map((app, index) => {
               const Icon = app.icon
+              const moduleId = app.id === 'live-runs' ? 'logs' : app.id
               return (
                 <div 
                   key={app.id} 
-                  className="border-2 border-[#D4C4A8] rounded-2xl overflow-hidden hover:shadow-2xl transition-all duration-500 hover:-translate-y-3 hover:border-[#F54E00] hover:rotate-1 group animate-scale-in cursor-pointer"
+                  className="module-card border-2 border-[#D4C4A8] rounded-2xl overflow-hidden hover:shadow-2xl group animate-scale-in cursor-pointer"
+                  data-module={moduleId}
                   style={{ animationDelay: `${0.6 + index * 0.05}s` }}
                 >
                   <div className="bg-[#D4C4A8] px-4 py-3 relative group-hover:bg-[#F54E00] transition-all duration-500">
