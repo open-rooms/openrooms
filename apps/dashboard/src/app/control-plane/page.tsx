@@ -88,19 +88,20 @@ export default function ControlPlanePage() {
                         <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center">
                           <ServiceIcon className="w-10 h-10" />
                         </div>
-                      <div>
-                        <h4 className="font-semibold text-sm">{service.name}</h4>
-                        <div className="flex items-center gap-4 text-xs text-text-secondary mt-1">
-                          <span>Version: {service.version}</span>
-                          <span className={`font-semibold ${service.color}`}>{service.status}</span>
+                        <div>
+                          <h4 className="font-semibold text-sm">{service.name}</h4>
+                          <div className="flex items-center gap-4 text-xs text-text-secondary mt-1">
+                            <span>Version: {service.version}</span>
+                            <span className={`font-semibold ${service.color}`}>{service.status}</span>
+                          </div>
                         </div>
                       </div>
+                      <button className="text-xs px-3 py-1 bg-gray-100 hover:bg-gray-200 rounded font-semibold transition-colors">
+                        Details
+                      </button>
                     </div>
-                    <button className="text-xs px-3 py-1 bg-gray-100 hover:bg-gray-200 rounded font-semibold transition-colors">
-                      Details
-                    </button>
-                  </div>
-                ))}
+                  )
+                })}
               </div>
             </CardContent>
           </Card>

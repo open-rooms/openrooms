@@ -245,3 +245,19 @@ export {
   LiveActivityIcon,
   ExecutionTraceIcon
 } from './icons/system-icons'
+
+// Export OpenRooms product icons
+export {
+  ControlPlaneIllustrationIcon,
+  WorkflowsIllustrationIcon,
+  AutomationIllustrationIcon,
+  AgentsIllustrationIcon,
+  RunsIllustrationIcon,
+  LogsIllustrationIcon,
+  ToolsIllustrationIcon,
+  StorageIllustrationIcon,
+  APIIllustrationIcon,
+  MetricsIllustrationIcon,
+  AlertsIllustrationIcon,
+  SettingsIllustrationIcon
+} from './icons/openrooms-icons'
