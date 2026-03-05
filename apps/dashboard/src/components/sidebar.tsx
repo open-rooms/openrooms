@@ -22,6 +22,7 @@ const navigation = [
   { name: 'Tools', href: '/tools', Icon: ToolIcon },
   { name: 'Agents', href: '/agents', Icon: AgentIcon },
   { name: 'Runtime', href: '/runtime', Icon: RuntimeIcon },
+  { name: 'Settings', href: '/settings', Icon: SettingsIcon },
   { name: 'Control Plane', href: '/control-plane', Icon: SettingsIcon },
 ]
 
