@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { SettingsIcon } from '@/components/icons';
+import { SettingsIcon, CheckCircleIcon, AlertCircleIcon, ZapIcon, ClockIcon, DatabaseIcon } from '@/components/icons';
 
 interface APIKey {
   id: string;
@@ -121,13 +121,14 @@ export default function SettingsPage() {
     <div className="min-h-screen bg-[#E8DCC8] p-4 sm:p-6 md:p-8">
       <div className="max-w-6xl mx-auto">
         {/* Header */}
-        <div className="mb-8 animate-slide-up">
+        <div className="mb-8">
           <div className="flex items-center gap-3 mb-4">
             <SettingsIcon className="w-10 h-10" />
             <h1 className="text-3xl sm:text-4xl font-bold text-[#111111]">API Keys</h1>
           </div>
-          <p className="text-gray-700 text-base sm:text-lg max-w-3xl">
-            Manage programmatic access to OpenRooms. API keys are hashed and rate-limited per configuration.
+          <p className="text-gray-700 max-w-3xl flex items-center gap-2">
+            <DatabaseIcon className="w-4 h-4" />
+            Programmatic access with rate limiting and scopes
           </p>
         </div>
 
@@ -283,15 +284,17 @@ export default function SettingsPage() {
                     <div className="flex-1">
                       <div className="flex items-center gap-3 mb-2">
                         <h3 className="text-xl font-bold text-[#111111]">{key.name}</h3>
-                        {key.isActive ? (
-                          <span className="px-3 py-1 bg-green-100 text-green-800 border-2 border-green-200 rounded-full text-xs font-bold">
-                            ACTIVE
-                          </span>
-                        ) : (
-                          <span className="px-3 py-1 bg-gray-100 text-gray-800 border-2 border-gray-200 rounded-full text-xs font-bold">
-                            REVOKED
-                          </span>
-                        )}
+                      {key.isActive ? (
+                        <span className="px-3 py-1 bg-green-100 text-green-800 border-2 border-green-200 rounded-full text-xs font-bold flex items-center gap-1">
+                          <CheckCircleIcon className="w-3 h-3" />
+                          ACTIVE
+                        </span>
+                      ) : (
+                        <span className="px-3 py-1 bg-gray-100 text-gray-800 border-2 border-gray-200 rounded-full text-xs font-bold flex items-center gap-1">
+                          <AlertCircleIcon className="w-3 h-3" />
+                          REVOKED
+                        </span>
+                      )}
                       </div>
                       <p className="text-sm text-gray-600 font-mono mb-3">
                         Key Prefix: <span className="text-[#111111]">{key.keyPrefix}...</span>
@@ -310,8 +313,11 @@ export default function SettingsPage() {
 
                   <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 text-sm">
                     <div>
-                      <span className="font-semibold text-gray-600">Scopes</span>
-                      <div className="flex flex-wrap gap-1 mt-1">
+                      <div className="flex items-center gap-1 mb-1">
+                        <SettingsIcon className="w-4 h-4 text-gray-500" />
+                        <span className="font-semibold text-gray-600">Scopes</span>
+                      </div>
+                      <div className="flex flex-wrap gap-1">
                         {key.scopes.map((scope) => (
                           <span
                             key={scope}
@@ -324,20 +330,29 @@ export default function SettingsPage() {
                     </div>
 
                     <div>
-                      <span className="font-semibold text-gray-600">Rate Limit</span>
-                      <p className="font-mono text-[#111111] mt-1">
+                      <div className="flex items-center gap-1 mb-1">
+                        <ZapIcon className="w-4 h-4 text-gray-500" />
+                        <span className="font-semibold text-gray-600">Rate Limit</span>
+                      </div>
+                      <p className="font-mono text-[#111111]">
                         {key.rateLimit} / {key.rateLimitWindow}s
                       </p>
                     </div>
 
                     <div>
-                      <span className="font-semibold text-gray-600">Created</span>
-                      <p className="text-[#111111] mt-1">{new Date(key.createdAt).toLocaleDateString()}</p>
+                      <div className="flex items-center gap-1 mb-1">
+                        <ClockIcon className="w-4 h-4 text-gray-500" />
+                        <span className="font-semibold text-gray-600">Created</span>
+                      </div>
+                      <p className="text-[#111111]">{new Date(key.createdAt).toLocaleDateString()}</p>
                     </div>
 
                     <div>
-                      <span className="font-semibold text-gray-600">Last Used</span>
-                      <p className="text-[#111111] mt-1">
+                      <div className="flex items-center gap-1 mb-1">
+                        <CheckCircleIcon className="w-4 h-4 text-gray-500" />
+                        <span className="font-semibold text-gray-600">Last Used</span>
+                      </div>
+                      <p className="text-[#111111]">
                         {key.lastUsedAt ? new Date(key.lastUsedAt).toLocaleDateString() : 'Never'}
                       </p>
                     </div>
