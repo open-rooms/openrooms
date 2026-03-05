@@ -236,11 +236,15 @@ export function agentRoutes(fastify: FastifyInstance, container: Container) {
       }
 
       // Enqueue agent execution job
-      const job = await container.jobQueue.add('agent-execution', {
-        agentId: agent.id,
-        roomId: body.roomId,
-        maxIterations: body.maxIterations || 10,
-      });
+      const jobId = await container.jobQueue.addJob(
+        'agent-execution',
+        'execute',
+        {
+          agentId: agent.id,
+          roomId: body.roomId,
+          maxIterations: body.maxIterations || 10,
+        }
+      );
 
       await container.loggingService.log({
         roomId: body.roomId,
@@ -250,13 +254,13 @@ export function agentRoutes(fastify: FastifyInstance, container: Container) {
         level: 'INFO',
         message: `Agent execution queued`,
         metadata: {
-          jobId: job.id,
+          jobId,
           maxIterations: body.maxIterations || 10,
         },
       });
 
       return {
-        executionId: job.id,
+        executionId: jobId,
         agentId: agent.id,
         roomId: body.roomId,
         status: 'QUEUED',
