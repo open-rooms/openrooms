@@ -1,44 +1,40 @@
-## 📝 Description
+## Description
 
-<!-- Provide a brief description of your changes -->
+Provide a technical description of changes made.
 
-## 🔗 Related Issues
+## Related Issues
 
-<!-- Link any related issues here -->
+Link any related issues here.
 Closes #
 
-## 🎯 Type of Change
+## Type of Change
 
-- [ ] 🐛 Bug fix (non-breaking change which fixes an issue)
-- [ ] ✨ New feature (non-breaking change which adds functionality)
-- [ ] 💥 Breaking change (fix or feature that would cause existing functionality to not work as expected)
-- [ ] 📚 Documentation update
-- [ ] 🔧 Refactoring (no functional changes)
-- [ ] ⚡ Performance improvement
-- [ ] ✅ Test update
+- [ ] Bug fix (non-breaking change which fixes an issue)
+- [ ] New feature (non-breaking change which adds functionality)
+- [ ] Breaking change (fix or feature that would cause existing functionality to not work as expected)
+- [ ] Documentation update
+- [ ] Refactoring (no functional changes)
+- [ ] Performance improvement
+- [ ] Test update
 
-## 🧪 Testing
+## Testing
 
-<!-- Describe the tests you ran and how to reproduce them -->
+Describe tests executed and reproduction steps.
 
-- [ ] I have tested this change locally
-- [ ] I have added tests that prove my fix/feature works
-- [ ] Existing tests pass with my changes
+- [ ] Tested locally
+- [ ] Added tests that prove fix/feature works
+- [ ] Existing tests pass
 
-## 📋 Checklist
+## Checklist
 
-- [ ] My code follows the code style of this project
-- [ ] I have performed a self-review of my own code
-- [ ] I have commented my code, particularly in hard-to-understand areas
-- [ ] I have made corresponding changes to the documentation
-- [ ] My changes generate no new warnings or errors
-- [ ] I have run `pnpm lint` and it passes
-- [ ] I have checked my code and corrected any misspellings
+- [ ] Code follows project style guidelines
+- [ ] Self-review completed
+- [ ] Complex areas documented
+- [ ] Documentation updated
+- [ ] No new warnings or errors
+- [ ] `pnpm lint` passes
+- [ ] Spelling verified
 
-## 📸 Screenshots (if applicable)
+## Additional Context
 
-<!-- Add screenshots to help explain your changes -->
-
-## 🔍 Additional Context
-
-<!-- Add any other context about the PR here -->
+Add any other technical context here.
