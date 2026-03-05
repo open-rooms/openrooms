@@ -1,4 +1,4 @@
-# Running Critical Runtime Tests
+# Running Tests
 
 ## Quick Start
 
@@ -6,66 +6,86 @@
 ./test-runtime.sh
 ```
 
-This will:
-1. Start the test database (if not running)
-2. Run all three critical runtime guarantee tests
-3. Display results
+This script will:
+1. Start PostgreSQL test container if not running
+2. Wait for database ready state
+3. Execute runtime guarantee tests
+4. Display results
 
-## Three Non-Negotiable Tests
+## Manual Execution
 
-### [A] Duplicate Execution Prevention
-**Validates**: Idempotency via `executedSteps` Map  
-**Test**: Manually enqueue same step twice  
-**Expected**: Side effect executes once
-
-### [B] FSM Transition Enforcement  
-**Validates**: State machine guards illegal transitions  
-**Test**: Attempt RUNNING → IDLE transition  
-**Expected**: `InvalidStateTransitionError` thrown
-
-### [C] Crash Recovery
-**Validates**: Deterministic recovery without duplication  
-**Test**: Kill worker mid-step, restart  
-**Expected**: Step marked FAILED, no duplicate execution
-
-## Manual Test Execution
+### Start Test Database
 
 ```bash
-# Start database
 docker-compose -f docker-compose.test.yml up -d
+```
 
-# Run tests
+### Run Runtime Guarantee Tests
+
+```bash
 cd apps/api
 DATABASE_URL=postgresql://rooms_test:rooms_test_pass@localhost:5433/rooms_test pnpm test runtime-guarantees
+```
 
-# Stop database
+### Run All Tests
+
+```bash
+cd apps/api
+DATABASE_URL=postgresql://rooms_test:rooms_test_pass@localhost:5433/rooms_test pnpm test
+```
+
+### Stop Test Database
+
+```bash
 docker-compose -f docker-compose.test.yml down
 ```
+
+## Test Suites
+
+### Runtime Guarantees (`runtime-guarantees.test.ts`)
+
+Validates three critical execution invariants:
+
+**Test A: Idempotency Enforcement**
+- Mechanism: `executedSteps` Map tracking
+- Validation: Duplicate step execution prevented
+- Expected: Single execution despite multiple enqueue attempts
+
+**Test B: FSM Transition Validation**
+- Mechanism: `enforceTransition()` guard function
+- Validation: Illegal state transitions rejected
+- Expected: `InvalidStateTransitionError` for invalid transitions
+
+**Test C: Crash Recovery**
+- Mechanism: Interrupted step detection and marking
+- Validation: Deterministic recovery without duplication
+- Expected: Crashed steps marked `FAILED`, no re-execution
+
+### Determinism Tests (`determinism.test.ts`)
+
+Validates workflow execution produces identical results across multiple runs with fixed inputs.
 
 ## Expected Output
 
 ```
 PASS tests/runtime-guarantees.test.ts
   CRITICAL Runtime Guarantees
-    ✓ [A] CRITICAL: duplicate execution prevented by idempotency
-    ✓ [B] CRITICAL: illegal FSM transition rejected (RUNNING → IDLE)
-    ✓ [C] CRITICAL: crash recovery prevents duplication
+    ✓ [A] duplicate execution prevented by idempotency (18 ms)
+    ✓ [B] illegal FSM transition rejected (RUNNING → IDLE) (12 ms)
+    ✓ [C] crash recovery prevents duplication (9 ms)
 
 Test Suites: 1 passed, 1 total
 Tests:       3 passed, 3 total
 ```
 
+## Database Configuration
+
+**Connection**: `postgresql://rooms_test:rooms_test_pass@localhost:5433/rooms_test`  
+**Container**: `rooms-test-db`  
+**Image**: `postgres:16-alpine`
+
 ## Documentation
 
-- `RUNTIME_GUARANTEES.md` - Full validation report
-- `TESTING.md` - Test infrastructure setup
-- `docker-compose.test.yml` - Test database configuration
-
-## Architecture Guarantees
-
-These tests enforce:
-- ✅ Idempotent step execution
-- ✅ Strict FSM state transitions
-- ✅ Deterministic crash recovery
-- ✅ Append-only execution logs
-- ✅ Transactional state management
+- Implementation details: `docs/runtime-guarantees.md`
+- Infrastructure setup: `docs/testing.md`
+- Architecture: `docs/architecture.md`
