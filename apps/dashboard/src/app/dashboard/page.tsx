@@ -78,27 +78,27 @@ export default function DashboardPage() {
   }
 
   return (
-    <div>
+    <div className="bg-[#E8DCC8] min-h-screen">
       <Header 
         title="Dashboard" 
         subtitle="Monitor and manage your agent orchestration system"
         actions={
-          <Button asChild>
-            <Link href="/rooms?action=create">
-              <PlayIcon className="w-4 h-4 mr-2" />
+          <button className="inline-flex items-center gap-2 px-4 py-2 bg-[#F54E00] hover:bg-[#E24600] text-white text-sm font-bold rounded-lg transition-all duration-200">
+            <Link href="/rooms?action=create" className="flex items-center gap-2">
+              <PlayIcon className="w-4 h-4" />
               Launch Room
             </Link>
-          </Button>
+          </button>
         }
       />
       
-      <div className="p-8">
+      <div className="p-8 animate-fade-in">
         <div className="max-w-7xl mx-auto space-y-10">
           {/* Stats Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-8 animate-slide-up">
             {/* Total Rooms - Uses brand color */}
             <Card 
-              className="border border-[#DED8D2] bg-white hover:bg-[#FBF7F2] transition-colors duration-150 ease-in-out rounded-lg"
+              className="border border-[#D4C4A8] bg-[#F5F1E8] hover:bg-white transition-all duration-200 ease-in-out rounded-lg hover:shadow-md hover:-translate-y-1"
             >
               <CardHeader className="pb-2">
                 <div className="flex items-center justify-between mb-2">
@@ -117,7 +117,7 @@ export default function DashboardPage() {
 
             {/* Running - Active state when rooms are running */}
             <Card 
-              className="border border-neutral-200 bg-white shadow-sm hover:shadow-md transition-shadow duration-200 rounded-lg"
+              className="border border-[#D4C4A8] bg-[#F5F1E8] hover:bg-white hover:shadow-md hover:-translate-y-1 transition-all duration-200 rounded-lg"
               data-state={stats.runningRooms > 0 ? 'active' : 'inactive'}
             >
               <CardHeader 
@@ -142,7 +142,7 @@ export default function DashboardPage() {
             </Card>
 
             {/* Success Rate */}
-            <Card className="border border-[#DED8D2] bg-white hover:bg-[#FBF7F2] transition-colors duration-150 ease-in-out rounded-lg">
+            <Card className="border border-[#D4C4A8] bg-[#F5F1E8] hover:bg-white hover:shadow-md hover:-translate-y-1 transition-all duration-200 ease-in-out rounded-lg">
               <CardHeader className="pb-2">
                 <div className="flex items-center justify-between mb-2">
                   <CardDescription>Success Rate</CardDescription>
@@ -169,7 +169,7 @@ export default function DashboardPage() {
             </Card>
 
             {/* Workflows */}
-            <Card className="border border-[#DED8D2] bg-white hover:bg-[#FBF7F2] transition-colors duration-150 ease-in-out rounded-lg">
+            <Card className="border border-[#D4C4A8] bg-[#F5F1E8] hover:bg-white transition-all duration-200 ease-in-out rounded-lg hover:shadow-md">
               <CardHeader className="pb-2">
                 <div className="flex items-center justify-between mb-2">
                   <CardDescription>Workflows</CardDescription>
@@ -192,7 +192,7 @@ export default function DashboardPage() {
             <h2 className="text-xl font-bold text-text-primary mb-6">Recent Activity</h2>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             {/* Recent Rooms */}
-            <Card className="border border-[#DED8D2] bg-white hover:bg-[#FBF7F2] transition-colors duration-150 ease-in-out rounded-lg">
+            <Card className="border border-[#D4C4A8] bg-[#F5F1E8] hover:bg-white transition-all duration-200 ease-in-out rounded-lg hover:shadow-md">
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <div>
@@ -219,7 +219,7 @@ export default function DashboardPage() {
                       <Link
                         key={room.id}
                         href={`/rooms/${room.id}`}
-                        className="block p-4 rounded-lg border border-[#DED8D2] bg-white hover:bg-[#FBF7F2] transition-colors duration-150 ease-in-out group"
+                        className="block p-4 rounded-lg border border-[#D4C4A8] bg-[#F5F1E8] hover:bg-white hover:shadow-sm transition-all duration-200 ease-in-out group hover:-translate-y-0.5"
                       >
                         <div className="flex items-center justify-between">
                           <div className="flex-1 min-w-0">
@@ -244,7 +244,7 @@ export default function DashboardPage() {
             </Card>
 
             {/* Workflows */}
-            <Card className="border border-[#DED8D2] bg-white hover:bg-[#FBF7F2] transition-colors duration-150 ease-in-out rounded-lg">
+            <Card className="border border-[#D4C4A8] bg-[#F5F1E8] hover:bg-white transition-all duration-200 ease-in-out rounded-lg hover:shadow-md">
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <div>
@@ -271,7 +271,7 @@ export default function DashboardPage() {
                       <Link
                         key={workflow.id}
                         href={`/workflows/${workflow.id}`}
-                        className="block p-4 rounded-lg border border-[#DED8D2] bg-white hover:bg-[#FBF7F2] transition-colors duration-150 ease-in-out group"
+                        className="block p-4 rounded-lg border border-[#D4C4A8] bg-[#F5F1E8] hover:bg-white hover:shadow-sm transition-all duration-200 ease-in-out group hover:-translate-y-0.5"
                       >
                         <div className="flex items-center gap-3 mb-2">
                           <div className="text-xl">

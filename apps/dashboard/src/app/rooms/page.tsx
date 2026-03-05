@@ -48,21 +48,21 @@ export default function RoomsPage() {
   }
 
   return (
-    <div>
+    <div className="bg-[#E8DCC8] min-h-screen">
       <Header 
         title="Rooms" 
         subtitle={`${rooms.length} execution environments`}
         actions={
-          <Button asChild>
-            <Link href="/rooms?action=create">
-              <PlayIcon className="w-4 h-4 mr-2" />
+          <button className="inline-flex items-center gap-2 px-4 py-2 bg-[#F54E00] hover:bg-[#E24600] text-white text-sm font-bold rounded-lg transition-all duration-200">
+            <Link href="/rooms?action=create" className="flex items-center gap-2">
+              <PlayIcon className="w-4 h-4" />
               New Room
             </Link>
-          </Button>
+          </button>
         }
       />
       
-      <div className="p-8">
+      <div className="p-8 animate-fade-in">
         <div className="max-w-7xl mx-auto space-y-10">
           {/* Filter Tabs */}
           <div className="flex items-center gap-2 border-b border-[#DED8D2] pb-2">
@@ -99,7 +99,7 @@ export default function RoomsPage() {
                   href={`/rooms/${room.id}`}
                   className="block"
                 >
-                  <Card className="border border-[#DED8D2] bg-white hover:bg-[#FAFAF9] transition-colors duration-150 ease-in-out rounded-lg group">
+                  <Card className="border border-[#D4C4A8] bg-[#F5F1E8] hover:bg-white hover:shadow-md transition-all duration-200 ease-in-out rounded-lg group hover:-translate-y-1">
                     <CardContent className="p-6">
                       <div className="flex items-start justify-between gap-4">
                         <div className="flex items-start gap-4 flex-1 min-w-0">

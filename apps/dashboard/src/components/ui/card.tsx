@@ -2,6 +2,7 @@ import { cn } from '@/lib/utils'
 
 interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
   variant?: 'default' | 'glass' | 'glow'
+  'data-state'?: string
 }
 
 export function Card({ className, variant = 'default', ...props }: CardProps) {
@@ -23,7 +24,11 @@ export function Card({ className, variant = 'default', ...props }: CardProps) {
   )
 }
 
-export function CardHeader({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
+interface CardHeaderProps extends React.HTMLAttributes<HTMLDivElement> {
+  'data-state'?: string
+}
+
+export function CardHeader({ className, ...props }: CardHeaderProps) {
   const isActive = props['data-state'] === 'active'
   
   return (

@@ -3,21 +3,26 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { cn } from '@/lib/utils'
-import { RoomsIcon } from '@/components/icons/RoomsIcon'
-import { AgentIcon } from '@/components/icons/AgentIcon'
-import { WorkflowIcon } from '@/components/icons/WorkflowIcon'
-import { LogsIcon } from '@/components/icons/LogsIcon'
-import { MemoryIcon } from '@/components/icons/MemoryIcon'
-import { DashboardIcon } from '@/components/icons/DashboardIcon'
-import { ToolIcon, SettingsIcon } from '@/components/icons'
+import { DashboardIcon } from './icons/DashboardIcon'
+import { RoomsIcon } from './icons/RoomsIcon'
+import { WorkflowIcon } from './icons/WorkflowIcon'
+import { AutomationIcon } from './icons/AutomationIcon'
+import { LiveRunsIcon } from './icons/LiveRunsIcon'
+import { ToolIcon } from './icons/ToolIcon'
+import { AgentIcon } from './icons/AgentIcon'
+import { RuntimeIcon } from './icons/RuntimeIcon'
+import { SettingsIcon } from './icons/SettingsIcon'
 
 const navigation = [
   { name: 'Dashboard', href: '/dashboard', Icon: DashboardIcon },
   { name: 'Rooms', href: '/rooms', Icon: RoomsIcon },
   { name: 'Workflows', href: '/workflows', Icon: WorkflowIcon },
-  { name: 'Logs', href: '/logs', Icon: LogsIcon },
+  { name: 'Automation', href: '/automation', Icon: AutomationIcon },
+  { name: 'Live Runs', href: '/live-runs', Icon: LiveRunsIcon },
   { name: 'Tools', href: '/tools', Icon: ToolIcon },
-  { name: 'Settings', href: '/settings', Icon: SettingsIcon },
+  { name: 'Agents', href: '/agents', Icon: AgentIcon },
+  { name: 'Runtime', href: '/runtime', Icon: RuntimeIcon },
+  { name: 'Control Plane', href: '/control-plane', Icon: SettingsIcon },
 ]
 
 export function Sidebar() {
@@ -25,9 +30,8 @@ export function Sidebar() {
 
   return (
     <aside className="fixed left-0 top-0 bottom-0 w-64 bg-white border-r border-[#DED8D2] flex flex-col">
-      {/* Logo - Colorful Agent icon */}
       <div className="h-16 flex items-center px-6 border-b border-[#DED8D2]">
-        <Link href="/dashboard" className="flex items-center gap-3 group">
+        <Link href="/home" className="flex items-center gap-3 group">
           <AgentIcon className="w-8 h-8" />
           <div>
             <span className="text-base font-semibold text-gray-900">
@@ -37,10 +41,9 @@ export function Sidebar() {
         </Link>
       </div>
 
-      {/* Navigation */}
       <nav className="flex-1 px-4 py-6 space-y-1 overflow-y-auto">
         {navigation.map((item) => {
-          const isActive = pathname === item.href || (item.href !== '/' && pathname.startsWith(item.href))
+          const isActive = pathname === item.href || (item.href !== '/' && pathname?.startsWith(item.href + '/'))
           const Icon = item.Icon
           
           return (
@@ -61,7 +64,6 @@ export function Sidebar() {
         })}
       </nav>
 
-      {/* User Section */}
       <div className="p-4 border-t border-[#DED8D2]">
         <div className="flex items-center gap-3 px-4 py-2.5 rounded-lg bg-[#FBF7F2] hover:bg-[#F1EBE6] transition-colors duration-150 ease-in-out cursor-pointer">
           <div className="relative">

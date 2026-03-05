@@ -4,131 +4,44 @@
 
 @layer base {
   :root {
-    /* Semantic color tokens - Warm brownish/peachy neutral */
-    --color-bg: 30 50% 97%; /* #FCF2E8 brownish peachy */
-    --color-surface: 0 0% 100%; /* #FFFFFF */
-    --color-surface-active: 30 40% 97%; /* #FBF7F2 warm gray */
-    --color-border: 30 12% 87%; /* #DED8D2 warm border */
-    --color-text-primary: 0 0% 7%; /* #111111 */
-    --color-text-secondary: 0 0% 40%; /* Gray 600 */
-    --color-accent: 16 100% 48%; /* #F54E00 orange-red for buttons/active only */
-    --color-accent-soft: 16 100% 97%;
-    --color-accent-foreground: 0 0% 100%;
-
-    /* Fixed OpenRooms brand color (only for buttons/active states) */
-    --color-brand: 16 100% 48%; /* #F54E00 */
-    --color-brand-soft: 16 100% 97%;
-    --color-brand-foreground: 0 0% 100%;
-
-    /* Legacy variables for backwards compatibility */
-    --background: var(--color-bg);
-    --foreground: var(--color-text-primary);
-    --card: var(--color-surface);
-    --card-foreground: var(--color-text-primary);
-    --popover: var(--color-surface);
-    --popover-foreground: var(--color-text-primary);
-    --primary: var(--color-brand);
-    --primary-foreground: var(--color-brand-foreground);
-    --secondary: var(--color-surface-active);
-    --secondary-foreground: var(--color-text-primary);
-    --muted: var(--color-surface-active);
-    --muted-foreground: var(--color-text-secondary);
-    --accent: var(--color-accent);
-    --accent-foreground: var(--color-accent-foreground);
-    --destructive: 0 84% 60%;
-    --destructive-foreground: 0 0% 100%;
-    --border: var(--color-border);
-    --input: var(--color-border);
-    --ring: var(--color-accent);
-    --radius: 0.75rem;
-  }
-
-  /* Page-level themes - Applied via data-page-theme attribute */
-  
-  /* Dashboard - Orange */
-  [data-page-theme="dashboard"] {
-    --color-accent: 24 100% 55%;
-    --color-accent-soft: 24 100% 97%;
-    --color-accent-foreground: 0 0% 100%;
-    --ring: var(--color-accent);
-  }
-
-  /* Workflows - Blue */
-  [data-page-theme="workflows"] {
-    --color-accent: 217 91% 60%;
-    --color-accent-soft: 217 91% 97%;
-    --color-accent-foreground: 0 0% 100%;
-    --ring: var(--color-accent);
-  }
-
-  /* Rooms - Purple */
-  [data-page-theme="rooms"] {
-    --color-accent: 271 81% 56%;
-    --color-accent-soft: 271 81% 97%;
-    --color-accent-foreground: 0 0% 100%;
-    --ring: var(--color-accent);
-  }
-
-  /* Tools - Green */
-  [data-page-theme="tools"] {
-    --color-accent: 142 76% 45%;
-    --color-accent-soft: 142 76% 97%;
-    --color-accent-foreground: 0 0% 100%;
-    --ring: var(--color-accent);
-  }
-
-  /* Logs - Gray */
-  [data-page-theme="logs"] {
-    --color-accent: 240 5% 50%;
-    --color-accent-soft: 240 5% 97%;
-    --color-accent-foreground: 0 0% 100%;
-    --ring: var(--color-accent);
-  }
-
-  /* Home - Orange (same as brand) */
-  [data-page-theme="home"] {
-    --color-accent: 24 100% 55%;
-    --color-accent-soft: 24 100% 97%;
-    --color-accent-foreground: 0 0% 100%;
-    --ring: var(--color-accent);
-  }
-
-  /* Settings - Slate */
-  [data-page-theme="settings"] {
-    --color-accent: 215 20% 45%;
-    --color-accent-soft: 215 20% 97%;
-    --color-accent-foreground: 0 0% 100%;
-    --ring: var(--color-accent);
-  }
-}
-
-@layer base {
-  * {
-    @apply border-border;
-  }
-  body {
-    @apply bg-[#FCF2E8] text-text-primary antialiased;
+    --background: #E8DCC8;
+    --foreground: #111111;
+    --cta-button: #F54E00;
+    --cta-button-hover: #E24600;
+    --card-bg: #F5F1E8;
+    --card-hover: #FFFFFF;
+    --border: #D4C4A8;
   }
 }
 
 @layer utilities {
-  .animate-slide-in {
-    animation: slideIn 0.3s ease-out;
-  }
-
-  @keyframes slideIn {
-    from {
-      opacity: 0;
-      transform: translateY(10px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-
+  /* Smooth animations */
   .animate-fade-in {
-    animation: fadeIn 0.5s ease-out;
+    animation: fadeIn 0.5s ease-in;
+  }
+  
+  .animate-slide-up {
+    animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  
+  .animate-scale-in {
+    animation: scaleIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  .animate-bounce-in {
+    animation: bounceIn 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  }
+
+  .animate-float {
+    animation: float 3s ease-in-out infinite;
+  }
+
+  .animate-wiggle {
+    animation: wiggle 0.5s ease-in-out;
+  }
+
+  .animate-pop {
+    animation: pop 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
   }
 
   @keyframes fadeIn {
@@ -137,25 +50,83 @@
     }
     to {
       opacity: 1;
-      transform: translateY(0);
     }
   }
-}
 
-::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
-}
+  @keyframes slideUp {
+    from {
+      transform: translateY(30px);
+      opacity: 0;
+    }
+    to {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
 
-::-webkit-scrollbar-track {
-  background: hsl(var(--color-surface-active));
-}
+  @keyframes scaleIn {
+    from {
+      transform: scale(0.9);
+      opacity: 0;
+    }
+    to {
+      transform: scale(1);
+      opacity: 1;
+    }
+  }
 
-::-webkit-scrollbar-thumb {
-  background: hsl(var(--color-border));
-  border-radius: 4px;
-}
+  @keyframes bounceIn {
+    0% {
+      transform: scale(0.3);
+      opacity: 0;
+    }
+    50% {
+      transform: scale(1.05);
+      opacity: 1;
+    }
+    70% {
+      transform: scale(0.9);
+    }
+    100% {
+      transform: scale(1);
+    }
+  }
 
-::-webkit-scrollbar-thumb:hover {
-  background: hsl(var(--color-text-secondary) / 0.3);
+  @keyframes float {
+    0%, 100% {
+      transform: translateY(0px);
+    }
+    50% {
+      transform: translateY(-10px);
+    }
+  }
+
+  @keyframes wiggle {
+    0%, 100% {
+      transform: rotate(0deg);
+    }
+    25% {
+      transform: rotate(-5deg);
+    }
+    75% {
+      transform: rotate(5deg);
+    }
+  }
+
+  @keyframes pop {
+    0% {
+      transform: scale(1);
+    }
+    50% {
+      transform: scale(1.15);
+    }
+    100% {
+      transform: scale(1);
+    }
+  }
+
+  /* Smooth transitions */
+  * {
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  }
 }
