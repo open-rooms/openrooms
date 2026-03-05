@@ -13,7 +13,6 @@ import {
 export class RedisStateManager implements StateManager {
   private readonly redis: Redis;
   private readonly ttl: number = 3600; // 1 hour default TTL
-  private readonly lockTTL: number = 30; // 30 seconds lock TTL
 
   constructor(redis: Redis, ttl?: number) {
     this.redis = redis;
@@ -28,10 +27,11 @@ export class RedisStateManager implements StateManager {
 
     try {
       const parsed = JSON.parse(data) as RoomState;
-      // Convert attempts from object to Map
+      // Convert attempts and executedSteps from objects to Maps
       const state: RoomState = {
         ...parsed,
-        attempts: new Map(Object.entries((parsed.attempts as unknown as JSONObject) ?? {})),
+        attempts: new Map(Object.entries((parsed.attempts as unknown as JSONObject) ?? {}).map(([k, v]) => [k, Number(v)])),
+        executedSteps: new Map(Object.entries((parsed.executedSteps as unknown as JSONObject) ?? {}).map(([k, v]) => [k, v as any])),
       };
       return state;
     } catch (error) {
@@ -42,10 +42,11 @@ export class RedisStateManager implements StateManager {
 
   async setState(roomId: UUID, state: RoomState): Promise<void> {
     const key = this.getStateKey(roomId);
-    // Convert Map to object for JSON serialization
+    // Convert Maps to objects for JSON serialization
     const serializable = {
       ...state,
       attempts: Object.fromEntries(state.attempts),
+      executedSteps: Object.fromEntries(state.executedSteps),
     };
     
     await this.redis.setex(
@@ -84,9 +85,9 @@ export class RedisStateManager implements StateManager {
     const result = await this.redis.set(
       lockKey,
       lockValue,
-      'NX',
       'EX',
-      Math.ceil(timeout / 1000)
+      Math.ceil(timeout / 1000),
+      'NX'
     );
 
     return result === 'OK';

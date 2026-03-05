@@ -31,6 +31,8 @@ import {
   shouldSkipExecution,
   enforceTransition,
   STATE_TRANSITION_RULES,
+  JSONObject,
+  JSONValue,
 } from '@openrooms/core';
 
 export interface ExecutionEngineConfig {
@@ -243,7 +245,7 @@ export class WorkflowExecutionEngine implements WorkflowEngine {
       
       if (result.success) {
         stepRecord.status = 'COMPLETED';
-        stepRecord.result = result.data;
+        stepRecord.result = (result.data ?? null) as JSONValue;
         
         await this.log(roomId, ExecutionEventType.NODE_EXECUTED, `Node executed successfully: ${node.name}`, {
           nodeId,
@@ -546,7 +548,7 @@ export class WorkflowExecutionEngine implements WorkflowEngine {
       eventType: eventType as string,
       level: level as string,
       message,
-      data,
+      data: data as any as JSONObject,
       metadata: {},
     });
   }

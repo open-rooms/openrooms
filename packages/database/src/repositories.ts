@@ -32,9 +32,6 @@ import {
   UUID,
   RoomStatus,
   WorkflowStatus,
-  AgentRole,
-  AgentStatus,
-  ExecutionLogLevel,
   MemoryType,
 } from '@openrooms/core';
 
@@ -53,6 +50,7 @@ export class KyselyRoomRepository implements RoomRepository {
         name: data.name,
         description: data.description || null,
         workflowId: data.workflowId,
+        status: 'IDLE' as RoomStatus,
         config: JSON.stringify(data.config || {}),
         metadata: JSON.stringify(data.metadata || {}),
         updatedAt: new Date(),
@@ -188,7 +186,7 @@ export class KyselyWorkflowRepository implements WorkflowRepository {
         name: data.name,
         description: data.description || null,
         version: 1,
-        status: 'DRAFT',
+        status: 'DRAFT' as WorkflowStatus,
         initialNodeId: data.initialNodeId,
         metadata: JSON.stringify(data.metadata || {}),
         updatedAt: new Date(),
@@ -322,11 +320,9 @@ export class KyselyAgentRepository implements AgentRepository {
         id: sql`gen_random_uuid()`,
         roomId: data.roomId,
         name: data.name,
-        role: data.role,
-        status: (data.status as AgentStatus) || 'IDLE',
-        model: data.model,
-        systemPrompt: data.systemPrompt || null,
+        description: data.description || null,
         config: JSON.stringify(data.config || {}),
+        metadata: JSON.stringify(data.metadata || {}),
         updatedAt: new Date(),
       })
       .returningAll()
@@ -368,11 +364,11 @@ export class KyselyAgentRepository implements AgentRepository {
     };
 
     if (data.name !== undefined) updateData.name = data.name;
-    if (data.status !== undefined) updateData.status = data.status;
-    if (data.systemPrompt !== undefined)
-      updateData.systemPrompt = data.systemPrompt;
+    if (data.description !== undefined) updateData.description = data.description;
     if (data.config !== undefined)
       updateData.config = JSON.stringify(data.config);
+    if (data.metadata !== undefined)
+      updateData.metadata = JSON.stringify(data.metadata);
 
     const agent = await db
       .updateTable('agents')
@@ -394,11 +390,12 @@ export class KyselyAgentRepository implements AgentRepository {
       id: row.id,
       roomId: row.roomId,
       name: row.name,
-      role: row.role as AgentRole,
-      status: row.status as AgentStatus,
-      model: row.model,
-      systemPrompt: row.systemPrompt,
+      description: row.description || undefined,
       config: typeof row.config === 'string' ? JSON.parse(row.config) : row.config,
+      metadata:
+        typeof row.metadata === 'string'
+          ? JSON.parse(row.metadata)
+          : row.metadata || {},
       createdAt: row.createdAt,
       updatedAt: row.updatedAt,
     };
@@ -413,30 +410,33 @@ export class KyselyExecutionLogRepository implements ExecutionLogRepository {
   async create(data: CreateLogData): Promise<ExecutionLog> {
     const db = getDb();
 
-    const log = await db
+    const result = await db
       .insertInto('execution_logs')
       .values({
         id: sql`gen_random_uuid()`,
         roomId: data.roomId,
         workflowId: data.workflowId,
         nodeId: data.nodeId || null,
+        agentId: data.agentId || null,
         eventType: data.eventType,
-        level: (data.level as ExecutionLogLevel) || 'INFO',
+        level: data.level,
         message: data.message,
-        data: JSON.stringify(data.data || {}),
+        data: JSON.stringify({
+          ...data.data,
+          error: data.error,
+          duration: data.duration,
+          metadata: data.metadata,
+        }),
       })
       .returningAll()
       .executeTakeFirstOrThrow();
 
-    return this.mapLog(log);
+    return this.mapLog(result);
   }
 
-  async findByRoom(
-    roomId: UUID,
-    options?: LogQueryOptions
-  ): Promise<ExecutionLog[]> {
+  async findByRoomId(roomId: UUID, options?: LogQueryOptions): Promise<ExecutionLog[]> {
     const db = getDb();
-
+    
     let query = db
       .selectFrom('execution_logs')
       .selectAll()
@@ -446,8 +446,12 @@ export class KyselyExecutionLogRepository implements ExecutionLogRepository {
       query = query.where('level', '=', options.level);
     }
 
-    if (options?.eventType) {
-      query = query.where('eventType', '=', options.eventType);
+    if (options?.startTime) {
+      query = query.where('createdAt', '>=', new Date(options.startTime));
+    }
+
+    if (options?.endTime) {
+      query = query.where('createdAt', '<=', new Date(options.endTime));
     }
 
     query = query.orderBy('createdAt', 'desc');
@@ -460,65 +464,64 @@ export class KyselyExecutionLogRepository implements ExecutionLogRepository {
       query = query.offset(options.offset);
     }
 
-    const logs = await query.execute();
-    return logs.map((l) => this.mapLog(l));
+    const results = await query.execute();
+    return results.map(r => this.mapLog(r));
   }
 
-  async findByWorkflow(
-    workflowId: UUID,
-    options?: LogQueryOptions
-  ): Promise<ExecutionLog[]> {
+  async findByNodeId(nodeId: UUID): Promise<ExecutionLog[]> {
     const db = getDb();
-
-    let query = db
+    
+    const results = await db
       .selectFrom('execution_logs')
       .selectAll()
-      .where('workflowId', '=', workflowId);
+      .where('nodeId', '=', nodeId)
+      .orderBy('createdAt', 'desc')
+      .execute();
 
-    if (options?.level) {
-      query = query.where('level', '=', options.level);
-    }
-
-    if (options?.eventType) {
-      query = query.where('eventType', '=', options.eventType);
-    }
-
-    query = query.orderBy('createdAt', 'desc');
-
-    if (options?.limit) {
-      query = query.limit(options.limit);
-    }
-
-    if (options?.offset) {
-      query = query.offset(options.offset);
-    }
-
-    const logs = await query.execute();
-    return logs.map((l) => this.mapLog(l));
+    return results.map(r => this.mapLog(r));
   }
 
-  async deleteOlderThan(date: Date): Promise<number> {
+  async findByEventType(roomId: UUID, eventType: string): Promise<ExecutionLog[]> {
     const db = getDb();
+    
+    const results = await db
+      .selectFrom('execution_logs')
+      .selectAll()
+      .where('roomId', '=', roomId)
+      .where('eventType', '=', eventType)
+      .orderBy('createdAt', 'desc')
+      .execute();
 
-    const result = await db
+    return results.map(r => this.mapLog(r));
+  }
+
+  async deleteByRoomId(roomId: UUID): Promise<void> {
+    const db = getDb();
+    
+    await db
       .deleteFrom('execution_logs')
-      .where('createdAt', '<', date)
-      .executeTakeFirst();
-
-    return Number(result.numDeletedRows);
+      .where('roomId', '=', roomId)
+      .execute();
   }
 
   private mapLog(row: any): ExecutionLog {
+    const data = typeof row.data === 'string' ? JSON.parse(row.data) : row.data || {};
+    const { error, duration, metadata, ...restData } = data;
+
     return {
       id: row.id,
       roomId: row.roomId,
       workflowId: row.workflowId,
-      nodeId: row.nodeId,
+      nodeId: row.nodeId || undefined,
+      agentId: row.agentId || undefined,
       eventType: row.eventType,
-      level: row.level as ExecutionLogLevel,
+      level: row.level,
       message: row.message,
-      data: typeof row.data === 'string' ? JSON.parse(row.data) : row.data,
-      createdAt: row.createdAt,
+      data: restData,
+      error,
+      duration,
+      metadata: metadata || {},
+      timestamp: row.createdAt instanceof Date ? row.createdAt.toISOString() : row.createdAt,
     };
   }
 }
@@ -536,8 +539,11 @@ export class KyselyMemoryRepository implements MemoryRepository {
       .values({
         id: sql`gen_random_uuid()`,
         roomId: data.roomId,
-        type: data.type,
-        config: JSON.stringify(data.config || {}),
+        type: MemoryType.SEMANTIC,
+        config: JSON.stringify({ 
+          conversationHistory: data.conversationHistory || [],
+          context: data.context || {}
+        }),
         updatedAt: new Date(),
       })
       .returningAll()
@@ -574,8 +580,21 @@ export class KyselyMemoryRepository implements MemoryRepository {
       updatedAt: new Date(),
     };
 
-    if (data.config !== undefined) {
-      updateData.config = JSON.stringify(data.config);
+    if (data.conversationHistory !== undefined || data.context !== undefined) {
+      const currentMemory = await db
+        .selectFrom('memories')
+        .selectAll()
+        .where('id', '=', id)
+        .executeTakeFirstOrThrow();
+      
+      const config = typeof currentMemory.config === 'string' 
+        ? JSON.parse(currentMemory.config) 
+        : currentMemory.config || {};
+
+      updateData.config = JSON.stringify({
+        conversationHistory: data.conversationHistory ?? config.conversationHistory ?? [],
+        context: data.context ?? config.context ?? {}
+      });
     }
 
     await db.updateTable('memories').set(updateData).where('id', '=', id).execute();
@@ -596,54 +615,45 @@ export class KyselyMemoryRepository implements MemoryRepository {
     return this.mapMemory(memory, entries);
   }
 
-  async delete(id: UUID): Promise<void> {
-    const db = getDb();
-    await db.deleteFrom('memories').where('id', '=', id).execute();
-  }
-
-  async addEntry(
-    memoryId: UUID,
-    key: string,
-    value: any,
-    embedding?: number[]
-  ): Promise<MemoryEntry> {
+  async addEntry(roomId: UUID, entry: Omit<MemoryEntry, 'id' | 'createdAt'>): Promise<MemoryEntry> {
     const db = getDb();
 
-    const entry = await db
+    // Get memory for this room
+    const memory = await this.findByRoomId(roomId);
+    if (!memory) {
+      throw new Error(`Memory not found for room ${roomId}`);
+    }
+
+    const newEntry = await db
       .insertInto('memory_entries')
       .values({
         id: sql`gen_random_uuid()`,
-        memoryId,
-        key,
-        value: JSON.stringify(value),
-        embedding: embedding || [],
+        memoryId: memory.id,
+        key: entry.key,
+        value: JSON.stringify(entry.value),
+        embedding: entry.embedding || [],
         updatedAt: new Date(),
       })
       .returningAll()
       .executeTakeFirstOrThrow();
 
-    return this.mapEntry(entry);
+    return this.mapEntry(newEntry);
   }
 
-  async getEntries(roomId: UUID, type?: MemoryType): Promise<MemoryEntry[]> {
+  async getEntries(roomId: UUID): Promise<MemoryEntry[]> {
     const db = getDb();
     
-    // First get the memory for this room
     const memory = await this.findByRoomId(roomId);
     if (!memory) {
       return [];
     }
 
-    let query = db
+    const entries = await db
       .selectFrom('memory_entries')
       .selectAll()
-      .where('memoryId', '=', memory.id);
+      .where('memoryId', '=', memory.id)
+      .execute();
 
-    if (type) {
-      query = query.where('type', '=', type);
-    }
-
-    const entries = await query.execute();
     return entries.map(e => this.mapEntry(e));
   }
 
@@ -652,76 +662,31 @@ export class KyselyMemoryRepository implements MemoryRepository {
     await db.deleteFrom('memories').where('roomId', '=', roomId).execute();
   }
 
-  async getEntry(memoryId: UUID, key: string): Promise<MemoryEntry | null> {
-    const db = getDb();
-
-    const entry = await db
-      .selectFrom('memory_entries')
-      .selectAll()
-      .where('memoryId', '=', memoryId)
-      .where('key', '=', key)
-      .executeTakeFirst();
-
-    return entry ? this.mapEntry(entry) : null;
-  }
-
-  async removeEntry(memoryId: UUID, key: string): Promise<void> {
-    const db = getDb();
-    await db
-      .deleteFrom('memory_entries')
-      .where('memoryId', '=', memoryId)
-      .where('key', '=', key)
-      .execute();
-  }
-
-  async searchEntries(
-    memoryId: UUID,
-    searchQuery: string,
-    limit?: number
-  ): Promise<MemoryEntry[]> {
-    const db = getDb();
-
-    const entries = await db
-      .selectFrom('memory_entries')
-      .selectAll()
-      .where('memoryId', '=', memoryId)
-      .where((eb) =>
-        eb.or([
-          eb('key', 'ilike', `%${searchQuery}%`),
-          sql`value::text ilike ${`%${searchQuery}%`}`,
-        ])
-      )
-      .orderBy('createdAt', 'desc')
-      .limit(limit || 10)
-      .execute();
-
-    return entries.map((e) => this.mapEntry(e));
-  }
-
-  private mapMemory(memoryRow: any, entryRows: any[]): Memory {
+  private mapMemory(row: any, entries: any[]): Memory {
+    const config = typeof row.config === 'string' ? JSON.parse(row.config) : row.config || {};
+    
     return {
-      id: memoryRow.id,
-      roomId: memoryRow.roomId,
-      type: memoryRow.type as MemoryType,
-      entries: entryRows.map((e) => this.mapEntry(e)),
-      config:
-        typeof memoryRow.config === 'string'
-          ? JSON.parse(memoryRow.config)
-          : memoryRow.config,
-      createdAt: memoryRow.createdAt,
-      updatedAt: memoryRow.updatedAt,
+      id: row.id,
+      roomId: row.roomId,
+      conversationHistory: config.conversationHistory || [],
+      context: config.context || {},
+      entries: entries.map(e => this.mapEntry(e)),
+      createdAt: row.createdAt instanceof Date ? row.createdAt.toISOString() : row.createdAt,
+      updatedAt: row.updatedAt instanceof Date ? row.updatedAt.toISOString() : row.updatedAt,
     };
   }
 
   private mapEntry(row: any): MemoryEntry {
     return {
       id: row.id,
-      memoryId: row.memoryId,
+      roomId: row.roomId,
+      type: MemoryType.SEMANTIC,
       key: row.key,
       value: typeof row.value === 'string' ? JSON.parse(row.value) : row.value,
-      embedding: row.embedding,
-      createdAt: row.createdAt,
-      updatedAt: row.updatedAt,
+      embedding: row.embedding || undefined,
+      metadata: {},
+      createdAt: row.createdAt instanceof Date ? row.createdAt.toISOString() : row.createdAt,
     };
   }
 }
+

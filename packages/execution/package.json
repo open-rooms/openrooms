@@ -16,7 +16,9 @@
   },
   "dependencies": {
     "@openrooms/core": "workspace:*",
-    "@openrooms/infrastructure-database": "workspace:*"
+    "@openrooms/infrastructure-database": "workspace:*",
+    "bullmq": "^5.0.0",
+    "openai": "^6.25.0"
   },
   "devDependencies": {
     "typescript": "^5.3.3"

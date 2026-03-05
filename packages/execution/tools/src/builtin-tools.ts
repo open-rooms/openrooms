@@ -8,9 +8,9 @@ import {
 import {
   ToolDefinition,
   ToolCategory,
-  ToolParameter,
   Result,
   JSONObject,
+  JSONValue,
   ToolExecutionContext,
   UUID,
 } from '@openrooms/core';
@@ -26,7 +26,7 @@ export class CalculatorToolExecutor extends BaseToolExecutor {
 
   async execute(
     args: JSONObject,
-    context: ToolExecutionContext
+    _context: ToolExecutionContext
   ): Promise<Result<JSONObject>> {
     try {
       const expression = args.expression as string;
@@ -92,7 +92,7 @@ export class HttpRequestToolExecutor extends BaseToolExecutor {
 
   async execute(
     args: JSONObject,
-    context: ToolExecutionContext
+    _context: ToolExecutionContext
   ): Promise<Result<JSONObject>> {
     try {
       const url = args.url as string;
@@ -121,7 +121,7 @@ export class HttpRequestToolExecutor extends BaseToolExecutor {
           status: response.status,
           statusText: response.statusText,
           headers: Object.fromEntries(response.headers.entries()),
-          data: parsedData,
+          data: parsedData as any as JSONValue,
         },
       };
     } catch (error) {
@@ -199,7 +199,7 @@ export class MemoryQueryToolExecutor extends BaseToolExecutor {
       const memory = context.memory;
 
       // Simple keyword search in conversation history
-      const results = memory.conversationHistory.filter((msg) => {
+      const results = memory.conversationHistory.filter((msg: any) => {
         const content = typeof msg === 'object' && msg !== null && 'content' in msg 
           ? String(msg.content)
           : '';
@@ -209,7 +209,7 @@ export class MemoryQueryToolExecutor extends BaseToolExecutor {
       return {
         success: true,
         data: {
-          results,
+          results: results as any as JSONValue,
           count: results.length,
         },
       };

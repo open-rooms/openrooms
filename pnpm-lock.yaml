@@ -7,6 +7,13 @@ settings:
 importers:
 
   .:
+    dependencies:
+      bullmq:
+        specifier: ^5.0.0
+        version: 5.70.1
+      openai:
+        specifier: ^6.25.0
+        version: 6.25.0
     devDependencies:
       turbo:
         specifier: ^2.0.0
@@ -172,6 +179,12 @@ importers:
       '@openrooms/infrastructure-database':
         specifier: workspace:*
         version: link:../infrastructure/database
+      bullmq:
+        specifier: ^5.0.0
+        version: 5.70.1
+      openai:
+        specifier: ^6.25.0
+        version: 6.25.0
     devDependencies:
       typescript:
         specifier: ^5.3.3
@@ -4703,6 +4716,19 @@ packages:
     dependencies:
       mimic-fn: 2.1.0
     dev: true
+
+  /openai@6.25.0:
+    resolution: {integrity: sha512-mEh6VZ2ds2AGGokWARo18aPISI1OhlgdEIC1ewhkZr8pSIT31dec0ecr9Nhxx0JlybyOgoAT1sWeKtwPZzJyww==}
+    hasBin: true
+    peerDependencies:
+      ws: ^8.18.0
+      zod: ^3.25 || ^4.0
+    peerDependenciesMeta:
+      ws:
+        optional: true
+      zod:
+        optional: true
+    dev: false
 
   /optionator@0.9.4:
     resolution: {integrity: sha512-6IpQ7mKUxRcZNLIObR0hz7lxsapSSIYNZJwXPGeF0mTVqGKFIXj1DQcMoT22S3ROcLyY/rz0PWaWZ9ayWmad9g==}

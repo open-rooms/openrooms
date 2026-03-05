@@ -8,10 +8,6 @@ import {
   RoomStatus,
   WorkflowStatus,
   NodeType,
-  AgentRole,
-  AgentStatus,
-  ExecutionLogLevel,
-  ExecutionLogEventType,
   MemoryType,
   ToolCategory,
 } from '@openrooms/core';
@@ -70,11 +66,9 @@ export interface AgentTable {
   id: Generated<string>;
   roomId: string;
   name: string;
-  role: AgentRole;
-  status: Generated<AgentStatus>;
-  model: string;
-  systemPrompt: string | null;
+  description: string | null;
   config: ColumnType<Record<string, any>, string, string>;
+  metadata: ColumnType<Record<string, any>, string, string>;
   createdAt: Generated<Timestamp>;
   updatedAt: Timestamp;
 }
@@ -84,8 +78,9 @@ export interface ExecutionLogTable {
   roomId: string;
   workflowId: string;
   nodeId: string | null;
-  eventType: ExecutionLogEventType;
-  level: Generated<ExecutionLogLevel>;
+  agentId: string | null;
+  eventType: string;
+  level: string;
   message: string;
   data: ColumnType<Record<string, any>, string, string>;
   createdAt: Generated<Timestamp>;

@@ -2,7 +2,7 @@
  * BullMQ Queue Manager
  */
 
-import { Queue, QueueEvents, ConnectionOptions } from 'bullmq';
+import { Queue, ConnectionOptions } from 'bullmq';
 import { JobQueue, JobOptions, Job, JobProcessor } from '@openrooms/core';
 
 export class BullMQJobQueue implements JobQueue {
@@ -41,7 +41,7 @@ export class BullMQJobQueue implements JobQueue {
   process<T>(
     queueName: string,
     jobName: string,
-    processor: JobProcessor<T>
+    _processor: JobProcessor<T>
   ): void {
     const queue = this.getOrCreateQueue(queueName);
 
@@ -50,12 +50,12 @@ export class BullMQJobQueue implements JobQueue {
     void queue.add(jobName, {});
   }
 
-  async getJob(jobId: string): Promise<Job | null> {
+  async getJob(_jobId: string): Promise<Job | null> {
     // Need to know which queue - simplified implementation
     return null;
   }
 
-  async removeJob(jobId: string): Promise<void> {
+  async removeJob(_jobId: string): Promise<void> {
     // Need to know which queue - simplified implementation
   }
 

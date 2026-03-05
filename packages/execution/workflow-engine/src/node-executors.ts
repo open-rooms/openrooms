@@ -5,21 +5,21 @@
 import {
   NodeExecutor,
   NodeExecutionContext,
-} from './workflow-engine';
+} from './engine';
 import {
   Result,
   NodeType,
 } from '@openrooms/core';
 
 export class StartNodeExecutor implements NodeExecutor {
-  async execute(context: NodeExecutionContext): Promise<Result<void>> {
+  async execute(_context: NodeExecutionContext): Promise<Result<void>> {
     // START node simply passes through
     return { success: true, data: undefined };
   }
 }
 
 export class EndNodeExecutor implements NodeExecutor {
-  async execute(context: NodeExecutionContext): Promise<Result<void>> {
+  async execute(_context: NodeExecutionContext): Promise<Result<void>> {
     // END node marks completion
     return { success: true, data: undefined };
   }
@@ -193,7 +193,9 @@ export class DecisionNodeExecutor implements NodeExecutor {
         },
       });
 
-      return { success: conditionMet, data: undefined };
+      return conditionMet 
+        ? { success: true, data: undefined }
+        : { success: false, error: new Error('Condition not met') };
     } catch (error) {
       return {
         success: false,
@@ -228,9 +230,9 @@ export function createDefaultNodeExecutors(
   executors.set(NodeType.END, new EndNodeExecutor());
   executors.set(NodeType.WAIT, new WaitNodeExecutor());
   executors.set(NodeType.AGENT_TASK, new AgentTaskNodeExecutor(deps.llmService, deps.memoryRepository));
-  executors.set(NodeType.TOOL_EXECUTION, new ToolExecutionNodeExecutor(deps.toolRegistry, deps.memoryRepository));
+  executors.set(NodeType.TOOL_EXECUTION, new ToolExecutionNodeExecutor());
   executors.set(NodeType.DECISION, new DecisionNodeExecutor(deps.stateManager));
-  executors.set(NodeType.PARALLEL, new ParallelNodeExecutor(deps.workflowEngine));
+  executors.set(NodeType.PARALLEL, new ParallelNodeExecutor());
   
   return executors;
 }

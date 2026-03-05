@@ -5,6 +5,7 @@
  */
 
 import { RoomStatus } from '../types';
+import { InvalidStateTransitionError } from '../errors';
 
 /**
  * Valid state transitions for Room execution
@@ -52,10 +53,7 @@ export function isTerminalState(state: RoomStatus): boolean {
  */
 export function enforceTransition(from: RoomStatus, to: RoomStatus): void {
   if (!isValidTransition(from, to)) {
-    const validStates = getValidNextStates(from).join(', ') || 'none (terminal state)';
-    throw new Error(
-      `Invalid state transition: ${from} -> ${to}. Valid transitions from ${from}: ${validStates}`
-    );
+    throw new InvalidStateTransitionError(from, to);
   }
 }
 

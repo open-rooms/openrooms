@@ -75,7 +75,7 @@ export class OpenAIProvider implements LLMProvider {
 
       const completion = await this.client.chat.completions.create({
         model: request.model,
-        messages,
+        messages: messages as any,
         temperature: request.temperature,
         max_tokens: request.maxTokens,
         tools,
@@ -91,7 +91,7 @@ export class OpenAIProvider implements LLMProvider {
       const message: ConversationMessage = {
         role: 'assistant',
         content: choice.message.content ?? '',
-        toolCalls: choice.message.tool_calls?.map((tc) => ({
+        toolCalls: choice.message.tool_calls?.map((tc: any) => ({
           id: tc.id,
           toolId: tc.function.name,
           toolName: tc.function.name,
