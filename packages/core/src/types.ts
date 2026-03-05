@@ -52,13 +52,52 @@ export interface Room {
 }
 
 // ============================================================================
-// Agent - AI Entity
+// Agent - First-Class Autonomous Entity (Stage 3)
 // ============================================================================
+
+export enum AgentStatus {
+  ACTIVE = 'ACTIVE',
+  PAUSED = 'PAUSED',
+  ARCHIVED = 'ARCHIVED',
+}
+
+export enum AgentLoopState {
+  IDLE = 'IDLE',
+  PERCEIVING = 'PERCEIVING',
+  REASONING = 'REASONING',
+  SELECTING_TOOL = 'SELECTING_TOOL',
+  EXECUTING_TOOL = 'EXECUTING_TOOL',
+  UPDATING_MEMORY = 'UPDATING_MEMORY',
+  TERMINATING = 'TERMINATING',
+}
 
 export enum AgentProvider {
   OPENAI = 'OPENAI',
   ANTHROPIC = 'ANTHROPIC',
   CUSTOM = 'CUSTOM',
+}
+
+// Policy configuration for agent governance
+export interface AgentPolicy {
+  // Tool restrictions
+  allowedToolCategories?: ToolCategory[];
+  deniedTools?: string[];
+  requireApprovalFor?: string[];
+  
+  // Resource limits
+  maxToolCallsPerLoop?: number;
+  maxLoopIterations?: number;
+  maxExecutionTime?: number; // milliseconds
+  
+  // Cost controls
+  maxTokensPerRequest?: number;
+  maxCostPerExecution?: number; // USD
+  
+  // Behavior constraints
+  requireExplicitTermination?: boolean;
+  allowRecursiveToolCalls?: boolean;
+  
+  metadata?: JSONObject;
 }
 
 export interface AgentConfig {
@@ -73,13 +112,82 @@ export interface AgentConfig {
 
 export interface Agent {
   id: UUID;
-  roomId: UUID;
   name: string;
   description?: string;
-  config: AgentConfig;
-  metadata: JSONObject;
+  goal: string;
+  version: number;
+  
+  // Room binding
+  roomId?: UUID;
+  
+  // Tool governance
+  allowedTools: string[];
+  policyConfig: AgentPolicy;
+  
+  // Runtime state
+  status: AgentStatus;
+  loopState: AgentLoopState;
+  memoryState: JSONObject;
+  
+  // Versioning
+  parentAgentId?: UUID;
+  snapshotData?: JSONObject;
+  
+  // Metadata
   createdAt: ISO8601DateTime;
   updatedAt: ISO8601DateTime;
+  lastExecutedAt?: ISO8601DateTime;
+}
+
+// Agent execution trace for reasoning observability
+export interface AgentExecutionTrace {
+  id: UUID;
+  agentId: UUID;
+  roomId: UUID;
+  executionLogId?: UUID;
+  
+  // Loop tracking
+  loopIteration: number;
+  loopState: AgentLoopState;
+  
+  // Reasoning trace
+  modelPrompt?: string;
+  modelResponse?: string;
+  modelName?: string;
+  temperature?: number;
+  maxTokens?: number;
+  
+  // Tool selection
+  selectedTool?: string;
+  toolRationale?: string;
+  toolInput?: JSONObject;
+  toolOutput?: JSONValue;
+  toolError?: ErrorDetails;
+  
+  // State changes
+  stateBefore?: JSONObject;
+  stateAfter?: JSONObject;
+  stateDiff?: JSONObject;
+  
+  // Metrics
+  durationMs?: number;
+  timestamp: ISO8601DateTime;
+  
+  metadata: JSONObject;
+}
+
+// Policy violation record
+export interface PolicyViolation {
+  id: UUID;
+  agentId: UUID;
+  roomId: UUID;
+  violationType: string;
+  attemptedTool?: string;
+  policyRule: string;
+  denialReason: string;
+  severity: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+  timestamp: ISO8601DateTime;
+  metadata: JSONObject;
 }
 
 // ============================================================================
@@ -184,6 +292,14 @@ export enum ExecutionEventType {
   AGENT_INVOKED = 'AGENT_INVOKED',
   AGENT_RESPONSE = 'AGENT_RESPONSE',
   AGENT_ERROR = 'AGENT_ERROR',
+  // Stage 3 agent events
+  AGENT_LOOP_STARTED = 'AGENT_LOOP_STARTED',
+  AGENT_LOOP_ITERATION = 'AGENT_LOOP_ITERATION',
+  AGENT_LOOP_COMPLETED = 'AGENT_LOOP_COMPLETED',
+  AGENT_TOOL_SELECTED = 'AGENT_TOOL_SELECTED',
+  AGENT_TOOL_DENIED = 'AGENT_TOOL_DENIED',
+  AGENT_MEMORY_UPDATED = 'AGENT_MEMORY_UPDATED',
+  AGENT_REASONING_TRACE = 'AGENT_REASONING_TRACE',
   TRANSITION = 'TRANSITION',
   STATE_UPDATED = 'STATE_UPDATED',
   MEMORY_UPDATED = 'MEMORY_UPDATED',
@@ -398,4 +514,45 @@ export interface DomainEvent<T = JSONObject> {
   payload: T;
   timestamp: ISO8601DateTime;
   version: number;
+}
+
+// ============================================================================
+// API Keys - Programmatic Access (Stage 3)
+// ============================================================================
+
+export interface APIKey {
+  id: UUID;
+  name: string;
+  keyHash: string;
+  keyPrefix: string;
+  
+  // Scoping
+  userId?: string;
+  scopes: string[];
+  
+  // Rate limiting
+  rateLimit: number; // requests per window
+  rateLimitWindow: number; // seconds
+  
+  // Status
+  isActive: boolean;
+  expiresAt?: ISO8601DateTime;
+  lastUsedAt?: ISO8601DateTime;
+  
+  // Audit
+  createdAt: ISO8601DateTime;
+  createdBy?: string;
+  metadata: JSONObject;
+}
+
+export interface APIKeyUsage {
+  id: UUID;
+  apiKeyId: UUID;
+  endpoint: string;
+  method: string;
+  statusCode?: number;
+  responseTime?: number;
+  ipAddress?: string;
+  userAgent?: string;
+  timestamp: ISO8601DateTime;
 }
