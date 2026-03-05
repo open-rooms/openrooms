@@ -52,6 +52,7 @@ export interface Container {
   workflowEngine: WorkflowEngine;
   
   // Infrastructure
+  db: Kysely<Database>;
   redis: Redis;
   jobQueue: BullMQJobQueue;
   workerManager: WorkerManager;
