@@ -15,6 +15,8 @@ import { toolRoutes } from './routes/tools';
 import { healthRoutes } from './routes/health';
 import { agentRoutes } from './routes/agents';
 import { apiKeyRoutes } from './routes/api-keys';
+import { createAPIKeyMiddleware } from './middleware/api-key-auth';
+import { createAgentWorker } from './workers/agent-worker';
 
 async function main() {
   const container = createContainer();
@@ -31,6 +33,10 @@ async function main() {
   });
 
   await fastify.register(helmet);
+
+  // API Key Authentication Middleware (optional - can be enabled per route)
+  const apiKeyAuth = createAPIKeyMiddleware(container.redis);
+  fastify.decorate('apiKeyAuth', apiKeyAuth);
 
   // Routes
   await fastify.register((instance) => healthRoutes(instance, container), { prefix: '/api' });
@@ -68,14 +74,22 @@ async function main() {
   });
 
   // Start workers
-  const worker = container.workerManager.startRoomExecutionWorker();
-  fastify.log.info('Background workers started');
+  const roomWorker = container.workerManager.startRoomExecutionWorker();
+  fastify.log.info('Room execution worker started');
+
+  // Start agent execution worker
+  const agentWorker = createAgentWorker(container.redis, {
+    host: process.env.REDIS_HOST ?? 'localhost',
+    port: parseInt(process.env.REDIS_PORT ?? '6379'),
+  });
+  fastify.log.info('Agent execution worker started');
 
   // Graceful shutdown
   const shutdown = async () => {
     fastify.log.info('Shutting down gracefully...');
     
-    await worker.close();
+    await roomWorker.close();
+    await agentWorker.close();
     await container.jobQueue.close();
     await container.redis.quit();
     await fastify.close();

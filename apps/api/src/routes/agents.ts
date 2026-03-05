@@ -235,9 +235,12 @@ export function agentRoutes(fastify: FastifyInstance, container: Container) {
         });
       }
 
-      // TODO: Enqueue agent execution job
-      // For now, return success with job ID
-      const executionId = crypto.randomUUID();
+      // Enqueue agent execution job
+      const job = await container.jobQueue.add('agent-execution', {
+        agentId: agent.id,
+        roomId: body.roomId,
+        maxIterations: body.maxIterations || 10,
+      });
 
       await container.loggingService.log({
         roomId: body.roomId,
@@ -245,19 +248,19 @@ export function agentRoutes(fastify: FastifyInstance, container: Container) {
         agentId: agent.id,
         eventType: 'AGENT_LOOP_STARTED',
         level: 'INFO',
-        message: `Agent execution started`,
+        message: `Agent execution queued`,
         metadata: {
-          executionId,
+          jobId: job.id,
           maxIterations: body.maxIterations || 10,
         },
       });
 
       return {
-        executionId,
+        executionId: job.id,
         agentId: agent.id,
         roomId: body.roomId,
         status: 'QUEUED',
-        message: 'Agent execution queued',
+        message: 'Agent execution queued successfully',
       };
     } catch (error) {
       fastify.log.error(error);
