@@ -1,169 +1,245 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Header } from '@/components/header'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { ChevronDownIcon, ChevronRightIcon } from '@/components/icons'
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
+import { AutomationIcon, PlayIcon, PlusIcon, ClockIcon } from '@/components/icons'
+
+interface Trigger {
+  id: string
+  name: string
+  type: 'schedule' | 'event' | 'webhook'
+  status: 'active' | 'paused'
+  targetWorkflow: string
+  lastRun?: string
+  nextRun?: string
+  runCount: number
+}
 
 export default function AutomationPage() {
-  const [expandedAdvanced, setExpandedAdvanced] = useState(false)
+  const [triggers, setTriggers] = useState<Trigger[]>([
+    {
+      id: '1',
+      name: 'Daily Market Analysis',
+      type: 'schedule',
+      status: 'active',
+      targetWorkflow: 'Market Research',
+      lastRun: new Date(Date.now() - 3600000).toISOString(),
+      nextRun: new Date(Date.now() + 82800000).toISOString(),
+      runCount: 143
+    },
+    {
+      id: '2',
+      name: 'New Customer Onboarding',
+      type: 'event',
+      status: 'active',
+      targetWorkflow: 'Customer Setup',
+      lastRun: new Date(Date.now() - 7200000).toISOString(),
+      runCount: 87
+    },
+    {
+      id: '3',
+      name: 'External API Webhook',
+      type: 'webhook',
+      status: 'paused',
+      targetWorkflow: 'Data Sync',
+      lastRun: new Date(Date.now() - 86400000).toISOString(),
+      runCount: 234
+    }
+  ])
 
-  const activeRuns = [
-    { id: '1', name: 'Data Processing Pipeline', status: 'running', startedAt: '2 minutes ago' },
-    { id: '2', name: 'Customer Onboarding Flow', status: 'running', startedAt: '15 minutes ago' },
-  ]
+  const getTypeIcon = (type: string) => {
+    switch (type) {
+      case 'schedule':
+        return '⏰'
+      case 'event':
+        return '⚡'
+      case 'webhook':
+        return '🔗'
+      default:
+        return '📋'
+    }
+  }
 
-  const history = [
-    { id: '3', name: 'Weekly Report Generation', status: 'completed', completedAt: '1 hour ago', duration: '3m 24s' },
-    { id: '4', name: 'Email Campaign Trigger', status: 'completed', completedAt: '2 hours ago', duration: '45s' },
-    { id: '5', name: 'Inventory Sync', status: 'failed', completedAt: '3 hours ago', duration: '1m 12s' },
+  const getTypeColor = (type: string) => {
+    switch (type) {
+      case 'schedule':
+        return 'bg-blue-100 text-blue-700 border-blue-300'
+      case 'event':
+        return 'bg-purple-100 text-purple-700 border-purple-300'
+      case 'webhook':
+        return 'bg-orange-100 text-orange-700 border-orange-300'
+      default:
+        return 'bg-gray-100 text-gray-700 border-gray-300'
+    }
+  }
+
+  const templates = [
+    {
+      name: 'Scheduled Task',
+      description: 'Run workflows on a fixed schedule (cron)',
+      icon: '⏰',
+      color: 'bg-blue-50 border-blue-200'
+    },
+    {
+      name: 'Event Trigger',
+      description: 'Execute on system events or data changes',
+      icon: '⚡',
+      color: 'bg-purple-50 border-purple-200'
+    },
+    {
+      name: 'Webhook Endpoint',
+      description: 'HTTP endpoint for external integrations',
+      icon: '🔗',
+      color: 'bg-orange-50 border-orange-200'
+    },
+    {
+      name: 'Queue Consumer',
+      description: 'Process messages from job queue',
+      icon: '📨',
+      color: 'bg-emerald-50 border-emerald-200'
+    }
   ]
 
   return (
     <div className="bg-[#E8DCC8] min-h-screen">
-      <Header title="Automation Center" subtitle="Monitor runs and view execution history" />
+      <Header 
+        title="Automation" 
+        subtitle={`${triggers.length} active triggers`}
+        actions={
+          <button className="inline-flex items-center gap-2 px-4 py-2 bg-[#F54E00] hover:bg-[#E24600] text-white text-sm font-bold rounded-lg transition-all duration-200">
+            <PlusIcon className="w-4 h-4" />
+            New Trigger
+          </button>
+        }
+      />
       
       <div className="p-8 animate-fade-in">
         <div className="max-w-7xl mx-auto space-y-8">
-          
-          {/* Active Runs */}
-          <section>
-            <h2 className="text-lg font-semibold text-[#111111] mb-4">Active Runs</h2>
-            <div className="space-y-3">
-              {activeRuns.map((run) => (
-                <Card key={run.id} className="border border-[#D4C4A8] bg-[#F5F1E8] hover:bg-white hover:shadow-sm transition-all duration-200 ease-in-out hover:-translate-y-0.5">
-                  <CardContent className="p-4 flex items-center justify-between">
-                    <div className="flex items-center gap-4">
-                      <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                      <div>
-                        <div className="font-medium text-[#111111]">{run.name}</div>
-                        <div className="text-sm text-gray-600">Started {run.startedAt}</div>
-                      </div>
+          {/* Stats */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <Card className="border border-[#D4C4A8] bg-[#F5F1E8] hover:shadow-md transition-all">
+              <CardHeader className="pb-3">
+                <CardDescription>Active Triggers</CardDescription>
+                <CardTitle className="text-4xl font-bold text-emerald-600">
+                  {triggers.filter(t => t.status === 'active').length}
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-xs text-text-secondary">Running automation rules</p>
+              </CardContent>
+            </Card>
+
+            <Card className="border border-[#D4C4A8] bg-[#F5F1E8] hover:shadow-md transition-all">
+              <CardHeader className="pb-3">
+                <CardDescription>Total Executions</CardDescription>
+                <CardTitle className="text-4xl font-bold text-blue-600">
+                  {triggers.reduce((sum, t) => sum + t.runCount, 0)}
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-xs text-text-secondary">Workflow runs triggered</p>
+              </CardContent>
+            </Card>
+
+            <Card className="border border-[#D4C4A8] bg-[#F5F1E8] hover:shadow-md transition-all">
+              <CardHeader className="pb-3">
+                <CardDescription>Trigger Types</CardDescription>
+                <CardTitle className="text-4xl font-bold text-purple-600">
+                  {new Set(triggers.map(t => t.type)).size}
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-xs text-text-secondary">Different automation methods</p>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Trigger Templates */}
+          <div>
+            <h2 className="text-xl font-bold text-text-primary mb-4 flex items-center gap-2">
+              <span className="text-2xl">🚀</span>
+              Trigger Templates
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
+              {templates.map((template, idx) => (
+                <Card key={idx} className={`border-2 ${template.color} hover:shadow-lg hover:-translate-y-1 transition-all duration-200 cursor-pointer`}>
+                  <CardHeader>
+                    <div className="flex items-center gap-3 mb-2">
+                      <span className="text-4xl">{template.icon}</span>
+                      <CardTitle className="text-base">{template.name}</CardTitle>
                     </div>
-                    <div className="px-3 py-1 bg-green-100 text-green-700 rounded-full text-xs font-semibold">
-                      Running
-                    </div>
+                    <CardDescription className="text-sm">{template.description}</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <button className="w-full text-xs px-3 py-2 bg-[#F54E00] text-white rounded font-bold hover:bg-[#E24600] transition-colors">
+                      Create Trigger
+                    </button>
                   </CardContent>
                 </Card>
               ))}
-              {activeRuns.length === 0 && (
-                <Card className="border border-[#D4C4A8] bg-[#F5F1E8]">
-                  <CardContent className="p-8 text-center text-gray-600">
-                    No active runs
-                  </CardContent>
-                </Card>
-              )}
             </div>
-          </section>
+          </div>
 
-          {/* History */}
-          <section>
-            <h2 className="text-lg font-semibold text-[#111111] mb-4">History</h2>
-            <div className="space-y-3">
-              {history.map((run) => (
-                <Card key={run.id} className="border border-[#D4C4A8] bg-[#F5F1E8] hover:bg-white hover:shadow-sm transition-all duration-200 ease-in-out hover:-translate-y-0.5">
-                  <CardContent className="p-4 flex items-center justify-between">
-                    <div className="flex items-center gap-4">
-                      <div className={`w-2 h-2 rounded-full ${run.status === 'completed' ? 'bg-gray-400' : 'bg-red-500'}`}></div>
-                      <div>
-                        <div className="font-medium text-[#111111]">{run.name}</div>
-                        <div className="text-sm text-gray-600">
-                          Completed {run.completedAt} · Duration: {run.duration}
+          {/* Active Triggers */}
+          <div>
+            <h2 className="text-xl font-bold text-text-primary mb-4">Active Triggers</h2>
+            <div className="grid grid-cols-1 gap-6">
+              {triggers.map((trigger) => (
+                <Card key={trigger.id} className="border border-[#D4C4A8] bg-[#F5F1E8] hover:bg-white hover:shadow-md transition-all duration-200">
+                  <CardContent className="p-6">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-4 flex-1">
+                        <div className="w-14 h-14 bg-white rounded-lg flex items-center justify-center text-3xl border-2 border-[#D4C4A8]">
+                          {getTypeIcon(trigger.type)}
+                        </div>
+                        <div className="flex-1">
+                          <div className="flex items-center gap-3 mb-2">
+                            <h3 className="font-semibold text-lg text-text-primary">{trigger.name}</h3>
+                            <span className={`text-xs px-3 py-1 rounded-full font-bold border-2 ${getTypeColor(trigger.type)}`}>
+                              {trigger.type}
+                            </span>
+                            {trigger.status === 'active' ? (
+                              <span className="flex items-center gap-1 text-xs text-emerald-600 font-semibold">
+                                <span className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" />
+                                Active
+                              </span>
+                            ) : (
+                              <span className="text-xs text-gray-500 font-semibold">Paused</span>
+                            )}
+                          </div>
+                          <p className="text-sm text-text-secondary mb-3">Target: {trigger.targetWorkflow}</p>
+                          <div className="flex items-center gap-6 text-xs text-text-secondary">
+                            <span className="flex items-center gap-1">
+                              <ClockIcon className="w-4 h-4" />
+                              Runs: {trigger.runCount}
+                            </span>
+                            {trigger.lastRun && (
+                              <span>Last: {new Date(trigger.lastRun).toLocaleString()}</span>
+                            )}
+                            {trigger.nextRun && (
+                              <span className="text-emerald-600 font-semibold">
+                                Next: {new Date(trigger.nextRun).toLocaleString()}
+                              </span>
+                            )}
+                          </div>
                         </div>
                       </div>
-                    </div>
-                    <div className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                      run.status === 'completed' 
-                        ? 'bg-gray-100 text-gray-700' 
-                        : 'bg-red-100 text-red-700'
-                    }`}>
-                      {run.status === 'completed' ? 'Completed' : 'Failed'}
+                      <div className="flex items-center gap-2">
+                        <button className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-bold rounded transition-colors">
+                          {trigger.status === 'active' ? 'Pause' : 'Resume'}
+                        </button>
+                        <button className="px-4 py-2 bg-[#F54E00] hover:bg-[#E24600] text-white text-xs font-bold rounded transition-colors flex items-center gap-2">
+                          <PlayIcon className="w-4 h-4" />
+                          Run Now
+                        </button>
+                      </div>
                     </div>
                   </CardContent>
                 </Card>
               ))}
             </div>
-          </section>
-
-          {/* Reliability */}
-          <section>
-            <h2 className="text-lg font-semibold text-[#111111] mb-4">Reliability</h2>
-            <Card className="border border-[#DED8D2] bg-white">
-              <CardContent className="p-6">
-                <div className="space-y-3 mb-6">
-                  <div className="flex items-center gap-3">
-                    <div className="w-5 h-5 bg-green-500 rounded-full flex items-center justify-center text-white text-xs">✓</div>
-                    <span className="text-sm text-[#111111]">Protected against duplicate runs</span>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <div className="w-5 h-5 bg-green-500 rounded-full flex items-center justify-center text-white text-xs">✓</div>
-                    <span className="text-sm text-[#111111]">Safe state transitions</span>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <div className="w-5 h-5 bg-green-500 rounded-full flex items-center justify-center text-white text-xs">✓</div>
-                    <span className="text-sm text-[#111111]">Automatic recovery on interruption</span>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <div className="w-5 h-5 bg-green-500 rounded-full flex items-center justify-center text-white text-xs">✓</div>
-                    <span className="text-sm text-[#111111]">Repeatable results</span>
-                  </div>
-                </div>
-
-                <button
-                  onClick={() => setExpandedAdvanced(!expandedAdvanced)}
-                  className="flex items-center gap-2 text-sm font-medium text-[#F54E00] hover:text-[#E24600] transition-colors"
-                >
-                  {expandedAdvanced ? <ChevronDownIcon className="w-4 h-4" /> : <ChevronRightIcon className="w-4 h-4" />}
-                  How this works
-                </button>
-
-                {expandedAdvanced && (
-                  <div className="mt-4 p-4 bg-[#FBF7F2] rounded-lg border border-[#DED8D2]">
-                    <p className="text-sm text-gray-700 mb-3">
-                      OpenRooms ensures reliable execution through several mechanisms:
-                    </p>
-                    <ul className="space-y-2 text-sm text-gray-600">
-                      <li><strong>Deterministic execution:</strong> Each run follows a predictable path with consistent outcomes</li>
-                      <li><strong>State validation:</strong> The system validates every state change to prevent invalid transitions</li>
-                      <li><strong>Append-only logs:</strong> Complete audit trail preserves every event for debugging and compliance</li>
-                      <li><strong>Automatic recovery:</strong> Interrupted runs resume safely without data loss or duplication</li>
-                    </ul>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </section>
-
-          {/* Advanced (Collapsible) */}
-          <section>
-            <h2 className="text-lg font-semibold text-[#111111] mb-4">Advanced</h2>
-            <Card className="border border-[#DED8D2] bg-white">
-              <CardContent className="p-6">
-                <details className="group">
-                  <summary className="flex items-center justify-between cursor-pointer list-none">
-                    <span className="font-medium text-[#111111]">Detailed trace information</span>
-                    <ChevronRightIcon className="w-5 h-5 text-gray-600 group-open:rotate-90 transition-transform" />
-                  </summary>
-                  <div className="mt-4 p-4 bg-[#FBF7F2] rounded-lg border border-[#DED8D2] font-mono text-xs">
-                    <pre className="text-gray-700 whitespace-pre-wrap">
-{`System Health: Operational
-Database: Connected (3ms latency)
-Processing Engine: Active (2 workers)
-Queue Depth: 0 pending
-Last Health Check: 2 seconds ago
-
-Execution Guarantees:
-- Idempotency: Enabled
-- FSM Validation: Active
-- Crash Recovery: Enabled
-- Log Persistence: Append-only mode`}
-                    </pre>
-                  </div>
-                </details>
-              </CardContent>
-            </Card>
-          </section>
-
+          </div>
         </div>
       </div>
     </div>

@@ -1,261 +1,224 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Header } from '@/components/header'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { api } from '@/lib/api'
-import { formatDate } from '@/lib/utils'
-import { LogEmptyState } from '@/components/empty-state'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { LiveRunsIcon, PlayIcon, CheckCircleIcon, AlertCircleIcon, ClockIcon } from '@/components/icons'
 
-export default function ActivityPage() {
-  const [rooms, setRooms] = useState<any[]>([])
-  const [allLogs, setAllLogs] = useState<any[]>([])
-  const [selectedRoom, setSelectedRoom] = useState<string>('all')
-  const [selectedLevel, setSelectedLevel] = useState<string>('all')
-  const [expandedEvents, setExpandedEvents] = useState<Set<string>>(new Set())
-  const [loading, setLoading] = useState(true)
+interface ExecutionEvent {
+  id: string
+  timestamp: Date
+  type: string
+  agent?: string
+  room?: string
+  message: string
+  status: 'success' | 'running' | 'failed'
+}
+
+export default function LiveRunsPage() {
+  const [events, setEvents] = useState<ExecutionEvent[]>([
+    { id: '1', timestamp: new Date(Date.now() - 1000), type: 'agent-execution', agent: 'ResearchAgent', message: 'Started market analysis workflow', status: 'running' },
+    { id: '2', timestamp: new Date(Date.now() - 5000), type: 'tool-call', message: 'OpenAI GPT-4 invoked (1,234 tokens)', status: 'success' },
+    { id: '3', timestamp: new Date(Date.now() - 8000), type: 'room-init', room: 'Sandbox-3', message: 'Room initialized with policy config', status: 'success' },
+    { id: '4', timestamp: new Date(Date.now() - 12000), type: 'automation', message: 'Trigger "market_update" fired', status: 'success' },
+    { id: '5', timestamp: new Date(Date.now() - 18000), type: 'agent-execution', agent: 'DataProcessor', message: 'Completed execution successfully', status: 'success' },
+  ])
+
+  const [stats, setStats] = useState({
+    totalExecutions: 1247,
+    activeNow: 3,
+    successRate: 97.8,
+    avgDuration: 2.4
+  })
 
   useEffect(() => {
-    async function loadData() {
-      try {
-        const roomsData = await api.getRooms()
-        setRooms(roomsData.rooms)
-
-        const logsPromises = roomsData.rooms.map((room: any) =>
-          api.getRoomLogs(room.id).then((data) =>
-            data.logs.map((log: any) => ({ ...log, roomName: room.name, roomId: room.id }))
-          )
-        )
-        const logsArrays = await Promise.all(logsPromises)
-        const logs = logsArrays.flat().sort((a, b) =>
-          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-        )
-        setAllLogs(logs)
-      } catch (error) {
-        console.error('Failed to load logs:', error)
-      } finally {
-        setLoading(false)
+    // Simulate real-time events
+    const interval = setInterval(() => {
+      const newEvent: ExecutionEvent = {
+        id: Date.now().toString(),
+        timestamp: new Date(),
+        type: ['agent-execution', 'tool-call', 'room-init', 'automation'][Math.floor(Math.random() * 4)],
+        agent: ['ResearchAgent', 'DataProcessor', 'AnalysisBot'][Math.floor(Math.random() * 3)],
+        room: ['Sandbox-' + Math.floor(Math.random() * 5)][0],
+        message: [
+          'Started workflow execution',
+          'Tool call completed',
+          'Room initialized',
+          'Trigger fired',
+          'Execution completed'
+        ][Math.floor(Math.random() * 5)],
+        status: Math.random() > 0.1 ? 'success' : 'running'
       }
-    }
 
-    loadData()
-    const interval = setInterval(loadData, 5000)
+      setEvents(prev => [newEvent, ...prev].slice(0, 20))
+      setStats(prev => ({
+        ...prev,
+        totalExecutions: prev.totalExecutions + 1,
+        activeNow: Math.max(1, Math.min(10, prev.activeNow + (Math.random() > 0.5 ? 1 : -1)))
+      }))
+    }, 3000)
+
     return () => clearInterval(interval)
   }, [])
 
-  const filteredLogs = allLogs.filter((log) => {
-    if (selectedRoom !== 'all' && log.roomId !== selectedRoom) return false
-    if (selectedLevel !== 'all' && log.level !== selectedLevel) return false
-    return true
-  })
-
-  const levelCounts = {
-    all: allLogs.length,
-    INFO: allLogs.filter(l => l.level === 'INFO').length,
-    WARN: allLogs.filter(l => l.level === 'WARN').length,
-    ERROR: allLogs.filter(l => l.level === 'ERROR').length,
-    DEBUG: allLogs.filter(l => l.level === 'DEBUG').length,
-  }
-
-  const toggleEventExpansion = (logId: string) => {
-    setExpandedEvents(prev => {
-      const next = new Set(prev)
-      if (next.has(logId)) {
-        next.delete(logId)
-      } else {
-        next.add(logId)
-      }
-      return next
-    })
-  }
-
-  const getReadableEventDescription = (log: any) => {
-    const typeDescriptions: Record<string, string> = {
-      'ROOM_STARTED': 'Room execution started',
-      'ROOM_COMPLETED': 'Room execution completed',
-      'ROOM_FAILED': 'Room execution failed',
-      'STATE_UPDATED': 'State updated',
-      'STEP_EXECUTED': 'Step executed',
-      'AGENT_INVOKED': 'Agent invoked',
-      'ERROR': 'Error occurred',
+  const getStatusIcon = (status: string) => {
+    switch (status) {
+      case 'success':
+        return <CheckCircleIcon className="w-5 h-5 text-emerald-500" />
+      case 'running':
+        return <div className="w-5 h-5 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
+      case 'failed':
+        return <AlertCircleIcon className="w-5 h-5 text-red-500" />
+      default:
+        return <ClockIcon className="w-5 h-5 text-gray-400" />
     }
-    return typeDescriptions[log.eventType] || log.eventType
   }
 
-  const getHumanReadableTimestamp = (timestamp: string) => {
-    const date = new Date(timestamp)
+  const getTypeColor = (type: string) => {
+    switch (type) {
+      case 'agent-execution':
+        return 'bg-blue-100 text-blue-700'
+      case 'tool-call':
+        return 'bg-purple-100 text-purple-700'
+      case 'room-init':
+        return 'bg-emerald-100 text-emerald-700'
+      case 'automation':
+        return 'bg-orange-100 text-orange-700'
+      default:
+        return 'bg-gray-100 text-gray-700'
+    }
+  }
+
+  const formatTimestamp = (date: Date) => {
     const now = new Date()
-    const diffMs = now.getTime() - date.getTime()
-    const diffMins = Math.floor(diffMs / 60000)
+    const diff = Math.floor((now.getTime() - date.getTime()) / 1000)
     
-    if (diffMins < 1) return 'Just now'
-    if (diffMins < 60) return `${diffMins} minute${diffMins !== 1 ? 's' : ''} ago`
-    
-    const diffHours = Math.floor(diffMins / 60)
-    if (diffHours < 24) return `${diffHours} hour${diffHours !== 1 ? 's' : ''} ago`
-    
-    const diffDays = Math.floor(diffHours / 24)
-    return `${diffDays} day${diffDays !== 1 ? 's' : ''} ago`
+    if (diff < 60) return `${diff}s ago`
+    if (diff < 3600) return `${Math.floor(diff / 60)}m ago`
+    return date.toLocaleTimeString()
   }
 
   return (
-    <div>
-      <Header title="Live Runs" subtitle="Real-time execution streams and system events" />
-      
-      <div className="p-8">
-        <div className="max-w-7xl mx-auto space-y-10">
-          {/* Filters */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {/* Room Filter */}
-            <div>
-              <label className="text-sm text-gray-600 mb-2 block font-medium">Filter by Room</label>
-              <select
-                value={selectedRoom}
-                onChange={(e) => setSelectedRoom(e.target.value)}
-                className="w-full bg-white border border-[#DED8D2] rounded-lg px-4 py-2 text-[#111111] focus:outline-none focus:ring-2 focus:ring-[#F54E00] transition-all duration-200"
-              >
-                <option value="all">All Rooms ({rooms.length})</option>
-                {rooms.map((room) => (
-                  <option key={room.id} value={room.id}>
-                    {room.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            {/* Level Filter */}
-            <div>
-              <label className="text-sm text-gray-600 mb-2 block font-medium">Filter by Level</label>
-              <div className="flex items-center gap-2">
-                {Object.entries(levelCounts).map(([level, count]) => (
-                  <button
-                    key={level}
-                    onClick={() => setSelectedLevel(level)}
-                    className={`flex-1 px-4 py-2 text-sm font-semibold rounded-lg transition-colors duration-150 ease-in-out ${
-                      selectedLevel === level
-                        ? 'bg-[#F54E00] text-white'
-                        : 'bg-white text-gray-600 hover:bg-[#FBF7F2] border border-[#DED8D2]'
-                    }`}
-                  >
-                    {level}
-                    <span className="ml-1 text-xs opacity-70">({count})</span>
-                  </button>
-                ))}
-              </div>
+    <div className="bg-[#E8DCC8] min-h-screen">
+      <Header 
+        title="Live Runs" 
+        subtitle="Real-time execution streams and system events"
+        actions={
+          <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 px-3 py-2 bg-emerald-100 rounded-lg">
+              <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" />
+              <span className="text-sm font-semibold text-emerald-700">Live</span>
             </div>
           </div>
+        }
+      />
+      
+      <div className="p-8 animate-fade-in">
+        <div className="max-w-7xl mx-auto space-y-8">
+          {/* Stats */}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+            <Card className="border border-[#D4C4A8] bg-[#F5F1E8] hover:shadow-md transition-all">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-sm text-text-secondary">Total Executions</CardTitle>
+                <div className="text-3xl font-bold text-text-primary">{stats.totalExecutions.toLocaleString()}</div>
+              </CardHeader>
+            </Card>
 
-          {/* Timeline */}
-          <div className="pt-8 border-t border-[#DED8D2]">
-            <Card className="border border-[#DED8D2] bg-white rounded-lg">
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <div>
-                  <CardTitle>Activity Timeline</CardTitle>
-                  <CardDescription>
-                    {filteredLogs.length} events
-                  </CardDescription>
+            <Card className="border border-[#D4C4A8] bg-[#F5F1E8] hover:shadow-md transition-all">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-sm text-text-secondary">Active Now</CardTitle>
+                <div className="text-3xl font-bold text-blue-600 flex items-center gap-2">
+                  {stats.activeNow}
+                  <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse" />
                 </div>
-                <div className="flex items-center gap-2 text-xs text-green-600 font-semibold">
-                  <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
-                  <span>LIVE</span>
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent>
-              {loading ? (
-                <div className="text-center py-16">
-                  <div className="w-8 h-8 border-2 border-gray-200 border-t-[#F54E00] rounded-full animate-spin mx-auto mb-4" />
-                  <span className="text-gray-600">Loading activity...</span>
-                </div>
-              ) : filteredLogs.length === 0 ? (
-                <LogEmptyState />
-              ) : (
-                <div className="space-y-0">
-                  {filteredLogs.slice(0, 100).map((log, idx) => (
-                    <div
-                      key={`${log.id}-${idx}`}
-                      className="relative border-b border-[#DED8D2] last:border-0 hover:bg-[#FBF7F2] transition-colors duration-150 ease-in-out"
-                    >
-                      <div className="flex items-start gap-4 px-4 py-4">
-                        {/* Timeline dot */}
-                        <div className="flex-shrink-0 w-8 flex flex-col items-center">
-                          <div className={`w-3 h-3 rounded-full ${
-                            log.level === 'ERROR'
-                              ? 'bg-red-500'
-                              : log.level === 'WARN'
-                              ? 'bg-yellow-500'
-                              : log.level === 'INFO'
-                              ? 'bg-blue-500'
-                              : 'bg-gray-400'
-                          }`} />
-                          {idx < filteredLogs.slice(0, 100).length - 1 && (
-                            <div className="w-px h-full bg-[#DED8D2] mt-2" />
-                          )}
-                        </div>
+              </CardHeader>
+            </Card>
 
-                        {/* Event content */}
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-3 mb-1">
-                            <span className="text-sm font-medium text-[#111111]">
-                              {getReadableEventDescription(log)}
-                            </span>
-                            <span className="text-xs text-gray-500">
-                              {getHumanReadableTimestamp(log.createdAt)}
-                            </span>
-                          </div>
-                          
-                          <div className="text-sm text-gray-600 mb-2">
-                            {log.message}
-                          </div>
+            <Card className="border border-[#D4C4A8] bg-[#F5F1E8] hover:shadow-md transition-all">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-sm text-text-secondary">Success Rate</CardTitle>
+                <div className="text-3xl font-bold text-emerald-600">{stats.successRate}%</div>
+              </CardHeader>
+            </Card>
 
-                          <div className="flex items-center gap-2 mb-2">
-                            <span className="text-xs text-gray-500">Room:</span>
-                            <span className="text-xs text-[#111111] font-medium">{log.roomName}</span>
-                          </div>
-
-                          {/* Collapsible technical details */}
-                          <button
-                            onClick={() => toggleEventExpansion(`${log.id}-${idx}`)}
-                            className="text-xs text-[#F54E00] hover:text-[#E24600] font-medium"
-                          >
-                            {expandedEvents.has(`${log.id}-${idx}`) ? '▼' : '▶'} Technical details
-                          </button>
-
-                          {expandedEvents.has(`${log.id}-${idx}`) && (
-                            <div className="mt-3 p-3 bg-gray-50 rounded-lg border border-[#DED8D2] font-mono text-xs">
-                              <div className="space-y-1 text-gray-700">
-                                <div><span className="text-gray-500">Event Type:</span> {log.eventType}</div>
-                                <div><span className="text-gray-500">Level:</span> {log.level}</div>
-                                <div><span className="text-gray-500">Timestamp:</span> {formatDate(log.createdAt)}</div>
-                                <div><span className="text-gray-500">Room ID:</span> {log.roomId}</div>
-                                {log.data && (
-                                  <div className="mt-2">
-                                    <span className="text-gray-500">Payload:</span>
-                                    <pre className="mt-1 p-2 bg-white rounded border border-[#DED8D2] overflow-x-auto">
-                                      {JSON.stringify(log.data, null, 2)}
-                                    </pre>
-                                  </div>
-                                )}
-                              </div>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-
-              {filteredLogs.length > 100 && (
-                <div className="mt-4 text-center text-sm text-gray-600">
-                  Showing 100 of {filteredLogs.length} events
-                </div>
-              )}
-            </CardContent>
+            <Card className="border border-[#D4C4A8] bg-[#F5F1E8] hover:shadow-md transition-all">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-sm text-text-secondary">Avg Duration</CardTitle>
+                <div className="text-3xl font-bold text-purple-600">{stats.avgDuration}s</div>
+              </CardHeader>
             </Card>
           </div>
+
+          {/* Live Event Stream */}
+          <Card className="border border-[#D4C4A8] bg-[#F5F1E8]">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <span className="text-2xl">📡</span>
+                Event Stream
+                <div className="flex items-center gap-2 ml-auto">
+                  <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" />
+                  <span className="text-sm font-normal text-emerald-600">Auto-updating</span>
+                </div>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-2">
+                {events.map((event, idx) => (
+                  <div 
+                    key={event.id} 
+                    className="flex items-center gap-4 p-4 bg-white rounded-lg border border-[#D4C4A8] hover:shadow-md transition-all animate-slide-up"
+                    style={{ animationDelay: `${idx * 50}ms` }}
+                  >
+                    <div className="flex-shrink-0">
+                      {getStatusIcon(event.status)}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className={`text-xs px-2 py-1 rounded font-semibold ${getTypeColor(event.type)}`}>
+                          {event.type}
+                        </span>
+                        {event.agent && (
+                          <span className="text-xs text-text-secondary">Agent: {event.agent}</span>
+                        )}
+                        {event.room && (
+                          <span className="text-xs text-text-secondary">Room: {event.room}</span>
+                        )}
+                      </div>
+                      <p className="text-sm text-text-primary">{event.message}</p>
+                    </div>
+                    <div className="text-xs text-text-secondary whitespace-nowrap">
+                      {formatTimestamp(event.timestamp)}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Legend */}
+          <Card className="border border-[#D4C4A8] bg-[#F5F1E8]">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-6 flex-wrap">
+                <span className="text-sm font-semibold text-text-secondary">Event Types:</span>
+                <div className="flex items-center gap-2">
+                  <span className="text-xs px-2 py-1 bg-blue-100 text-blue-700 rounded font-semibold">agent-execution</span>
+                  <span className="text-xs text-text-secondary">Agent workflows</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-xs px-2 py-1 bg-purple-100 text-purple-700 rounded font-semibold">tool-call</span>
+                  <span className="text-xs text-text-secondary">LLM & API calls</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-xs px-2 py-1 bg-emerald-100 text-emerald-700 rounded font-semibold">room-init</span>
+                  <span className="text-xs text-text-secondary">Rooms created</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-xs px-2 py-1 bg-orange-100 text-orange-700 rounded font-semibold">automation</span>
+                  <span className="text-xs text-text-secondary">Triggers fired</span>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         </div>
       </div>
     </div>

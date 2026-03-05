@@ -1,191 +1,172 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Header } from '@/components/header'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { DatabaseIcon, CpuIcon, MemoryIcon, ChevronRightIcon } from '@/components/icons'
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
+import { SettingsIcon, CheckCircleIcon, AlertCircleIcon, DatabaseIcon } from '@/components/icons'
 
 export default function ControlPlanePage() {
-  const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set())
+  const [systemHealth, setSystemHealth] = useState({
+    database: 'healthy',
+    redis: 'healthy',
+    workers: 'healthy',
+    api: 'healthy'
+  })
 
-  const toggleSection = (section: string) => {
-    setExpandedSections(prev => {
-      const next = new Set(prev)
-      if (next.has(section)) {
-        next.delete(section)
-      } else {
-        next.add(section)
-      }
-      return next
-    })
-  }
+  const services = [
+    { name: 'PostgreSQL Database', status: 'Connected', version: '16.0', icon: '🗄️', color: 'text-emerald-600' },
+    { name: 'Redis Cache', status: 'Online', version: '7.2', icon: '⚡', color: 'text-blue-600' },
+    { name: 'BullMQ Workers', status: 'Active', version: '5.1.0', icon: '⚙️', color: 'text-purple-600' },
+    { name: 'Agent Runtime', status: 'Running', version: '0.3.0', icon: '🤖', color: 'text-orange-600' },
+  ]
+
+  const configuration = [
+    { category: 'API', key: 'PORT', value: '3001', sensitive: false },
+    { category: 'API', key: 'LOG_LEVEL', value: 'info', sensitive: false },
+    { category: 'LLM', key: 'OPENAI_API_KEY', value: 'sk-***', sensitive: true },
+    { category: 'LLM', key: 'ANTHROPIC_API_KEY', value: 'sk-ant-***', sensitive: true },
+    { category: 'Database', key: 'DATABASE_URL', value: 'postgresql://***', sensitive: true },
+    { category: 'Redis', key: 'REDIS_URL', value: 'redis://localhost:6379', sensitive: false },
+  ]
+
+  const limits = [
+    { name: 'Max Agent Loop Iterations', value: '10', category: 'Agent Policy' },
+    { name: 'Max Tokens Per Request', value: '4000', category: 'Agent Policy' },
+    { name: 'Max Cost Per Execution', value: '$1.00', category: 'Agent Policy' },
+    { name: 'Rate Limit (API Keys)', value: '100/min', category: 'Authentication' },
+    { name: 'Worker Concurrency', value: '5', category: 'Runtime' },
+  ]
 
   return (
-    <div>
-      <Header title="Control Plane" subtitle="System configuration and health monitoring" />
+    <div className="bg-[#E8DCC8] min-h-screen">
+      <Header 
+        title="Control Plane" 
+        subtitle="System configuration and governance"
+      />
       
-      <div className="p-8">
+      <div className="p-8 animate-fade-in">
         <div className="max-w-7xl mx-auto space-y-8">
-          
           {/* System Health */}
-          <section>
-            <h2 className="text-lg font-semibold text-[#111111] mb-4">System Health</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-              <Card className="border border-[#DED8D2] bg-white">
-                <CardContent className="p-4">
-                  <div className="flex items-center gap-3">
-                    <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+          <Card className="border border-[#D4C4A8] bg-[#F5F1E8]">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <span className="text-2xl">🏥</span>
+                System Health
+              </CardTitle>
+              <CardDescription>All systems operational</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
+                {Object.entries(systemHealth).map(([service, status]) => (
+                  <div key={service} className="p-4 bg-white rounded-lg border border-[#D4C4A8] flex items-center justify-between">
                     <div>
-                      <div className="text-xs text-gray-600">Database</div>
-                      <div className="text-sm font-semibold text-[#111111]">Connected</div>
+                      <p className="text-sm font-semibold capitalize">{service}</p>
+                      <p className="text-xs text-text-secondary mt-1">Status: {status}</p>
+                    </div>
+                    <CheckCircleIcon className="w-6 h-6 text-emerald-500" />
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Connected Services */}
+          <Card className="border border-[#D4C4A8] bg-[#F5F1E8]">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <span className="text-2xl">🔌</span>
+                Connected Services
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                {services.map((service, idx) => (
+                  <div key={idx} className="flex items-center justify-between p-4 bg-white rounded-lg border border-[#D4C4A8] hover:shadow-md transition-all">
+                    <div className="flex items-center gap-4">
+                      <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center text-2xl">
+                        {service.icon}
+                      </div>
+                      <div>
+                        <h4 className="font-semibold text-sm">{service.name}</h4>
+                        <div className="flex items-center gap-4 text-xs text-text-secondary mt-1">
+                          <span>Version: {service.version}</span>
+                          <span className={`font-semibold ${service.color}`}>{service.status}</span>
+                        </div>
+                      </div>
+                    </div>
+                    <button className="text-xs px-3 py-1 bg-gray-100 hover:bg-gray-200 rounded font-semibold transition-colors">
+                      Details
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Configuration */}
+          <Card className="border border-[#D4C4A8] bg-[#F5F1E8]">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <span className="text-2xl">⚙️</span>
+                Configuration
+              </CardTitle>
+              <CardDescription>Environment variables and settings</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-2">
+                {configuration.map((config, idx) => (
+                  <div key={idx} className="flex items-center justify-between p-3 bg-white rounded border border-[#D4C4A8]">
+                    <div className="flex items-center gap-4">
+                      <span className="text-xs px-2 py-1 bg-blue-100 text-blue-700 rounded font-semibold">
+                        {config.category}
+                      </span>
+                      <span className="text-sm font-mono font-semibold">{config.key}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className={`text-sm font-mono ${config.sensitive ? 'text-text-secondary' : 'text-text-primary'}`}>
+                        {config.value}
+                      </span>
+                      {config.sensitive && (
+                        <span className="text-xs px-2 py-1 bg-orange-100 text-orange-700 rounded font-semibold">
+                          Sensitive
+                        </span>
+                      )}
                     </div>
                   </div>
-                </CardContent>
-              </Card>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
 
-              <Card className="border border-[#DED8D2] bg-white">
-                <CardContent className="p-4">
-                  <div className="flex items-center gap-3">
-                    <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-                    <div>
-                      <div className="text-xs text-gray-600">Processing Engine</div>
-                      <div className="text-sm font-semibold text-[#111111]">Active</div>
+          {/* Resource Limits */}
+          <Card className="border border-[#D4C4A8] bg-[#F5F1E8]">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <span className="text-2xl">📊</span>
+                Resource Limits & Policies
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-2">
+                {limits.map((limit, idx) => (
+                  <div key={idx} className="flex items-center justify-between p-3 bg-white rounded border border-[#D4C4A8]">
+                    <div className="flex items-center gap-4">
+                      <span className="text-xs px-2 py-1 bg-purple-100 text-purple-700 rounded font-semibold">
+                        {limit.category}
+                      </span>
+                      <span className="text-sm font-semibold">{limit.name}</span>
                     </div>
+                    <span className="text-sm font-mono font-bold text-[#F54E00]">{limit.value}</span>
                   </div>
-                </CardContent>
-              </Card>
-
-              <Card className="border border-[#DED8D2] bg-white">
-                <CardContent className="p-4">
-                  <div className="flex items-center gap-3">
-                    <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-                    <div>
-                      <div className="text-xs text-gray-600">Connected Services</div>
-                      <div className="text-sm font-semibold text-[#111111]">Online</div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card className="border border-[#DED8D2] bg-white">
-                <CardContent className="p-4">
-                  <div className="flex items-center gap-3">
-                    <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-                    <div>
-                      <div className="text-xs text-gray-600">Queue Status</div>
-                      <div className="text-sm font-semibold text-[#111111]">Operational</div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-          </section>
-
-          {/* Version Information */}
-          <section>
-            <h2 className="text-lg font-semibold text-[#111111] mb-4">Version Information</h2>
-            <Card className="border border-[#DED8D2] bg-white">
-              <CardContent className="p-6">
-                <div className="grid grid-cols-2 gap-6">
-                  <div>
-                    <div className="text-sm text-gray-600 mb-1">Release</div>
-                    <div className="text-lg font-bold text-[#111111]">v0.2.5</div>
-                  </div>
-                  <div>
-                    <div className="text-sm text-gray-600 mb-1">Validation</div>
-                    <div className="text-lg font-bold text-green-600">Passed</div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </section>
-
-          {/* Technical Details (Collapsible) */}
-          <section>
-            <h2 className="text-lg font-semibold text-[#111111] mb-4">Technical Details</h2>
-            
-            <div className="space-y-3">
-              {/* Database Details */}
-              <Card className="border border-[#DED8D2] bg-white">
-                <CardContent className="p-4">
-                  <button
-                    onClick={() => toggleSection('database')}
-                    className="w-full flex items-center justify-between"
-                  >
-                    <div className="flex items-center gap-3">
-                      <DatabaseIcon className="w-6 h-6 text-gray-600" />
-                      <span className="font-medium text-[#111111]">Database Configuration</span>
-                    </div>
-                    <ChevronRightIcon className={`w-5 h-5 text-gray-600 transition-transform ${expandedSections.has('database') ? 'rotate-90' : ''}`} />
-                  </button>
-
-                  {expandedSections.has('database') && (
-                    <div className="mt-4 p-4 bg-gray-50 rounded-lg border border-[#DED8D2] font-mono text-xs space-y-2 text-gray-700">
-                      <div><span className="text-gray-500">Host:</span> 127.0.0.1:5432</div>
-                      <div><span className="text-gray-500">Database:</span> openrooms</div>
-                      <div><span className="text-gray-500">Pool Size:</span> 10</div>
-                      <div><span className="text-gray-500">Connection Timeout:</span> 5000ms</div>
-                      <div><span className="text-gray-500">Schema Version:</span> 2.5.0</div>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-
-              {/* Redis Details */}
-              <Card className="border border-[#DED8D2] bg-white">
-                <CardContent className="p-4">
-                  <button
-                    onClick={() => toggleSection('redis')}
-                    className="w-full flex items-center justify-between"
-                  >
-                    <div className="flex items-center gap-3">
-                      <MemoryIcon className="w-6 h-6 text-gray-600" />
-                      <span className="font-medium text-[#111111]">State Manager Configuration</span>
-                    </div>
-                    <ChevronRightIcon className={`w-5 h-5 text-gray-600 transition-transform ${expandedSections.has('redis') ? 'rotate-90' : ''}`} />
-                  </button>
-
-                  {expandedSections.has('redis') && (
-                    <div className="mt-4 p-4 bg-gray-50 rounded-lg border border-[#DED8D2] font-mono text-xs space-y-2 text-gray-700">
-                      <div><span className="text-gray-500">Host:</span> 127.0.0.1:6379</div>
-                      <div><span className="text-gray-500">Max Retries:</span> 3</div>
-                      <div><span className="text-gray-500">Retry Strategy:</span> Exponential backoff</div>
-                      <div><span className="text-gray-500">Key Prefix:</span> rooms:</div>
-                      <div><span className="text-gray-500">TTL:</span> Persistent</div>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-
-              {/* Processing Engine Details */}
-              <Card className="border border-[#DED8D2] bg-white">
-                <CardContent className="p-4">
-                  <button
-                    onClick={() => toggleSection('engine')}
-                    className="w-full flex items-center justify-between"
-                  >
-                    <div className="flex items-center gap-3">
-                      <CpuIcon className="w-6 h-6 text-gray-600" />
-                      <span className="font-medium text-[#111111]">Processing Engine</span>
-                    </div>
-                    <ChevronRightIcon className={`w-5 h-5 text-gray-600 transition-transform ${expandedSections.has('engine') ? 'rotate-90' : ''}`} />
-                  </button>
-
-                  {expandedSections.has('engine') && (
-                    <div className="mt-4 p-4 bg-gray-50 rounded-lg border border-[#DED8D2] font-mono text-xs space-y-2 text-gray-700">
-                      <div><span className="text-gray-500">Workers:</span> 2</div>
-                      <div><span className="text-gray-500">Concurrency:</span> 5</div>
-                      <div><span className="text-gray-500">Queue Provider:</span> BullMQ</div>
-                      <div><span className="text-gray-500">Retry Policy:</span> 3 attempts with backoff</div>
-                      <div><span className="text-gray-500">Idempotency:</span> Enabled</div>
-                      <div><span className="text-gray-500">FSM Validation:</span> Strict mode</div>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            </div>
-          </section>
-
+                ))}
+              </div>
+              <div className="mt-4 pt-4 border-t border-[#D4C4A8]">
+                <button className="w-full px-4 py-2 bg-[#F54E00] hover:bg-[#E24600] text-white text-sm font-bold rounded transition-colors">
+                  Edit Policies
+                </button>
+              </div>
+            </CardContent>
+          </Card>
         </div>
       </div>
     </div>
