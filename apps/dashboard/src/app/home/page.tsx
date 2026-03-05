@@ -197,8 +197,8 @@ export default function HomePage() {
                     <div className="absolute inset-0 bg-gradient-to-b from-transparent via-black/5 to-transparent pointer-events-none" 
                          style={{ backgroundImage: 'repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.03) 2px, rgba(0,0,0,0.03) 4px)' }} />
                     <div className="flex items-center gap-2 relative">
-                      <div className="w-2.5 h-2.5 rounded-full bg-white"></div>
-                      <span className="text-[10px] font-semibold text-white tracking-wide">{app.category}</span>
+                      <div className="dot w-2.5 h-2.5 rounded-full"></div>
+                      <span className="text-[10px] font-semibold tracking-wide">{app.category}</span>
                     </div>
                   </div>
                   <div className="bg-[#F5F1E8] group-hover:bg-white transition-colors duration-200 p-5 sm:p-6">
