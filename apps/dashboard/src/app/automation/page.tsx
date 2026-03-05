@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { Header } from '@/components/header'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
-import { AutomationIcon, PlayIcon, PlusIcon, ClockIcon } from '@/components/icons'
+import { AutomationIcon, PlayIcon, PlusIcon, ClockIcon, ScheduledTaskIcon, EventTriggerIcon, WebhookIcon, QueueConsumerIcon } from '@/components/icons'
 
 interface Trigger {
   id: string
@@ -51,13 +51,13 @@ export default function AutomationPage() {
   const getTypeIcon = (type: string) => {
     switch (type) {
       case 'schedule':
-        return '⏰'
+        return ScheduledTaskIcon
       case 'event':
-        return '⚡'
+        return EventTriggerIcon
       case 'webhook':
-        return '🔗'
+        return WebhookIcon
       default:
-        return '📋'
+        return QueueConsumerIcon
     }
   }
 
@@ -78,26 +78,26 @@ export default function AutomationPage() {
     {
       name: 'Scheduled Task',
       description: 'Run workflows on a fixed schedule (cron)',
-      icon: '⏰',
-      color: 'bg-blue-50 border-blue-200'
+      icon: ScheduledTaskIcon,
+      color: 'bg-blue-50 border-blue-200 hover:border-blue-400'
     },
     {
       name: 'Event Trigger',
       description: 'Execute on system events or data changes',
-      icon: '⚡',
-      color: 'bg-purple-50 border-purple-200'
+      icon: EventTriggerIcon,
+      color: 'bg-orange-50 border-orange-200 hover:border-orange-400'
     },
     {
       name: 'Webhook Endpoint',
       description: 'HTTP endpoint for external integrations',
-      icon: '🔗',
-      color: 'bg-orange-50 border-orange-200'
+      icon: WebhookIcon,
+      color: 'bg-emerald-50 border-emerald-200 hover:border-emerald-400'
     },
     {
       name: 'Queue Consumer',
       description: 'Process messages from job queue',
-      icon: '📨',
-      color: 'bg-emerald-50 border-emerald-200'
+      icon: QueueConsumerIcon,
+      color: 'bg-teal-50 border-teal-200 hover:border-teal-400'
     }
   ]
 
@@ -162,22 +162,27 @@ export default function AutomationPage() {
               Trigger Templates
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
-              {templates.map((template, idx) => (
-                <Card key={idx} className={`border-2 ${template.color} hover:shadow-lg hover:-translate-y-1 transition-all duration-200 cursor-pointer`}>
-                  <CardHeader>
-                    <div className="flex items-center gap-3 mb-2">
-                      <span className="text-4xl">{template.icon}</span>
-                      <CardTitle className="text-base">{template.name}</CardTitle>
-                    </div>
-                    <CardDescription className="text-sm">{template.description}</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <button className="w-full text-xs px-3 py-2 bg-[#F54E00] text-white rounded font-bold hover:bg-[#E24600] transition-colors">
-                      Create Trigger
-                    </button>
-                  </CardContent>
-                </Card>
-              ))}
+              {templates.map((template, idx) => {
+                const IconComponent = template.icon
+                return (
+                  <Card key={idx} className={`border-2 ${template.color} hover:shadow-lg hover:-translate-y-1 transition-all duration-200 cursor-pointer`}>
+                    <CardHeader>
+                      <div className="flex items-center gap-3 mb-2">
+                        <div className="w-12 h-12 flex items-center justify-center">
+                          <IconComponent className="w-10 h-10" />
+                        </div>
+                        <CardTitle className="text-base">{template.name}</CardTitle>
+                      </div>
+                      <CardDescription className="text-sm">{template.description}</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <button className="w-full text-xs px-3 py-2 bg-[#F54E00] text-white rounded font-bold hover:bg-[#E24600] transition-colors">
+                        Create Trigger
+                      </button>
+                    </CardContent>
+                  </Card>
+                )
+              })}
             </div>
           </div>
 
@@ -185,14 +190,16 @@ export default function AutomationPage() {
           <div>
             <h2 className="text-xl font-bold text-text-primary mb-4">Active Triggers</h2>
             <div className="grid grid-cols-1 gap-6">
-              {triggers.map((trigger) => (
-                <Card key={trigger.id} className="border border-[#D4C4A8] bg-[#F5F1E8] hover:bg-white hover:shadow-md transition-all duration-200">
-                  <CardContent className="p-6">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-4 flex-1">
-                        <div className="w-14 h-14 bg-white rounded-lg flex items-center justify-center text-3xl border-2 border-[#D4C4A8]">
-                          {getTypeIcon(trigger.type)}
-                        </div>
+              {triggers.map((trigger) => {
+                const TriggerIcon = getTypeIcon(trigger.type)
+                return (
+                  <Card key={trigger.id} className="border border-[#D4C4A8] bg-[#F5F1E8] hover:bg-white hover:shadow-md transition-all duration-200">
+                    <CardContent className="p-6">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-4 flex-1">
+                          <div className="w-14 h-14 bg-white rounded-lg flex items-center justify-center border-2 border-[#D4C4A8]">
+                            <TriggerIcon className="w-10 h-10" />
+                          </div>
                         <div className="flex-1">
                           <div className="flex items-center gap-3 mb-2">
                             <h3 className="font-semibold text-lg text-text-primary">{trigger.name}</h3>
@@ -237,7 +244,8 @@ export default function AutomationPage() {
                     </div>
                   </CardContent>
                 </Card>
-              ))}
+              )
+              })}
             </div>
           </div>
         </div>

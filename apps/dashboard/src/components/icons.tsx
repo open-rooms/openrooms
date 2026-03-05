@@ -223,3 +223,6 @@ export const APIIntegrationIcon = ({ className = "w-6 h-6" }: { className?: stri
     <line x1="4" y1="12" x2="2" y2="12" stroke="#F59E0B" strokeWidth="2.5" strokeLinecap="round"/>
   </svg>
 )
+
+// Export automation icons
+export { ScheduledTaskIcon, EventTriggerIcon, WebhookIcon, QueueConsumerIcon } from './icons/automation-icons'
