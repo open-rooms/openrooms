@@ -144,3 +144,35 @@ export const MemoryIcon = ({ className = "w-4 h-4" }: { className?: string }) =>
     <path d="M6 10h4m4 0h4M6 14h4m4 0h4" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
   </svg>
 )
+
+export const AgentIcon = ({ className = "w-6 h-6" }: { className?: string }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="12" cy="8" r="4" stroke="currentColor" strokeWidth="2" fill="none"/>
+    <path d="M6 21v-2a6 6 0 0 1 12 0v2" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+    <circle cx="12" cy="8" r="1.5" fill="currentColor"/>
+  </svg>
+)
+
+export const RuntimeIcon = ({ className = "w-6 h-6" }: { className?: string }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M8 5v14l11-7z" fill="currentColor"/>
+    <rect x="3" y="4" width="2" height="16" fill="currentColor"/>
+  </svg>
+)
+
+export const AutomationIcon = ({ className = "w-6 h-6" }: { className?: string }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="12" cy="12" r="3" fill="currentColor"/>
+    <path d="M12 1v4m0 14v4M23 12h-4m-14 0H1" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+    <circle cx="12" cy="4" r="1.5" fill="currentColor"/>
+    <circle cx="12" cy="20" r="1.5" fill="currentColor"/>
+    <circle cx="20" cy="12" r="1.5" fill="currentColor"/>
+    <circle cx="4" cy="12" r="1.5" fill="currentColor"/>
+  </svg>
+)
+
+export const LiveRunsIcon = ({ className = "w-6 h-6" }: { className?: string }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M22 12h-4l-3 9L9 3l-3 9H2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+  </svg>
+)
