@@ -625,6 +625,33 @@ export class KyselyMemoryRepository implements MemoryRepository {
     return this.mapEntry(entry);
   }
 
+  async getEntries(roomId: UUID, type?: MemoryType): Promise<MemoryEntry[]> {
+    const db = getDb();
+    
+    // First get the memory for this room
+    const memory = await this.findByRoomId(roomId);
+    if (!memory) {
+      return [];
+    }
+
+    let query = db
+      .selectFrom('memory_entries')
+      .selectAll()
+      .where('memoryId', '=', memory.id);
+
+    if (type) {
+      query = query.where('type', '=', type);
+    }
+
+    const entries = await query.execute();
+    return entries.map(e => this.mapEntry(e));
+  }
+
+  async deleteByRoomId(roomId: UUID): Promise<void> {
+    const db = getDb();
+    await db.deleteFrom('memories').where('roomId', '=', roomId).execute();
+  }
+
   async getEntry(memoryId: UUID, key: string): Promise<MemoryEntry | null> {
     const db = getDb();
 

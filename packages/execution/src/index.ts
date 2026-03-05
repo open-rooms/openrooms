@@ -1,16 +1,27 @@
-/**
- * Execution Layer - Workflow Engine
- * 
- * FSM-based workflow orchestrator for deterministic execution
- */
+// Re-export from workflow engine
+export { WorkflowExecutionEngine } from '../workflow-engine/src/engine';
+export type { ExecutionEngineConfig, NodeExecutionContext, NodeExecutor } from '../workflow-engine/src/engine';
 
-export * from './workflow-engine/src/engine';
-export * from './workflow-engine/src/node-executors';
+// Re-export from node executors
+export { 
+  createDefaultNodeExecutors,
+  StartNodeExecutor,
+  EndNodeExecutor,
+  WaitNodeExecutor,
+  AgentTaskNodeExecutor,
+  ToolExecutionNodeExecutor,
+  DecisionNodeExecutor,
+  ParallelNodeExecutor
+} from '../workflow-engine/src/node-executors';
+export type { NodeExecutorDependencies } from '../workflow-engine/src/node-executors';
 
-export * from './tools/src/registry';
-export * from './tools/src/builtin-tools';
+// Re-export from tools
+export { DefaultToolRegistry, BaseToolExecutor } from '../tools/src/registry';
+export { BUILTIN_TOOLS } from '../tools/src/builtin-tools';
 
-export * from './llm/src/service';
-export * from './llm/src/providers';
+// Re-export from LLM
+export { LLMService, OpenAIProvider, AnthropicProvider } from '../llm/src/providers';
 
-export * from './workers/src/worker-pool';
+// Re-export from workers
+export { WorkerManager, RoomExecutionWorker } from '../workers/src/worker-pool';
+export type { RoomExecutionJobData } from '../workers/src/worker-pool';
