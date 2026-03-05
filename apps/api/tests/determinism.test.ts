@@ -33,9 +33,9 @@ describe('Deterministic Workflow Execution', () => {
   afterAll(async () => {
     await container.workflowRepository.delete(testWorkflowId).catch(() => {});
     
-    // Disconnect Redis
+    // Properly close Redis connection
     if (container.redis) {
-      container.redis.disconnect();
+      await container.redis.quit();
     }
   });
 

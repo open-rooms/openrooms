@@ -63,10 +63,11 @@ jobs:
     runs-on: ubuntu-latest
     services:
       postgres:
-        image: postgres:16
+        image: postgres:16-alpine
         env:
-          POSTGRES_PASSWORD: postgres
-          POSTGRES_DB: openrooms_test
+          POSTGRES_USER: rooms_test
+          POSTGRES_PASSWORD: rooms_test_pass
+          POSTGRES_DB: rooms_test
         options: >-
           --health-cmd pg_isready
           --health-interval 10s
@@ -103,13 +104,15 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Setup database
-        run: pnpm db:push
+      - name: Setup database schema
+        run: psql -U rooms_test -d rooms_test -f packages/database/schema.sql
         env:
-          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/openrooms_test
+          PGPASSWORD: rooms_test_pass
+          PGHOST: localhost
+          PGPORT: 5432
 
       - name: Run tests
-        run: pnpm test || echo "Tests not yet implemented"
+        run: pnpm test --workspace=apps/api
         env:
-          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/openrooms_test
+          DATABASE_URL: postgresql://rooms_test:rooms_test_pass@localhost:5432/rooms_test
           REDIS_URL: redis://localhost:6379
