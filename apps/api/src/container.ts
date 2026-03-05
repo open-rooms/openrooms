@@ -31,6 +31,7 @@ import { DefaultToolRegistry, BUILTIN_TOOLS } from '@openrooms/execution';
 import { LLMService, OpenAIProvider } from '@openrooms/execution';
 import { BullMQJobQueue } from '@openrooms/infrastructure-queue';
 import { WorkerManager } from '@openrooms/execution';
+import { NodeType } from '@openrooms/core';
 
 export interface Container {
   // Repositories
@@ -82,8 +83,15 @@ export function createContainer(): Container {
     );
   }
 
-  // Workflow Engine
-  const nodeExecutors = createDefaultNodeExecutors();
+  // Workflow Engine with proper node executor dependencies
+  const nodeExecutors = createDefaultNodeExecutors({
+    llmService,
+    toolRegistry,
+    memoryRepository,
+    stateManager,
+    workflowEngine: null as any, // Will be set after creation to avoid circular dependency
+  });
+  
   const workflowEngine = new WorkflowExecutionEngine(
     stateManager,
     roomRepository,
@@ -95,6 +103,12 @@ export function createContainer(): Container {
       lockTimeout: 30000, // 30 seconds
     }
   );
+
+  // Set circular reference for parallel node executor
+  const parallelExecutor = nodeExecutors.get(NodeType.PARALLEL);
+  if (parallelExecutor && 'workflowEngine' in parallelExecutor) {
+    (parallelExecutor as any).workflowEngine = workflowEngine;
+  }
 
   // Job Queue
   const jobQueue = new BullMQJobQueue({
