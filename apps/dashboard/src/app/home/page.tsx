@@ -100,16 +100,16 @@ export default function HomePage() {
       <nav className="bg-[#F5F1E8] border-b-2 border-black sticky top-0 z-40 backdrop-blur-sm">
         <div className="max-w-[95%] 2xl:max-w-[1600px] mx-auto px-4 sm:px-6 md:px-8 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3 sm:gap-4">
-            <AgentIcon className="w-7 h-7 sm:w-8 sm:h-8 transition-transform duration-500 hover:scale-125 hover:rotate-12 active:scale-95" />
+            <AgentIcon className="w-7 h-7 sm:w-8 sm:h-8" />
             <span className="text-lg sm:text-xl font-bold text-[#111111]">OpenRooms</span>
-            <span className="hidden sm:inline-block px-3 py-1 bg-black text-white text-xs font-bold rounded-full animate-bounce-in hover:animate-wiggle cursor-default">PLATFORM</span>
+            <span className="hidden sm:inline-block px-3 py-1 bg-black text-white text-xs font-bold rounded-full">PLATFORM</span>
           </div>
           <div className="flex items-center gap-3 sm:gap-6">
-            <Link href="/home" className="text-xs sm:text-sm font-semibold text-[#111111] hover:text-[#F54E00] transition-all duration-300 hover:-translate-y-1 hover:scale-110 relative after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-[#F54E00] hover:after:w-full after:transition-all after:duration-300">Home</Link>
-            <Link href="/docs" className="hidden sm:inline-block text-sm font-semibold text-gray-700 hover:text-[#F54E00] transition-all duration-300 hover:-translate-y-1 hover:scale-110 relative after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-[#F54E00] hover:after:w-full after:transition-all after:duration-300">Docs</Link>
-            <Link href="/live-runs" className="hidden md:inline-block text-sm font-semibold text-gray-700 hover:text-[#F54E00] transition-all duration-300 hover:-translate-y-1 hover:scale-110 relative after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-[#F54E00] hover:after:w-full after:transition-all after:duration-300">Status</Link>
-            <Link href="https://github.com" className="hidden md:inline-block text-sm font-semibold text-gray-700 hover:text-[#F54E00] transition-all duration-300 hover:-translate-y-1 hover:scale-110 relative after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-[#F54E00] hover:after:w-full after:transition-all after:duration-300">GitHub</Link>
-            <button className="px-3 sm:px-4 py-2 bg-[#F54E00] hover:bg-[#E24600] text-white text-xs sm:text-sm font-bold rounded-lg transition-all duration-300 hover:scale-110 hover:shadow-2xl hover:-translate-y-1 active:scale-95">
+            <Link href="/home" className="text-xs sm:text-sm font-semibold text-[#111111] hover:text-[#F54E00] transition-colors duration-150">Home</Link>
+            <Link href="/docs" className="hidden sm:inline-block text-sm font-semibold text-gray-700 hover:text-[#F54E00] transition-colors duration-150">Docs</Link>
+            <Link href="/live-runs" className="hidden md:inline-block text-sm font-semibold text-gray-700 hover:text-[#F54E00] transition-colors duration-150">Status</Link>
+            <Link href="https://github.com" className="hidden md:inline-block text-sm font-semibold text-gray-700 hover:text-[#F54E00] transition-colors duration-150">GitHub</Link>
+            <button className="px-3 sm:px-4 py-2 bg-[#F54E00] hover:bg-[#E24600] text-white text-xs sm:text-sm font-bold rounded-lg transition-colors duration-150">
               Sign In
             </button>
           </div>
@@ -130,13 +130,13 @@ export default function HomePage() {
               OpenRooms is an infrastructure layer for coordinating AI agents, workflows, tools and execution environments across models, APIs and chains.
             </p>
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4 animate-slide-up" style={{ animationDelay: '0.3s' }}>
-              <Link href="/control-plane" className="px-6 py-3 bg-[#F54E00] hover:bg-[#E24600] text-white text-sm sm:text-base font-bold rounded-lg transition-all duration-300 inline-flex items-center justify-center gap-2 hover:scale-110 hover:shadow-2xl hover:-translate-y-1 active:scale-95 group">
-                <span>Launch Control Plane</span>
-                <ChevronRightIcon className="w-5 h-5 transition-transform duration-300 group-hover:translate-x-2 group-hover:scale-125" />
-              </Link>
-              <Link href="/live-runs" className="px-6 py-3 bg-white border-2 border-black hover:bg-[#F54E00] hover:border-[#F54E00] text-[#111111] hover:text-white text-sm sm:text-base font-bold rounded-lg transition-all duration-300 hover:scale-110 hover:shadow-2xl hover:-translate-y-1 active:scale-95 text-center">
-                View Live System
-              </Link>
+            <Link href="/control-plane" className="px-6 py-3 bg-[#F54E00] hover:bg-[#E24600] text-white text-sm sm:text-base font-bold rounded-lg transition-colors duration-150 inline-flex items-center justify-center gap-2">
+              <span>Launch Control Plane</span>
+              <ChevronRightIcon className="w-5 h-5" />
+            </Link>
+            <Link href="/live-runs" className="px-6 py-3 bg-white border-2 border-black hover:bg-[#F54E00] hover:border-[#F54E00] text-[#111111] hover:text-white text-sm sm:text-base font-bold rounded-lg transition-colors duration-150 text-center">
+              View Live System
+            </Link>
             </div>
           </div>
         </div>
@@ -189,27 +189,27 @@ export default function HomePage() {
               return (
                 <div 
                   key={app.id} 
-                  className="module-card border-2 border-[#D4C4A8] rounded-2xl overflow-hidden hover:shadow-2xl group animate-scale-in cursor-pointer"
+                  className="module-card border-2 border-[#D4C4A8] rounded-2xl overflow-hidden group cursor-pointer"
                   data-module={moduleId}
                   style={{ animationDelay: `${0.6 + index * 0.05}s` }}
                 >
-                  <div className="bg-[#D4C4A8] px-4 py-3 relative group-hover:bg-[#F54E00] transition-all duration-500">
+                  <div className="module-header px-4 py-3 relative">
                     <div className="absolute inset-0 bg-gradient-to-b from-transparent via-black/5 to-transparent pointer-events-none" 
                          style={{ backgroundImage: 'repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.03) 2px, rgba(0,0,0,0.03) 4px)' }} />
                     <div className="flex items-center gap-2 relative">
-                      <div className="w-2.5 h-2.5 rounded-full bg-[#F54E00] group-hover:bg-white animate-pulse group-hover:scale-125 transition-all duration-300"></div>
-                      <span className="text-[10px] font-semibold text-gray-700 group-hover:text-white tracking-wide transition-colors duration-300">{app.category}</span>
+                      <div className="w-2.5 h-2.5 rounded-full bg-white"></div>
+                      <span className="text-[10px] font-semibold text-white tracking-wide">{app.category}</span>
                     </div>
                   </div>
-                  <div className="bg-[#F5F1E8] group-hover:bg-white transition-all duration-500 p-5 sm:p-6">
-                    <div className="mb-4 transition-all duration-500 group-hover:scale-125 group-hover:rotate-12 group-hover:animate-bounce-in">
+                  <div className="bg-[#F5F1E8] group-hover:bg-white transition-colors duration-200 p-5 sm:p-6">
+                    <div className="mb-4 transition-transform duration-150">
                       <Icon className="w-12 h-12 sm:w-14 sm:h-14" />
                     </div>
-                    <h3 className="text-base sm:text-lg font-bold text-[#111111] mb-2 group-hover:text-[#F54E00] transition-all duration-300 group-hover:scale-105">{app.name}</h3>
-                    <p className="text-xs sm:text-sm text-gray-600 mb-4 group-hover:text-gray-700">{app.description}</p>
-                    <Link href={app.href} className="inline-flex items-center gap-1 text-sm font-bold text-[#F54E00] hover:text-[#E24600] transition-all duration-300 group-hover:gap-3 group-hover:scale-110">
+                    <h3 className="text-base sm:text-lg font-bold text-[#111111] mb-2">{app.name}</h3>
+                    <p className="text-xs sm:text-sm text-gray-600 mb-4">{app.description}</p>
+                    <Link href={app.href} className="inline-flex items-center gap-1 text-sm font-bold text-[#F54E00] hover:text-[#E24600] transition-colors duration-150">
                       <span>Open</span>
-                      <ChevronRightIcon className="w-4 h-4 transition-all duration-300 group-hover:translate-x-2 group-hover:animate-bounce-in" />
+                      <ChevronRightIcon className="w-4 h-4" />
                     </Link>
                   </div>
                 </div>
