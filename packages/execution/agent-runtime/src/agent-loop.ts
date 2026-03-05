@@ -8,9 +8,13 @@
  * - State persistence
  */
 
+import {
+  AgentLoopState,
+  ExecutionEventType,
+} from '@openrooms/core';
+
 import type {
   Agent,
-  AgentLoopState,
   AgentStatus,
   AgentExecutionTrace,
   AgentPolicy,
@@ -24,7 +28,6 @@ import type {
   JSONObject,
   UUID,
   Result,
-  ExecutionEventType,
 } from '@openrooms/core';
 
 // ============================================================================

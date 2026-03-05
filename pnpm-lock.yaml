@@ -30,6 +30,9 @@ importers:
       '@fastify/helmet':
         specifier: ^11.1.1
         version: 11.1.1
+      '@openrooms/agent-runtime':
+        specifier: workspace:*
+        version: link:../../packages/execution/agent-runtime
       '@openrooms/core':
         specifier: workspace:*
         version: link:../../packages/core
@@ -185,6 +188,16 @@ importers:
       openai:
         specifier: ^6.25.0
         version: 6.25.0
+    devDependencies:
+      typescript:
+        specifier: ^5.3.3
+        version: 5.9.3
+
+  packages/execution/agent-runtime:
+    dependencies:
+      '@openrooms/core':
+        specifier: workspace:*
+        version: link:../../core
     devDependencies:
       typescript:
         specifier: ^5.3.3

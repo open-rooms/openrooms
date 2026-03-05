@@ -3,6 +3,9 @@
  */
 
 import Redis from 'ioredis';
+import { getDb } from '@openrooms/database';
+import type { Kysely } from 'kysely';
+import type { Database } from '@openrooms/database';
 import {
   WorkflowEngine,
   StateManager,
@@ -55,6 +58,9 @@ export interface Container {
 }
 
 export function createContainer(): Container {
+  // Database
+  const db = getDb();
+
   // Redis
   const redis = new Redis(process.env.REDIS_URL ?? 'redis://localhost:6379');
 
@@ -133,6 +139,7 @@ export function createContainer(): Container {
     toolRegistry,
     llmService,
     workflowEngine,
+    db,
     redis,
     jobQueue,
     workerManager,

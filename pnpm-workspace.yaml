@@ -2,6 +2,7 @@ packages:
   - apps/*
   - packages/*
   - packages/infrastructure/*
+  - packages/execution/*
 
 ignoredBuiltDependencies:
   - '@prisma/client'

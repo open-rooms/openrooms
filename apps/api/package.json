@@ -16,6 +16,7 @@
     "@openrooms/core": "workspace:*",
     "@openrooms/database": "workspace:*",
     "@openrooms/execution": "workspace:*",
+    "@openrooms/agent-runtime": "workspace:*",
     "@openrooms/infrastructure-database": "workspace:*",
     "@openrooms/infrastructure-redis": "workspace:*",
     "@openrooms/infrastructure-queue": "workspace:*",

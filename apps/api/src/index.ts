@@ -13,6 +13,8 @@ import { roomRoutes } from './routes/rooms';
 import { workflowRoutes } from './routes/workflows';
 import { toolRoutes } from './routes/tools';
 import { healthRoutes } from './routes/health';
+import { agentRoutes } from './routes/agents';
+import { apiKeyRoutes } from './routes/api-keys';
 
 async function main() {
   const container = createContainer();
@@ -35,13 +37,22 @@ async function main() {
   await fastify.register((instance) => roomRoutes(instance, container), { prefix: '/api' });
   await fastify.register((instance) => workflowRoutes(instance, container), { prefix: '/api' });
   await fastify.register((instance) => toolRoutes(instance, container), { prefix: '/api' });
+  await fastify.register((instance) => agentRoutes(instance, container), { prefix: '/api' });
+  await fastify.register((instance) => apiKeyRoutes(instance, container), { prefix: '/api' });
 
   // Root endpoint
   fastify.get('/', async () => {
     return {
       name: 'OpenRooms API',
-      version: '0.1.0',
+      version: '0.3.0',
+      stage: '3',
       status: 'running',
+      features: {
+        agents: true,
+        apiKeys: true,
+        policyEnforcement: true,
+        reasoningTraces: true,
+      },
     };
   });
 
