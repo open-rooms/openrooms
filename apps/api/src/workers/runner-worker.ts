@@ -206,10 +206,35 @@ async function simulateAgentLoop(
 
 // ─── Workers ─────────────────────────────────────────────────────────────────
 
+/** Load API keys from platform_config if not already in process.env */
+async function bootstrapEnvFromDB(db: any) {
+  try {
+    const rows: { key: string; value: string }[] = await db
+      .selectFrom('platform_config')
+      .select(['key', 'value'])
+      .where('key', 'in', ['openai_api_key', 'anthropic_api_key'])
+      .execute();
+
+    for (const row of rows) {
+      if (row.key === 'openai_api_key' && row.value && !process.env.OPENAI_API_KEY) {
+        process.env.OPENAI_API_KEY = row.value;
+        console.log('[RunnerWorker] Loaded OPENAI_API_KEY from platform_config');
+      }
+      if (row.key === 'anthropic_api_key' && row.value && !process.env.ANTHROPIC_API_KEY) {
+        process.env.ANTHROPIC_API_KEY = row.value;
+        console.log('[RunnerWorker] Loaded ANTHROPIC_API_KEY from platform_config');
+      }
+    }
+  } catch { /* ignore — will use env vars only */ }
+}
+
 export function createRunnerWorkers(redis: Redis, connection: ConnectionOpts) {
   const db = getDb();
   const runManager = new RunManager(db);
   const eventBus = new EventBus(redis);
+
+  // Bootstrap API keys from DB in case .env isn't set
+  bootstrapEnvFromDB(db);
 
   // ── Agent Runs Worker ─────────────────────────────────────────────────────
 
@@ -223,6 +248,9 @@ export function createRunnerWorkers(redis: Redis, connection: ConnectionOpts) {
 
       await runManager.updateRunStatus(runId, 'running', { startedAt: new Date().toISOString() });
       await eventBus.emit('agent.started', runId, { agentId });
+
+      // Refresh API keys from platform_config on every run (supports live key updates via Settings UI)
+      await bootstrapEnvFromDB(db);
 
       try {
         // Load agent from DB

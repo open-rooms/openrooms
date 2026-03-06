@@ -1,357 +1,396 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { CheckCircleIcon, AlertCircleIcon, ZapIcon, ClockIcon, DatabaseIcon, SettingsIllustrationIcon, APIIllustrationIcon } from '@/components/icons';
-import { getAPIKeys, createAPIKey, deleteAPIKey } from '@/lib/api';
+import Link from 'next/link';
+import { SettingsIllustrationIcon, CheckCircleIcon, AlertCircleIcon, ZapIcon, ClockIcon } from '@/components/icons';
+import { getProviderSettings, saveProviderSettings, getPlatformStatus, getAPIKeys, createAPIKey, deleteAPIKey } from '@/lib/api';
+
+interface ProviderState {
+  configured: boolean;
+  keyPreview: string | null;
+  keySource: string;
+  model: string;
+  availableModels: string[];
+}
 
 interface APIKey {
-  id: string;
-  name: string;
-  keyPrefix: string;
-  scopes: string[];
-  rateLimit: number;
-  rateLimitWindow: number;
-  isActive: boolean;
-  expiresAt?: string;
-  lastUsedAt?: string;
-  createdAt: string;
+  id: string; name: string; keyPrefix: string; scopes: string[];
+  rateLimit: number; rateLimitWindow: number; isActive: boolean;
+  expiresAt?: string; lastUsedAt?: string; createdAt: string;
 }
 
 export default function SettingsPage() {
+  const [providers, setProviders] = useState<{ openai: ProviderState; anthropic: ProviderState } | null>(null);
+  const [defaultProvider, setDefaultProvider] = useState('openai');
+  const [status, setStatus] = useState({ agents: 0, workflows: 0, tools: 0, runs: 0 });
   const [apiKeys, setApiKeys] = useState<APIKey[]>([]);
   const [loading, setLoading] = useState(true);
-  const [creating, setCreating] = useState(false);
+
+  // LLM form state
+  const [openaiKey, setOpenaiKey] = useState('');
+  const [openaiModel, setOpenaiModel] = useState('gpt-3.5-turbo');
+  const [anthropicKey, setAnthropicKey] = useState('');
+  const [anthropicModel, setAnthropicModel] = useState('claude-3-haiku-20240307');
+  const [saving, setSaving] = useState(false);
+  const [saveMsg, setSaveMsg] = useState<{ ok: boolean; text: string } | null>(null);
+
+  // API key form
+  const [showKeyForm, setShowKeyForm] = useState(false);
   const [newKeyData, setNewKeyData] = useState<string | null>(null);
-  const [showCreateForm, setShowCreateForm] = useState(false);
-  const [formData, setFormData] = useState({
-    name: '',
-    scopes: 'read,write',
-    rateLimit: '100',
-    rateLimitWindow: '60',
-    expiresIn: '365',
-  });
+  const [keyForm, setKeyForm] = useState({ name: '', scopes: 'read,write', rateLimit: '100', rateLimitWindow: '60', expiresIn: '365' });
+  const [creatingKey, setCreatingKey] = useState(false);
 
   useEffect(() => {
-    fetchAPIKeys();
+    Promise.all([
+      getProviderSettings().then(d => {
+        setProviders(d.providers as any);
+        setDefaultProvider(d.defaultProvider);
+        setOpenaiModel(d.providers.openai.model);
+        setAnthropicModel(d.providers.anthropic.model);
+      }).catch(() => {}),
+      getPlatformStatus().then(setStatus).catch(() => {}),
+      getAPIKeys().then(d => setApiKeys(d.keys || [])).catch(() => {}),
+    ]).finally(() => setLoading(false));
   }, []);
 
-  const fetchAPIKeys = async () => {
-    try {
-      setLoading(true);
-      const data = await getAPIKeys();
-      setApiKeys(data.keys || []);
-    } catch (error) {
-      console.error('Failed to fetch API keys:', error);
-      setApiKeys([]);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleCreateKey = async (e: React.FormEvent) => {
+  const handleSaveProviders = async (e: React.FormEvent) => {
     e.preventDefault();
-    setCreating(true);
-
+    setSaving(true);
+    setSaveMsg(null);
     try {
-      const payload = {
-        name: formData.name,
-        scopes: formData.scopes.split(',').map(s => s.trim()),
-        rateLimit: parseInt(formData.rateLimit),
-        rateLimitWindow: parseInt(formData.rateLimitWindow),
-        expiresIn: parseInt(formData.expiresIn),
-      };
-
-      const data = await createAPIKey(payload);
-      setNewKeyData(data.key);
-      setShowCreateForm(false);
-      setFormData({
-        name: '',
-        scopes: 'read,write',
-        rateLimit: '100',
-        rateLimitWindow: '60',
-        expiresIn: '365',
+      await saveProviderSettings({
+        openai: { apiKey: openaiKey || undefined, model: openaiModel },
+        anthropic: { apiKey: anthropicKey || undefined, model: anthropicModel },
+        defaultProvider,
       });
-      fetchAPIKeys();
-    } catch (error: any) {
-      console.error('Failed to create API key:', error);
-      alert(`Failed to create API key: ${error.message || 'Unknown error'}`);
+      setSaveMsg({ ok: true, text: 'Provider settings saved. New runs will use your updated keys.' });
+      setOpenaiKey('');
+      setAnthropicKey('');
+      // Reload provider status
+      const fresh = await getProviderSettings();
+      setProviders(fresh.providers as any);
+      setDefaultProvider(fresh.defaultProvider);
+    } catch (e: any) {
+      setSaveMsg({ ok: false, text: e.message || 'Save failed' });
     } finally {
-      setCreating(false);
+      setSaving(false);
     }
   };
 
-  const handleRevokeKey = async (keyId: string) => {
-    if (!confirm('Are you sure you want to revoke this API key? This action cannot be undone.')) {
-      return;
-    }
-
+  const handleCreateAPIKey = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setCreatingKey(true);
     try {
-      await deleteAPIKey(keyId);
-      fetchAPIKeys();
-    } catch (error) {
-      alert('Failed to revoke API key');
-      console.error('Failed to revoke API key:', error);
-      alert('Failed to revoke API key');
+      const data = await createAPIKey({
+        name: keyForm.name,
+        scopes: keyForm.scopes.split(',').map(s => s.trim()),
+        rateLimit: parseInt(keyForm.rateLimit),
+        rateLimitWindow: parseInt(keyForm.rateLimitWindow),
+        expiresIn: parseInt(keyForm.expiresIn),
+      });
+      setNewKeyData(data.key);
+      setShowKeyForm(false);
+      setKeyForm({ name: '', scopes: 'read,write', rateLimit: '100', rateLimitWindow: '60', expiresIn: '365' });
+      const fresh = await getAPIKeys();
+      setApiKeys(fresh.keys || []);
+    } catch (e: any) {
+      alert(`Failed: ${e.message}`);
+    } finally {
+      setCreatingKey(false);
     }
   };
 
-  const copyToClipboard = (text: string) => {
-    navigator.clipboard.writeText(text);
-    alert('Copied to clipboard');
+  const handleRevokeKey = async (id: string) => {
+    if (!confirm('Revoke this API key? This cannot be undone.')) return;
+    await deleteAPIKey(id).catch(() => {});
+    const fresh = await getAPIKeys();
+    setApiKeys(fresh.keys || []);
   };
+
+  const configured = providers?.openai.configured || providers?.anthropic.configured;
 
   return (
     <div className="min-h-screen bg-[#E8DCC8] p-4 sm:p-6 md:p-8">
-      <div className="max-w-6xl mx-auto">
+      <div className="max-w-4xl mx-auto space-y-8">
+
         {/* Header */}
-        <div className="mb-8">
-          <div className="flex items-center gap-3 mb-4">
-            <SettingsIllustrationIcon className="w-10 h-10" />
-            <h1 className="text-3xl sm:text-4xl font-bold text-[#111111]">API Keys</h1>
+        <div className="flex items-center gap-3">
+          <SettingsIllustrationIcon className="w-10 h-10" />
+          <div>
+            <h1 className="text-3xl font-bold text-[#111111]">Settings</h1>
+            <p className="text-gray-600 text-sm mt-0.5">Configure your LLM providers and platform access</p>
           </div>
-          <p className="text-gray-700 max-w-3xl flex items-center gap-2">
-            <APIIllustrationIcon className="w-4 h-4" />
-            Programmatic access with rate limiting and scopes
-          </p>
         </div>
 
-        {/* New Key Alert */}
-        {newKeyData && (
-          <div className="bg-yellow-50 border-2 border-yellow-400 rounded-lg p-6 mb-6 animate-bounce-in">
-            <h3 className="text-lg font-bold text-yellow-900 mb-2">⚠️ Save Your API Key</h3>
-            <p className="text-yellow-800 mb-4">
-              This is the only time you'll see this key. Store it securely.
-            </p>
-            <div className="flex items-center gap-2 bg-white border-2 border-yellow-400 rounded-lg p-4">
-              <code className="flex-1 font-mono text-sm break-all">{newKeyData}</code>
-              <button
-                onClick={() => copyToClipboard(newKeyData)}
-                className="px-4 py-2 bg-yellow-500 hover:bg-yellow-600 text-white font-bold rounded transition-all"
-              >
-                Copy
-              </button>
+        {/* Setup banner — only shown when no LLM key is configured */}
+        {!loading && !configured && (
+          <div className="bg-amber-50 border-2 border-amber-400 rounded-xl p-5 flex gap-4 items-start">
+            <div className="text-2xl">⚡</div>
+            <div>
+              <p className="font-bold text-amber-900 mb-1">Add your LLM key to unlock real AI reasoning</p>
+              <p className="text-amber-800 text-sm">
+                Without it, agents run in <strong>simulation mode</strong> — the full execution loop runs but with deterministic (non-AI) reasoning.
+                Add an OpenAI or Anthropic key below to switch to real GPT/Claude intelligence.
+              </p>
             </div>
-            <button
-              onClick={() => setNewKeyData(null)}
-              className="mt-4 text-yellow-800 hover:text-yellow-900 font-semibold"
-            >
-              I've saved it, dismiss this
-            </button>
           </div>
         )}
 
-        {/* Create Form */}
-        {showCreateForm ? (
-          <div className="bg-white border-2 border-black rounded-lg p-6 mb-6 animate-slide-up">
-            <h3 className="text-xl font-bold text-[#111111] mb-4">Create New API Key</h3>
-            <form onSubmit={handleCreateKey} className="space-y-4">
-              <div className="grid sm:grid-cols-2 gap-4">
+        {/* Platform snapshot */}
+        <div className="grid grid-cols-4 gap-3">
+          {[
+            { label: 'Agents', value: status.agents, href: '/agents', color: 'text-purple-600' },
+            { label: 'Workflows', value: status.workflows, href: '/workflows', color: 'text-indigo-600' },
+            { label: 'Tools', value: status.tools, href: '/tools', color: 'text-orange-600' },
+            { label: 'Total Runs', value: status.runs, href: '/live-runs', color: 'text-emerald-600' },
+          ].map(s => (
+            <Link key={s.label} href={s.href}
+              className="bg-white border-2 border-black rounded-xl p-4 hover:shadow-lg transition-all group">
+              <div className={`text-2xl font-bold ${s.color} group-hover:scale-110 transition-transform`}>{loading ? '…' : s.value}</div>
+              <div className="text-xs text-gray-500 mt-0.5">{s.label}</div>
+            </Link>
+          ))}
+        </div>
+
+        {/* ── LLM Providers ── */}
+        <div className="bg-white border-2 border-black rounded-xl overflow-hidden">
+          <div className="px-6 py-4 border-b-2 border-gray-100 flex items-center justify-between">
+            <div>
+              <h2 className="text-lg font-bold text-[#111111]">LLM Providers</h2>
+              <p className="text-sm text-gray-500 mt-0.5">Keys are stored encrypted and used by all agent and workflow runs</p>
+            </div>
+            {configured && (
+              <span className="flex items-center gap-1.5 px-3 py-1 bg-emerald-100 text-emerald-700 text-xs font-bold rounded-full">
+                <CheckCircleIcon className="w-3.5 h-3.5" /> Active
+              </span>
+            )}
+          </div>
+
+          <form onSubmit={handleSaveProviders} className="p-6 space-y-6">
+            {/* Default provider selector */}
+            <div>
+              <label className="block text-sm font-bold text-gray-700 mb-2">Default Provider</label>
+              <div className="flex gap-3">
+                {(['openai', 'anthropic', 'simulation'] as const).map(p => (
+                  <button key={p} type="button"
+                    onClick={() => setDefaultProvider(p)}
+                    className={`px-4 py-2 rounded-lg text-sm font-bold border-2 transition-all ${
+                      defaultProvider === p
+                        ? 'bg-[#F54E00] text-white border-[#F54E00]'
+                        : 'bg-white text-[#111111] border-black hover:bg-gray-50'
+                    }`}>
+                    {p === 'openai' ? 'OpenAI' : p === 'anthropic' ? 'Anthropic' : 'Simulation'}
+                  </button>
+                ))}
+              </div>
+              {defaultProvider === 'simulation' && (
+                <p className="text-xs text-gray-500 mt-1.5">Simulation mode runs the full agent loop with deterministic reasoning — useful for testing without API costs.</p>
+              )}
+            </div>
+
+            {/* OpenAI */}
+            <div className="rounded-xl border-2 border-gray-100 p-5">
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-2">
+                  <div className="w-6 h-6 bg-black rounded-full flex items-center justify-center">
+                    <span className="text-white text-[10px] font-bold">AI</span>
+                  </div>
+                  <span className="font-bold text-[#111111]">OpenAI</span>
+                </div>
+                {providers?.openai.configured ? (
+                  <span className="flex items-center gap-1 text-xs text-emerald-600 font-bold">
+                    <CheckCircleIcon className="w-3.5 h-3.5" />
+                    {providers.openai.keyPreview} · via {providers.openai.keySource}
+                  </span>
+                ) : (
+                  <span className="flex items-center gap-1 text-xs text-gray-400">
+                    <AlertCircleIcon className="w-3.5 h-3.5" /> Not configured
+                  </span>
+                )}
+              </div>
+              <div className="space-y-3">
                 <div>
-                  <label className="block text-sm font-bold text-gray-700 mb-2">
-                    Key Name <span className="text-red-500">*</span>
+                  <label className="block text-xs font-bold text-gray-600 mb-1.5">
+                    API Key {providers?.openai.configured && <span className="text-gray-400 font-normal">(leave blank to keep existing)</span>}
                   </label>
                   <input
-                    type="text"
-                    required
-                    value={formData.name}
-                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    className="w-full px-4 py-3 border-2 border-black rounded-lg focus:outline-none focus:ring-2 focus:ring-[#F54E00]"
-                    placeholder="e.g., Production API"
+                    type="password"
+                    value={openaiKey}
+                    onChange={e => setOpenaiKey(e.target.value)}
+                    placeholder={providers?.openai.configured ? '••••••••••••••••' : 'sk-proj-...'}
+                    className="w-full px-3 py-2.5 border-2 border-gray-200 rounded-lg text-sm focus:outline-none focus:border-[#F54E00] font-mono"
                   />
                 </div>
-
                 <div>
-                  <label className="block text-sm font-bold text-gray-700 mb-2">
-                    Scopes <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    value={formData.scopes}
-                    onChange={(e) => setFormData({ ...formData, scopes: e.target.value })}
-                    className="w-full px-4 py-3 border-2 border-black rounded-lg focus:outline-none focus:ring-2 focus:ring-[#F54E00]"
-                    placeholder="read, write, admin"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-bold text-gray-700 mb-2">Rate Limit (requests)</label>
-                  <input
-                    type="number"
-                    min="1"
-                    value={formData.rateLimit}
-                    onChange={(e) => setFormData({ ...formData, rateLimit: e.target.value })}
-                    className="w-full px-4 py-3 border-2 border-black rounded-lg focus:outline-none focus:ring-2 focus:ring-[#F54E00]"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-bold text-gray-700 mb-2">Window (seconds)</label>
-                  <input
-                    type="number"
-                    min="1"
-                    value={formData.rateLimitWindow}
-                    onChange={(e) => setFormData({ ...formData, rateLimitWindow: e.target.value })}
-                    className="w-full px-4 py-3 border-2 border-black rounded-lg focus:outline-none focus:ring-2 focus:ring-[#F54E00]"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-bold text-gray-700 mb-2">Expires In (days)</label>
-                  <input
-                    type="number"
-                    min="1"
-                    value={formData.expiresIn}
-                    onChange={(e) => setFormData({ ...formData, expiresIn: e.target.value })}
-                    className="w-full px-4 py-3 border-2 border-black rounded-lg focus:outline-none focus:ring-2 focus:ring-[#F54E00]"
-                  />
+                  <label className="block text-xs font-bold text-gray-600 mb-1.5">Model</label>
+                  <select
+                    value={openaiModel}
+                    onChange={e => setOpenaiModel(e.target.value)}
+                    className="w-full px-3 py-2.5 border-2 border-gray-200 rounded-lg text-sm focus:outline-none focus:border-[#F54E00] bg-white"
+                  >
+                    {['gpt-3.5-turbo', 'gpt-4', 'gpt-4-turbo', 'gpt-4o', 'gpt-4o-mini'].map(m => (
+                      <option key={m} value={m}>{m}</option>
+                    ))}
+                  </select>
                 </div>
               </div>
+            </div>
 
-              <div className="flex gap-4 pt-4 border-t-2 border-gray-200">
-                <button
-                  type="submit"
-                  disabled={creating}
-                  className="flex-1 px-6 py-3 bg-[#F54E00] hover:bg-[#E24600] text-white font-bold rounded-lg transition-all hover:scale-105 disabled:opacity-50"
-                >
-                  {creating ? 'Creating...' : 'Generate API Key'}
+            {/* Anthropic */}
+            <div className="rounded-xl border-2 border-gray-100 p-5">
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-2">
+                  <div className="w-6 h-6 bg-[#CC785C] rounded-full flex items-center justify-center">
+                    <span className="text-white text-[10px] font-bold">A</span>
+                  </div>
+                  <span className="font-bold text-[#111111]">Anthropic</span>
+                </div>
+                {providers?.anthropic.configured ? (
+                  <span className="flex items-center gap-1 text-xs text-emerald-600 font-bold">
+                    <CheckCircleIcon className="w-3.5 h-3.5" />
+                    {providers.anthropic.keyPreview} · via {providers.anthropic.keySource}
+                  </span>
+                ) : (
+                  <span className="flex items-center gap-1 text-xs text-gray-400">
+                    <AlertCircleIcon className="w-3.5 h-3.5" /> Not configured
+                  </span>
+                )}
+              </div>
+              <div className="space-y-3">
+                <div>
+                  <label className="block text-xs font-bold text-gray-600 mb-1.5">
+                    API Key {providers?.anthropic.configured && <span className="text-gray-400 font-normal">(leave blank to keep existing)</span>}
+                  </label>
+                  <input
+                    type="password"
+                    value={anthropicKey}
+                    onChange={e => setAnthropicKey(e.target.value)}
+                    placeholder={providers?.anthropic.configured ? '••••••••••••••••' : 'sk-ant-...'}
+                    className="w-full px-3 py-2.5 border-2 border-gray-200 rounded-lg text-sm focus:outline-none focus:border-[#F54E00] font-mono"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-gray-600 mb-1.5">Model</label>
+                  <select
+                    value={anthropicModel}
+                    onChange={e => setAnthropicModel(e.target.value)}
+                    className="w-full px-3 py-2.5 border-2 border-gray-200 rounded-lg text-sm focus:outline-none focus:border-[#F54E00] bg-white"
+                  >
+                    {['claude-3-haiku-20240307', 'claude-3-sonnet-20240229', 'claude-3-opus-20240229'].map(m => (
+                      <option key={m} value={m}>{m}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            {saveMsg && (
+              <div className={`p-3 rounded-lg text-sm font-medium flex items-center gap-2 ${saveMsg.ok ? 'bg-emerald-50 text-emerald-700' : 'bg-red-50 text-red-700'}`}>
+                {saveMsg.ok ? <CheckCircleIcon className="w-4 h-4" /> : <AlertCircleIcon className="w-4 h-4" />}
+                {saveMsg.text}
+              </div>
+            )}
+
+            <button type="submit" disabled={saving}
+              className="w-full py-3 bg-[#F54E00] hover:bg-[#E24600] text-white font-bold rounded-xl transition-all hover:scale-[1.01] disabled:opacity-50">
+              {saving ? 'Saving…' : 'Save Provider Settings'}
+            </button>
+          </form>
+        </div>
+
+        {/* ── OpenRooms API Keys ── */}
+        <div className="bg-white border-2 border-black rounded-xl overflow-hidden">
+          <div className="px-6 py-4 border-b-2 border-gray-100 flex items-center justify-between">
+            <div>
+              <h2 className="text-lg font-bold text-[#111111]">API Keys</h2>
+              <p className="text-sm text-gray-500 mt-0.5">Programmatic access to the OpenRooms control plane</p>
+            </div>
+            <button onClick={() => setShowKeyForm(true)}
+              className="px-4 py-2 bg-[#F54E00] hover:bg-[#E24600] text-white text-sm font-bold rounded-lg transition-all">
+              + New Key
+            </button>
+          </div>
+
+          {/* New key reveal */}
+          {newKeyData && (
+            <div className="mx-6 mt-4 bg-amber-50 border-2 border-amber-400 rounded-xl p-4">
+              <p className="text-sm font-bold text-amber-900 mb-2">⚠️ Copy this key now — it won't be shown again</p>
+              <div className="flex items-center gap-2 bg-white border border-amber-300 rounded-lg p-3">
+                <code className="flex-1 font-mono text-xs break-all">{newKeyData}</code>
+                <button onClick={() => { navigator.clipboard.writeText(newKeyData); }}
+                  className="px-3 py-1.5 bg-amber-500 text-white text-xs font-bold rounded">Copy</button>
+              </div>
+              <button onClick={() => setNewKeyData(null)} className="mt-2 text-xs text-amber-700 font-semibold hover:underline">
+                I've saved it ✓
+              </button>
+            </div>
+          )}
+
+          {/* Create form */}
+          {showKeyForm && (
+            <form onSubmit={handleCreateAPIKey} className="mx-6 mt-4 border-2 border-gray-100 rounded-xl p-4 space-y-3">
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="text-xs font-bold text-gray-600 mb-1 block">Key Name *</label>
+                  <input required value={keyForm.name} onChange={e => setKeyForm({...keyForm, name: e.target.value})}
+                    placeholder="e.g. My App" className="w-full px-3 py-2 border-2 border-gray-200 rounded-lg text-sm focus:outline-none focus:border-[#F54E00]" />
+                </div>
+                <div>
+                  <label className="text-xs font-bold text-gray-600 mb-1 block">Scopes</label>
+                  <input value={keyForm.scopes} onChange={e => setKeyForm({...keyForm, scopes: e.target.value})}
+                    className="w-full px-3 py-2 border-2 border-gray-200 rounded-lg text-sm focus:outline-none focus:border-[#F54E00]" />
+                </div>
+              </div>
+              <div className="flex gap-3">
+                <button type="submit" disabled={creatingKey}
+                  className="flex-1 py-2 bg-[#F54E00] text-white text-sm font-bold rounded-lg disabled:opacity-50">
+                  {creatingKey ? 'Creating…' : 'Generate Key'}
                 </button>
-                <button
-                  type="button"
-                  onClick={() => setShowCreateForm(false)}
-                  className="px-6 py-3 bg-white border-2 border-black text-[#111111] font-bold rounded-lg hover:bg-gray-100 transition-all"
-                >
+                <button type="button" onClick={() => setShowKeyForm(false)}
+                  className="px-4 py-2 border-2 border-black text-sm font-bold rounded-lg hover:bg-gray-50">
                   Cancel
                 </button>
               </div>
             </form>
-          </div>
-        ) : (
-          <div className="mb-6 animate-slide-up" style={{ animationDelay: '0.1s' }}>
-            <button
-              onClick={() => setShowCreateForm(true)}
-              className="px-6 py-3 bg-[#F54E00] hover:bg-[#E24600] text-white font-bold rounded-lg transition-all hover:scale-105 hover:shadow-xl"
-            >
-              + Generate New API Key
-            </button>
-          </div>
-        )}
+          )}
 
-        {/* API Keys List */}
-        <div className="animate-slide-up" style={{ animationDelay: '0.2s' }}>
-          {loading ? (
-            <div className="text-center py-12">
-              <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-[#F54E00]"></div>
-              <p className="mt-4 text-gray-600">Loading API keys...</p>
-            </div>
-          ) : apiKeys.length === 0 ? (
-            <div className="bg-white border-2 border-black rounded-lg p-12 text-center">
-              <SettingsIllustrationIcon className="w-16 h-16 mx-auto mb-4 opacity-60" />
-              <h3 className="text-xl font-bold text-[#111111] mb-2">No control-plane API keys yet</h3>
-              <p className="text-gray-600 mb-6">Generate a key to invoke OpenRooms orchestration APIs programmatically.</p>
-              <button
-                onClick={() => setShowCreateForm(true)}
-                className="inline-block px-6 py-3 bg-[#F54E00] hover:bg-[#E24600] text-white font-bold rounded-lg transition-all hover:scale-105"
-              >
-                + Generate First API Key
-              </button>
-            </div>
-          ) : (
-            <div className="space-y-4">
-              {apiKeys.map((key) => (
-                <div
-                  key={key.id}
-                  className="bg-white border-2 border-black rounded-lg p-6 hover:shadow-lg transition-all"
-                >
-                  <div className="flex items-start justify-between gap-4 mb-4">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-3 mb-2">
-                        <h3 className="text-xl font-bold text-[#111111]">{key.name}</h3>
-                      {key.isActive ? (
-                        <span className="px-3 py-1 bg-green-100 text-green-800 border-2 border-green-200 rounded-full text-xs font-bold flex items-center gap-1">
-                          <CheckCircleIcon className="w-3 h-3" />
-                          ACTIVE
+          <div className="p-6">
+            {apiKeys.length === 0 ? (
+              <div className="text-center py-6 text-gray-500">
+                <p className="text-sm">No API keys yet. Generate one to call OpenRooms from your own apps.</p>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {apiKeys.map(key => (
+                  <div key={key.id} className="flex items-center justify-between p-4 border-2 border-gray-100 rounded-xl">
+                    <div>
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="font-bold text-sm text-[#111111]">{key.name}</span>
+                        <span className={`px-2 py-0.5 text-[10px] font-bold rounded-full ${key.isActive ? 'bg-emerald-100 text-emerald-700' : 'bg-gray-100 text-gray-500'}`}>
+                          {key.isActive ? 'ACTIVE' : 'REVOKED'}
                         </span>
-                      ) : (
-                        <span className="px-3 py-1 bg-gray-100 text-gray-800 border-2 border-gray-200 rounded-full text-xs font-bold flex items-center gap-1">
-                          <AlertCircleIcon className="w-3 h-3" />
-                          REVOKED
-                        </span>
-                      )}
                       </div>
-                      <p className="text-sm text-gray-600 font-mono mb-3">
-                        Key Prefix: <span className="text-[#111111]">{key.keyPrefix}...</span>
-                      </p>
+                      <div className="flex items-center gap-4 text-xs text-gray-500">
+                        <span className="font-mono">{key.keyPrefix}...</span>
+                        <span className="flex items-center gap-1"><ZapIcon className="w-3 h-3" />{key.rateLimit}/{key.rateLimitWindow}s</span>
+                        <span className="flex items-center gap-1"><ClockIcon className="w-3 h-3" />
+                          {key.lastUsedAt ? new Date(key.lastUsedAt).toLocaleDateString() : 'never used'}
+                        </span>
+                      </div>
                     </div>
-
                     {key.isActive && (
-                      <button
-                        onClick={() => handleRevokeKey(key.id)}
-                        className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white font-bold rounded-lg transition-all"
-                      >
+                      <button onClick={() => handleRevokeKey(key.id)}
+                        className="px-3 py-1.5 bg-red-500 hover:bg-red-600 text-white text-xs font-bold rounded-lg transition-all">
                         Revoke
                       </button>
                     )}
                   </div>
-
-                  <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 text-sm">
-                    <div>
-                      <div className="flex items-center gap-1 mb-1">
-                        <SettingsIllustrationIcon className="w-4 h-4" />
-                        <span className="font-semibold text-gray-600">Scopes</span>
-                      </div>
-                      <div className="flex flex-wrap gap-1">
-                        {key.scopes.map((scope) => (
-                          <span
-                            key={scope}
-                            className="px-2 py-1 bg-blue-100 text-blue-800 border border-blue-200 rounded text-xs font-mono"
-                          >
-                            {scope}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-
-                    <div>
-                      <div className="flex items-center gap-1 mb-1">
-                        <ZapIcon className="w-4 h-4 text-gray-500" />
-                        <span className="font-semibold text-gray-600">Rate Limit</span>
-                      </div>
-                      <p className="font-mono text-[#111111]">
-                        {key.rateLimit} / {key.rateLimitWindow}s
-                      </p>
-                    </div>
-
-                    <div>
-                      <div className="flex items-center gap-1 mb-1">
-                        <ClockIcon className="w-4 h-4 text-gray-500" />
-                        <span className="font-semibold text-gray-600">Created</span>
-                      </div>
-                      <p className="text-[#111111]">{new Date(key.createdAt).toLocaleDateString()}</p>
-                    </div>
-
-                    <div>
-                      <div className="flex items-center gap-1 mb-1">
-                        <CheckCircleIcon className="w-4 h-4 text-gray-500" />
-                        <span className="font-semibold text-gray-600">Last Used</span>
-                      </div>
-                      <p className="text-[#111111]">
-                        {key.lastUsedAt ? new Date(key.lastUsedAt).toLocaleDateString() : 'Never'}
-                      </p>
-                    </div>
-                  </div>
-
-                  {key.expiresAt && (
-                    <div className="mt-4 pt-4 border-t-2 border-gray-200 text-sm">
-                      <span className="font-semibold text-gray-600">Expires:</span>{' '}
-                      <span className="text-[#111111]">{new Date(key.expiresAt).toLocaleDateString()}</span>
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
-          )}
+                ))}
+              </div>
+            )}
+          </div>
         </div>
+
       </div>
     </div>
   );

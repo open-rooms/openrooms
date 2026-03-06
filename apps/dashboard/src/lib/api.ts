@@ -57,6 +57,26 @@ export const executeAgent = (id: string, data: { roomId: string; maxIterations?:
   request<{ executionId: string; message: string }>(`/api/agents/${id}/execute`, { method: 'POST', body: JSON.stringify(data) })
 export const getAgentTraces = (id: string, limit = 50) => request<{ traces: AgentTrace[] }>(`/api/agents/${id}/traces?limit=${limit}`)
 
+// Settings
+export const getProviderSettings = () => request<{
+  providers: {
+    openai: { configured: boolean; keyPreview: string | null; keySource: string; model: string; availableModels: string[] };
+    anthropic: { configured: boolean; keyPreview: string | null; keySource: string; model: string; availableModels: string[] };
+  };
+  defaultProvider: string;
+}>('/api/settings/providers')
+
+export const saveProviderSettings = (data: {
+  openai?: { apiKey?: string; model?: string };
+  anthropic?: { apiKey?: string; model?: string };
+  defaultProvider?: string;
+}) => request<{ success: boolean; message: string }>('/api/settings/providers', {
+  method: 'PUT',
+  body: JSON.stringify(data),
+})
+
+export const getPlatformStatus = () => request<{ agents: number; workflows: number; tools: number; runs: number }>('/api/settings/status')
+
 // Runs — Stage 4
 export const getRuns = (params?: { type?: string; targetId?: string; status?: string; limit?: number }) => {
   const qs = new URLSearchParams()
