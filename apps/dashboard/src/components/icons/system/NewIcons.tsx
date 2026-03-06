@@ -170,6 +170,27 @@ export const EnterpriseArchitectureIcon = ({ className = "w-6 h-6" }: { classNam
   </svg>
 )
 
+// Clients - Human user/person silhouette (purple, distinct from RoomsIcon monitor)
+export const ClientsIcon = ({ className = "w-6 h-6" }: { className?: string }) => (
+  <svg className={className} viewBox="0 0 96 96" fill="none" xmlns="http://www.w3.org/2000/svg">
+    {/* Head */}
+    <circle cx="48" cy="32" r="16" fill="#A78BFA" stroke="#000" strokeWidth="2.5"/>
+    {/* Eyes */}
+    <circle cx="42" cy="30" r="3" fill="#000"/>
+    <circle cx="54" cy="30" r="3" fill="#000"/>
+    {/* Smile */}
+    <path d="M42 38 C42 41 54 41 54 38" stroke="#000" strokeWidth="2" strokeLinecap="round" fill="none"/>
+    {/* Antenna */}
+    <line x1="48" y1="16" x2="48" y2="10" stroke="#000" strokeWidth="2.5" strokeLinecap="round"/>
+    <circle cx="48" cy="8" r="3" fill="#A78BFA" stroke="#000" strokeWidth="2"/>
+    {/* Body / shoulders */}
+    <path d="M18 82 C18 64 30 56 48 56 C66 56 78 64 78 82"
+      fill="#A78BFA" stroke="#000" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+    {/* Shirt details */}
+    <line x1="48" y1="56" x2="48" y2="70" stroke="#000" strokeWidth="2" strokeLinecap="round" strokeDasharray="3 3"/>
+  </svg>
+)
+
 // Developer - Laptop with </> code brackets (teal fill, distinct from AgentIcon robot)
 export const DeveloperIcon = ({ className = "w-6 h-6" }: { className?: string }) => (
   <svg className={className} viewBox="0 0 96 96" fill="none" xmlns="http://www.w3.org/2000/svg">

@@ -31,4 +31,5 @@ export {
   DeveloperIcon,
   BuildIcon,
   GovernIcon,
+  ClientsIcon,
 } from './NewIcons'

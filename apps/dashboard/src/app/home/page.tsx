@@ -21,6 +21,7 @@ import {
   DeveloperIcon,
   BuildIcon,
   GovernIcon,
+  ClientsIcon,
 } from '@/components/icons/system'
 
 const dockApps = [
@@ -149,6 +150,16 @@ export default function HomePage() {
     return () => clearInterval(interval)
   }, [])
 
+  // Build live status marquee items from live stats
+  const statusMarqueeItems = [
+    { label: '● System', value: liveStats.systemStatus, color: 'text-green-400' },
+    { label: 'Rooms Active', value: liveStats.roomsActive },
+    { label: 'Agents Running', value: liveStats.agentsRunning },
+    { label: 'Workflows', value: liveStats.workflowsDeployed },
+    { label: 'Events', value: liveStats.events24h },
+    { label: 'Clock', value: currentTime },
+  ]
+
   return (
     <div className="min-h-screen bg-[#E8DCC8] pb-24 animate-fade-in">
       {/* Top Navigation Bar */}
@@ -199,17 +210,19 @@ export default function HomePage() {
         </div>
       </div>
 
-      {/* ── Product Path Cards ── */}
+      {/* ── Product Path Cards + Module Chips (same section) ── */}
       <div className="bg-[#E8DCC8] py-12 sm:py-16 border-b-2 border-black">
         <div className="max-w-[95%] 2xl:max-w-[1600px] mx-auto px-4 sm:px-6 md:px-8">
           <div className="mb-8 animate-slide-up" style={{ animationDelay: '0.35s' }}>
             <p className="text-xs font-bold tracking-widest text-gray-500 uppercase mb-2">Choose your path</p>
             <h2 className="text-2xl sm:text-3xl font-bold text-[#111111]">Who is OpenRooms for?</h2>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-5 sm:gap-6">
+
+          {/* 3 path cards */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-5 sm:gap-6 mb-6">
             {[
               {
-                icon: RoomsIcon,
+                icon: ClientsIcon,
                 title: 'Clients',
                 description: 'Deploy intelligent agents that research, monitor, and automate tasks for you.',
                 href: '/clients',
@@ -217,6 +230,7 @@ export default function HomePage() {
                 bg: 'bg-[#A78BFA]',
                 hoverBg: 'hover:bg-[#9270f0]',
                 textColor: 'text-white',
+                iconBg: '',
               },
               {
                 icon: DeveloperIcon,
@@ -227,6 +241,7 @@ export default function HomePage() {
                 bg: 'bg-[#5EEAD4]',
                 hoverBg: 'hover:bg-[#4dd4be]',
                 textColor: 'text-[#111111]',
+                iconBg: 'bg-[#5EEAD4]',
               },
               {
                 icon: ArchitectureIcon,
@@ -237,17 +252,18 @@ export default function HomePage() {
                 bg: 'bg-[#FB923C]',
                 hoverBg: 'hover:bg-[#e87d2a]',
                 textColor: 'text-white',
+                iconBg: '',
               },
             ].map((card, i) => {
               const Icon = card.icon
               return (
                 <div
                   key={card.title}
-                  className="group bg-[#F5F1E8] border-2 border-[#D4C4A8] rounded-2xl p-6 sm:p-8 flex flex-col hover:border-[#F54E00] hover:shadow-[4px_4px_0px_0px_rgba(245,78,0,0.4)] hover:-translate-y-1.5 transition-all duration-200 animate-slide-up"
+                  className="group bg-[#F5F1E8] border-2 border-[#D4C4A8] rounded-2xl p-6 sm:p-8 flex flex-col hover:border-[#F54E00] hover:shadow-[4px_4px_0px_0px_rgba(245,78,0,0.4)] hover:-translate-y-1 transition-all duration-300 animate-slide-up"
                   style={{ animationDelay: `${0.4 + i * 0.1}s` }}
                 >
-                  <div className="mb-5 transition-all duration-300 group-hover:scale-105">
-                    <div className={`inline-block rounded-2xl p-2 ${card.title === 'Developers' ? 'bg-[#5EEAD4]/15' : ''}`}>
+                  <div className="mb-5 transition-transform duration-300 group-hover:scale-105">
+                    <div className={`inline-flex items-center justify-center rounded-2xl p-2 ${card.iconBg}`}>
                       <Icon className="w-20 h-20 sm:w-24 sm:h-24" />
                     </div>
                   </div>
@@ -257,7 +273,7 @@ export default function HomePage() {
                   </div>
                   <Link
                     href={card.href}
-                    className={`inline-flex items-center justify-center gap-2 w-full py-3 ${card.bg} ${card.hoverBg} ${card.textColor} text-sm font-bold rounded-xl transition-colors duration-150 group-hover:shadow-md`}
+                    className={`inline-flex items-center justify-center gap-2 w-full py-3 ${card.bg} ${card.hoverBg} ${card.textColor} text-sm font-bold rounded-xl transition-colors duration-200`}
                   >
                     <span>{card.cta}</span>
                     <ChevronRightIcon className="w-4 h-4" />
@@ -266,37 +282,69 @@ export default function HomePage() {
               )
             })}
           </div>
+
+          {/* BUILD / DEPLOY & RUN / OBSERVE & GOVERN — same section, beneath path cards */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            {/* BUILD — only the word is CTA colored */}
+            <div className="bg-[#F5F1E8] border border-[#D4C4A8] rounded-2xl p-5 flex items-start gap-4">
+              <BuildIcon className="w-9 h-9 flex-shrink-0" />
+              <div>
+                <span className="text-[#F54E00] text-xs font-black tracking-widest uppercase block mb-1.5">BUILD</span>
+                <ul className="space-y-0.5">
+                  {['Agents', 'Workflows', 'Tools'].map(item => (
+                    <li key={item} className="text-sm text-gray-700 font-medium leading-snug">{item}</li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+            {/* DEPLOY & RUN — shape/pill is CTA orange */}
+            <div className="bg-[#F5F1E8] border border-[#D4C4A8] rounded-2xl p-5 flex items-start gap-4">
+              <RuntimeIcon className="w-9 h-9 flex-shrink-0" />
+              <div>
+                <span className="inline-block px-2.5 py-0.5 bg-[#F54E00] text-white rounded text-[10px] font-black tracking-widest mb-1.5">DEPLOY &amp; RUN</span>
+                <ul className="space-y-0.5">
+                  {['Rooms', 'Runtime', 'Automation'].map(item => (
+                    <li key={item} className="text-sm text-gray-700 font-medium leading-snug">{item}</li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+            {/* OBSERVE & GOVERN — shape/pill is CTA orange */}
+            <div className="bg-[#F5F1E8] border border-[#D4C4A8] rounded-2xl p-5 flex items-start gap-4">
+              <GovernIcon className="w-9 h-9 flex-shrink-0" />
+              <div>
+                <span className="inline-block px-2.5 py-0.5 bg-[#F54E00] text-white rounded text-[10px] font-black tracking-widest mb-1.5">OBSERVE &amp; GOVERN</span>
+                <ul className="space-y-0.5">
+                  {['Live Runs', 'Dashboard', 'Control Plane'].map(item => (
+                    <li key={item} className="text-sm text-gray-700 font-medium leading-snug">{item}</li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
-      {/* ── Platform Modules ── */}
-      <div className="bg-[#F5F1E8] py-12 border-b-2 border-black">
-        <div className="max-w-[95%] 2xl:max-w-[1600px] mx-auto px-4 sm:px-6 md:px-8">
-          <div className="mb-8">
-            <p className="text-xs font-bold tracking-widest text-gray-500 uppercase mb-2">Core Modules</p>
-            <h2 className="text-2xl sm:text-3xl font-bold text-[#111111]">Platform Architecture</h2>
+      {/* ── Live System Status — left-scrolling marquee ── */}
+      <div className="bg-[#111111] border-b border-gray-800 py-3 overflow-hidden">
+        <div className="relative flex items-center">
+          {/* Left label */}
+          <div className="flex-shrink-0 flex items-center gap-2 px-4 z-10 bg-[#111111] border-r border-gray-700 pr-5 mr-0">
+            <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
+            <span className="text-[10px] font-black tracking-widest text-green-400 uppercase whitespace-nowrap">System Live</span>
           </div>
-          {/* Non-clickable compact category chips — CTA orange fill */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            {categoryGroups.map((group) => {
-              const Icon = group.icon
-              return (
-                <div key={group.tag} className="bg-[#F54E00] rounded-2xl p-5 flex items-start gap-4">
-                  {/* Icon in natural color on a semi-transparent white circle */}
-                  <div className="p-2 bg-white/20 rounded-xl flex-shrink-0 backdrop-blur-sm">
-                    <Icon className="w-9 h-9" />
-                  </div>
-                  <div>
-                    <span className="inline-block px-2.5 py-0.5 bg-black/20 text-white text-[10px] font-black rounded tracking-widest mb-2">{group.tag}</span>
-                    <ul className="space-y-0.5">
-                      {group.items.map(item => (
-                        <li key={item} className="text-sm text-white/90 font-medium leading-snug">{item}</li>
-                      ))}
-                    </ul>
-                  </div>
-                </div>
-              )
-            })}
+          {/* Fade left edge */}
+          <div className="pointer-events-none absolute left-[120px] top-0 bottom-0 w-12 bg-gradient-to-r from-[#111111] to-transparent z-10" />
+          {/* Fade right edge */}
+          <div className="pointer-events-none absolute right-0 top-0 bottom-0 w-16 bg-gradient-to-l from-[#111111] to-transparent z-10" />
+          {/* Scrolling items */}
+          <div className="flex gap-0 animate-marquee whitespace-nowrap w-max pl-4">
+            {[...statusMarqueeItems, ...statusMarqueeItems].map((s, i) => (
+              <span key={i} className="inline-flex items-center gap-1.5 px-5 text-xs font-mono border-r border-gray-800 last:border-r-0">
+                <span className="text-gray-500">{s.label}</span>
+                <span className={`font-bold ${s.color ?? 'text-white'}`}>{s.value}</span>
+              </span>
+            ))}
           </div>
         </div>
       </div>
@@ -305,9 +353,8 @@ export default function HomePage() {
       <div className="bg-[#111111] py-16 border-b-2 border-black overflow-hidden">
         <div className="max-w-[95%] 2xl:max-w-[1600px] mx-auto px-4 sm:px-6 md:px-8">
           <div className="flex flex-col lg:flex-row gap-12 lg:gap-20 items-start">
-
             {/* Left — static content */}
-            <div className="lg:w-2/5 lg:sticky lg:top-24 flex-shrink-0">
+            <div className="lg:w-2/5 flex-shrink-0">
               <span className="text-[10px] font-black tracking-widest text-[#F54E00] uppercase mb-3 inline-block">Runtime Capabilities</span>
               <h2 className="text-3xl sm:text-4xl font-black text-white leading-tight mb-5">
                 Infrastructure<br />That Doesn&apos;t Flinch.
@@ -324,8 +371,6 @@ export default function HomePage() {
                   Live Runs
                 </Link>
               </div>
-
-              {/* Counter strip */}
               <div className="mt-10 grid grid-cols-2 gap-4">
                 <div className="bg-white/5 rounded-xl p-4">
                   <div className="text-xl font-black text-[#F54E00]">∞</div>
@@ -337,24 +382,16 @@ export default function HomePage() {
                 </div>
               </div>
             </div>
-
             {/* Right — vertical scrolling ticker */}
             <div className="lg:w-3/5 relative">
-              {/* Fade masks */}
               <div className="pointer-events-none absolute top-0 left-0 right-0 h-16 bg-gradient-to-b from-[#111111] to-transparent z-10" />
               <div className="pointer-events-none absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-[#111111] to-transparent z-10" />
-
-              {/* Scrolling container */}
               <div className="overflow-hidden h-[420px]">
                 <div className="animate-scroll-up flex flex-col gap-3">
-                  {/* Items duplicated for seamless loop */}
                   {[...featureHighlights, ...featureHighlights].map((feat, i) => {
                     const Icon = feat.icon
                     return (
-                      <div
-                        key={`${feat.title}-${i}`}
-                        className="bg-white/5 border border-white/10 rounded-2xl p-5 flex items-start gap-4 hover:bg-white/10 hover:border-white/20 transition-colors duration-200 flex-shrink-0"
-                      >
+                      <div key={`${feat.title}-${i}`} className="bg-white/5 border border-white/10 rounded-2xl p-5 flex items-start gap-4 hover:bg-white/10 hover:border-white/20 transition-colors duration-200 flex-shrink-0">
                         <div className="p-2 bg-white/10 rounded-lg flex-shrink-0">
                           <Icon className="w-7 h-7" />
                         </div>
@@ -367,27 +404,6 @@ export default function HomePage() {
                   })}
                 </div>
               </div>
-            </div>
-
-          </div>
-        </div>
-      </div>
-
-      {/* ── Live Platform Status Strip ── */}
-      <div className="border-b border-[#D4C4A8] bg-[#F5F1E8] py-6">
-        <div className="max-w-[95%] 2xl:max-w-[1600px] mx-auto px-8">
-          <div className="bg-[#E8DCC8] border border-[#D4C4A8] rounded-xl p-5 hover:shadow-lg transition-all duration-300 hover:border-[#F54E00]">
-            <div className="flex items-center justify-between flex-wrap gap-6">
-              <div className="flex items-center gap-2 group">
-                <div className="w-2.5 h-2.5 bg-green-500 rounded-full animate-pulse"></div>
-                <span className="text-sm font-bold text-[#111111]">System Status:</span>
-                <span className="text-sm font-semibold text-green-600">{liveStats.systemStatus}</span>
-              </div>
-              <div className="flex items-center gap-2"><span className="text-sm text-gray-600">Rooms Active:</span><span className="text-sm font-bold text-[#111111]">{liveStats.roomsActive}</span></div>
-              <div className="flex items-center gap-2"><span className="text-sm text-gray-600">Agents:</span><span className="text-sm font-bold text-[#111111]">{liveStats.agentsRunning}</span></div>
-              <div className="flex items-center gap-2"><span className="text-sm text-gray-600">Workflows Deployed:</span><span className="text-sm font-bold text-[#111111]">{liveStats.workflowsDeployed}</span></div>
-              <div className="flex items-center gap-2"><span className="text-sm text-gray-600">Recent Events:</span><span className="text-sm font-bold text-[#111111]">{liveStats.events24h}</span></div>
-              <div className="ml-auto text-xs text-gray-400 font-mono">{currentTime}</div>
             </div>
           </div>
         </div>
