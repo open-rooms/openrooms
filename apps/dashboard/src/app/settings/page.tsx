@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { SettingsIcon, CheckCircleIcon, AlertCircleIcon, ZapIcon, ClockIcon, DatabaseIcon } from '@/components/icons';
+import { CheckCircleIcon, AlertCircleIcon, ZapIcon, ClockIcon, DatabaseIcon, SettingsIllustrationIcon, APIIllustrationIcon } from '@/components/icons';
 
 interface APIKey {
   id: string;
@@ -123,11 +123,11 @@ export default function SettingsPage() {
         {/* Header */}
         <div className="mb-8">
           <div className="flex items-center gap-3 mb-4">
-            <SettingsIcon className="w-10 h-10" />
+            <SettingsIllustrationIcon className="w-10 h-10" />
             <h1 className="text-3xl sm:text-4xl font-bold text-[#111111]">API Keys</h1>
           </div>
           <p className="text-gray-700 max-w-3xl flex items-center gap-2">
-            <DatabaseIcon className="w-4 h-4" />
+            <APIIllustrationIcon className="w-4 h-4" />
             Programmatic access with rate limiting and scopes
           </p>
         </div>
@@ -263,7 +263,7 @@ export default function SettingsPage() {
             </div>
           ) : apiKeys.length === 0 ? (
             <div className="bg-white border-2 border-black rounded-lg p-12 text-center">
-              <SettingsIcon className="w-16 h-16 mx-auto mb-4 opacity-30" />
+              <SettingsIllustrationIcon className="w-16 h-16 mx-auto mb-4 opacity-60" />
               <h3 className="text-xl font-bold text-[#111111] mb-2">No API keys yet</h3>
               <p className="text-gray-600 mb-6">Generate your first API key for programmatic access.</p>
               <button
@@ -314,7 +314,7 @@ export default function SettingsPage() {
                   <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 text-sm">
                     <div>
                       <div className="flex items-center gap-1 mb-1">
-                        <SettingsIcon className="w-4 h-4 text-gray-500" />
+                        <SettingsIllustrationIcon className="w-4 h-4" />
                         <span className="font-semibold text-gray-600">Scopes</span>
                       </div>
                       <div className="flex flex-wrap gap-1">

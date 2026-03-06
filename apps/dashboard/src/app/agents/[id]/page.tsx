@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { AgentIcon } from '@/components/icons';
+import { AgentsIllustrationIcon } from '@/components/icons';
 
 interface Agent {
   id: string;
@@ -180,7 +180,7 @@ export default function AgentDetailPage() {
         <div className="bg-white border-2 border-black rounded-lg p-6 mb-6 animate-slide-up">
           <div className="flex items-start justify-between gap-4 mb-4">
             <div className="flex items-center gap-4">
-              <AgentIcon className="w-12 h-12" />
+              <AgentsIllustrationIcon className="w-12 h-12" />
               <div>
                 <h1 className="text-3xl font-bold text-[#111111] mb-1">{agent.name}</h1>
                 <div className="flex items-center gap-3">

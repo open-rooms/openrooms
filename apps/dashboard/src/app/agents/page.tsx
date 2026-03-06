@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { AgentIcon } from '@/components/icons';
+import { AgentsIllustrationIcon, AgentListIcon } from '@/components/icons';
 
 interface Agent {
   id: string;
@@ -78,7 +78,7 @@ export default function AgentsPage() {
         {/* Header */}
         <div className="mb-8 animate-slide-up">
           <div className="flex items-center gap-3 mb-4">
-            <AgentIcon className="w-10 h-10" />
+            <AgentsIllustrationIcon className="w-10 h-10" />
             <h1 className="text-3xl sm:text-4xl font-bold text-[#111111]">Agents</h1>
           </div>
           <p className="text-gray-700 text-base sm:text-lg max-w-3xl">
@@ -153,7 +153,7 @@ export default function AgentsPage() {
           </div>
         ) : filteredAgents.length === 0 ? (
           <div className="bg-white border-2 border-black rounded-lg p-12 text-center">
-            <AgentIcon className="w-16 h-16 mx-auto mb-4 opacity-30" />
+            <AgentListIcon className="w-16 h-16 mx-auto mb-4 opacity-30" />
             <h3 className="text-xl font-bold text-[#111111] mb-2">No agents found</h3>
             <p className="text-gray-600 mb-6">
               {searchTerm || filter !== 'ALL' 

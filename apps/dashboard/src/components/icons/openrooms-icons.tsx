@@ -57,10 +57,10 @@ export const AutomationIllustrationIcon = ({ className = "w-6 h-6" }: { classNam
     <circle cx="10" cy="12" r="6" fill={colors.automation} stroke={strokeColor} strokeWidth={strokeWidth}/>
     <circle cx="10" cy="12" r="3" fill="#FFF" opacity="0.3" stroke={strokeColor} strokeWidth={strokeWidth}/>
     {/* Gear teeth */}
-    <rect x="9" y="5" width="2" height="2" rx="0.5" fill={colors.automation} stroke={strokeColor} strokeWidth="0.8"/>
-    <rect x="15" y="11" width="2" height="2" rx="0.5" fill={colors.automation} stroke={strokeColor} strokeWidth="0.8"/>
-    <rect x="9" y="17" width="2" height="2" rx="0.5" fill={colors.automation} stroke={strokeColor} strokeWidth="0.8"/>
-    <rect x="3" y="11" width="2" height="2" rx="0.5" fill={colors.automation} stroke={strokeColor} strokeWidth="0.8"/>
+    <rect x="9" y="5" width="2" height="2" rx="0.5" fill={colors.automation} stroke={strokeColor} strokeWidth={strokeWidth}/>
+    <rect x="15" y="11" width="2" height="2" rx="0.5" fill={colors.automation} stroke={strokeColor} strokeWidth={strokeWidth}/>
+    <rect x="9" y="17" width="2" height="2" rx="0.5" fill={colors.automation} stroke={strokeColor} strokeWidth={strokeWidth}/>
+    <rect x="3" y="11" width="2" height="2" rx="0.5" fill={colors.automation} stroke={strokeColor} strokeWidth={strokeWidth}/>
     {/* Small gear */}
     <circle cx="17" cy="9" r="3.5" fill={colors.automation} stroke={strokeColor} strokeWidth={strokeWidth}/>
     <circle cx="17" cy="9" r="1.5" fill="#FFF" opacity="0.3"/>
@@ -89,7 +89,7 @@ export const RunsIllustrationIcon = ({ className = "w-6 h-6" }: { className?: st
     {/* Console screen */}
     <rect x="4" y="5" width="16" height="12" rx="2" fill={colors.runs} stroke={strokeColor} strokeWidth={strokeWidth}/>
     {/* Play triangle */}
-    <path d="M10 9 L10 15 L15 12 Z" fill="#FFF" stroke={strokeColor} strokeWidth="1"/>
+    <path d="M10 9 L10 15 L15 12 Z" fill="#FFF" stroke={strokeColor} strokeWidth={strokeWidth}/>
     {/* Base */}
     <rect x="7" y="17" width="10" height="2" rx="1" fill={colors.runs} stroke={strokeColor} strokeWidth={strokeWidth}/>
   </svg>
@@ -101,10 +101,10 @@ export const LogsIllustrationIcon = ({ className = "w-6 h-6" }: { className?: st
     {/* Document */}
     <rect x="6" y="3" width="12" height="18" rx="2" fill={colors.logs} stroke={strokeColor} strokeWidth={strokeWidth}/>
     {/* Log lines */}
-    <line x1="9" y1="7" x2="15" y2="7" stroke="#FFF" strokeWidth="1.5" opacity="0.6"/>
-    <line x1="9" y1="10" x2="15" y2="10" stroke="#FFF" strokeWidth="1.5" opacity="0.6"/>
-    <line x1="9" y1="13" x2="13" y2="13" stroke="#FFF" strokeWidth="1.5" opacity="0.6"/>
-    <line x1="9" y1="16" x2="15" y2="16" stroke="#FFF" strokeWidth="1.5" opacity="0.6"/>
+    <line x1="9" y1="7" x2="15" y2="7" stroke="#FFF" strokeWidth={strokeWidth} opacity="0.6"/>
+    <line x1="9" y1="10" x2="15" y2="10" stroke="#FFF" strokeWidth={strokeWidth} opacity="0.6"/>
+    <line x1="9" y1="13" x2="13" y2="13" stroke="#FFF" strokeWidth={strokeWidth} opacity="0.6"/>
+    <line x1="9" y1="16" x2="15" y2="16" stroke="#FFF" strokeWidth={strokeWidth} opacity="0.6"/>
     {/* Bullet points */}
     <circle cx="9" cy="7" r="0.8" fill="#FFF"/>
     <circle cx="9" cy="10" r="0.8" fill="#FFF"/>
@@ -193,6 +193,6 @@ export const SettingsIllustrationIcon = ({ className = "w-6 h-6" }: { className?
     {/* Screwdriver handle */}
     <rect x="4" y="4" width="4" height="6" rx="1" fill={colors.settings} stroke={strokeColor} strokeWidth={strokeWidth}/>
     {/* Screwdriver shaft */}
-    <rect x="5.2" y="10" width="1.6" height="5" fill={colors.settings} stroke={strokeColor} strokeWidth="1"/>
+    <rect x="5.2" y="10" width="1.6" height="5" fill={colors.settings} stroke={strokeColor} strokeWidth={strokeWidth}/>
   </svg>
 )

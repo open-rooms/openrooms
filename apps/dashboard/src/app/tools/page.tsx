@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { ToolIcon, DatabaseIcon, ZapIcon, CpuIcon, CheckCircleIcon, AlertCircleIcon } from '@/components/icons';
+import { CheckCircleIcon, AlertCircleIcon, ToolsIllustrationIcon, ToolRegistryIcon, APIIllustrationIcon, StorageIllustrationIcon, MetricsIllustrationIcon, AlertsIllustrationIcon } from '@/components/icons';
 
 interface Tool {
   id: string;
@@ -37,10 +37,10 @@ export default function ToolsPage() {
 
   const getCategoryIcon = (category: string) => {
     switch (category) {
-      case 'search': return <ZapIcon className="w-5 h-5" />;
-      case 'compute': return <CpuIcon className="w-5 h-5" />;
-      case 'database': return <DatabaseIcon className="w-5 h-5" />;
-      default: return <ToolIcon className="w-5 h-5" />;
+      case 'search': return <APIIllustrationIcon className="w-5 h-5" />;
+      case 'compute': return <MetricsIllustrationIcon className="w-5 h-5" />;
+      case 'database': return <StorageIllustrationIcon className="w-5 h-5" />;
+      default: return <ToolRegistryIcon className="w-5 h-5" />;
     }
   };
 
@@ -50,7 +50,7 @@ export default function ToolsPage() {
         {/* Header */}
         <div className="mb-8">
           <div className="flex items-center gap-3 mb-4">
-            <ToolIcon className="w-10 h-10" />
+            <ToolsIllustrationIcon className="w-10 h-10" />
             <h1 className="text-3xl sm:text-4xl font-bold text-[#111111]">Tool Registry</h1>
           </div>
           <p className="text-gray-700 text-base sm:text-lg max-w-3xl">
@@ -91,7 +91,7 @@ export default function ToolsPage() {
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
           <div className="bg-white border-2 border-black rounded-lg p-4">
             <div className="flex items-center gap-2 mb-2">
-              <ToolIcon className="w-5 h-5 text-[#F54E00]" />
+              <ToolRegistryIcon className="w-5 h-5 text-[#F54E00]" />
               <div className="text-2xl font-bold text-[#111111]">{tools.length}</div>
             </div>
             <div className="text-sm text-gray-600">Total Tools</div>
@@ -112,7 +112,7 @@ export default function ToolsPage() {
           </div>
           <div className="bg-white border-2 border-black rounded-lg p-4">
             <div className="flex items-center gap-2 mb-2">
-              <ZapIcon className="w-5 h-5 text-blue-600" />
+              <APIIllustrationIcon className="w-5 h-5" />
               <div className="text-2xl font-bold text-blue-600">{tools.reduce((acc, t) => acc + t.usageCount, 0).toLocaleString()}</div>
             </div>
             <div className="text-sm text-gray-600">Total Calls</div>
@@ -155,17 +155,17 @@ export default function ToolsPage() {
 
                     <div className="grid sm:grid-cols-3 gap-4 text-sm">
                       <div className="flex items-center gap-2">
-                        <ZapIcon className="w-4 h-4 text-gray-500" />
+                        <APIIllustrationIcon className="w-4 h-4" />
                         <span className="text-gray-600">Usage:</span>
                         <span className="font-bold text-[#111111]">{tool.usageCount.toLocaleString()}</span>
                       </div>
                       <div className="flex items-center gap-2">
-                        <CpuIcon className="w-4 h-4 text-gray-500" />
+                        <MetricsIllustrationIcon className="w-4 h-4" />
                         <span className="text-gray-600">Avg Duration:</span>
                         <span className="font-bold text-[#111111]">{tool.avgDuration}ms</span>
                       </div>
                       <div className="flex items-center gap-2">
-                        <DatabaseIcon className="w-4 h-4 text-gray-500" />
+                        <StorageIllustrationIcon className="w-4 h-4" />
                         <span className="text-gray-600">Category:</span>
                         <span className="font-bold text-[#111111]">{tool.category}</span>
                       </div>
@@ -195,7 +195,7 @@ export default function ToolsPage() {
 
         {filteredTools.length === 0 && (
           <div className="bg-white border-2 border-black rounded-lg p-12 text-center">
-            <ToolIcon className="w-16 h-16 mx-auto mb-4 opacity-30" />
+            <AlertsIllustrationIcon className="w-16 h-16 mx-auto mb-4 opacity-60" />
             <h3 className="text-xl font-bold text-[#111111] mb-2">No tools found</h3>
             <p className="text-gray-600">Try adjusting your filters.</p>
           </div>

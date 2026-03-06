@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { Header } from '@/components/header'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
-import { RuntimeIcon, CpuIcon, DatabaseIcon, ZapIcon, RuntimeMonitorIcon, WorkersIcon, JobQueueIcon } from '@/components/icons'
+import { CpuIcon, DatabaseIcon, ZapIcon, WorkersIcon, JobQueueIcon, RunsIllustrationIcon, MetricsIllustrationIcon, StorageIllustrationIcon, AgentsIllustrationIcon, ControlPlaneIllustrationIcon } from '@/components/icons'
 
 export default function RuntimePage() {
   const [metrics, setMetrics] = useState({
@@ -130,7 +130,7 @@ export default function RuntimePage() {
             <Card className="border border-[#D4C4A8] bg-[#F5F1E8]">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <span className="text-2xl">🖥️</span>
+                  <MetricsIllustrationIcon className="w-8 h-8" />
                   CPU Usage
                 </CardTitle>
               </CardHeader>
@@ -153,7 +153,7 @@ export default function RuntimePage() {
             <Card className="border border-[#D4C4A8] bg-[#F5F1E8]">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <span className="text-2xl">💾</span>
+                  <StorageIllustrationIcon className="w-8 h-8" />
                   Memory Usage
                 </CardTitle>
               </CardHeader>
@@ -178,7 +178,7 @@ export default function RuntimePage() {
           <Card className="border border-[#D4C4A8] bg-[#F5F1E8]">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <span className="text-2xl">⚙️</span>
+                <RunsIllustrationIcon className="w-8 h-8" />
                 Worker Pool Status
               </CardTitle>
             </CardHeader>
@@ -225,7 +225,11 @@ export default function RuntimePage() {
                       <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
                         job.type === 'agent-execution' ? 'bg-blue-100' : 'bg-purple-100'
                       }`}>
-                        <span className="text-2xl">{job.type === 'agent-execution' ? '🤖' : '🏠'}</span>
+                        {job.type === 'agent-execution' ? (
+                          <AgentsIllustrationIcon className="w-6 h-6" />
+                        ) : (
+                          <ControlPlaneIllustrationIcon className="w-6 h-6" />
+                        )}
                       </div>
                       <div>
                         <h4 className="font-semibold text-sm">{job.type}</h4>

@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { AgentIcon } from '@/components/icons';
+import { AgentsIllustrationIcon } from '@/components/icons';
 
 export default function CreateAgentPage() {
   const router = useRouter();
@@ -79,7 +79,7 @@ export default function CreateAgentPage() {
         {/* Header */}
         <div className="mb-8 animate-slide-up">
           <div className="flex items-center gap-3 mb-4">
-            <AgentIcon className="w-10 h-10" />
+            <AgentsIllustrationIcon className="w-10 h-10" />
             <h1 className="text-3xl sm:text-4xl font-bold text-[#111111]">Create Agent</h1>
           </div>
           <p className="text-gray-700">

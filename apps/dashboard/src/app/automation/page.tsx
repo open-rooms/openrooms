@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { Header } from '@/components/header'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
-import { AutomationIcon, PlayIcon, PlusIcon, ClockIcon, ScheduledTaskIcon, EventTriggerIcon, WebhookIcon, QueueConsumerIcon } from '@/components/icons'
+import { PlayIcon, PlusIcon, ClockIcon, ScheduledTaskIcon, EventTriggerIcon, WebhookIcon, QueueConsumerIcon, AutomationIllustrationIcon } from '@/components/icons'
 
 interface Trigger {
   id: string

@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { Header } from '@/components/header'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
-import { SettingsIcon, CheckCircleIcon, AlertCircleIcon, SystemHealthIcon, DatabaseFilledIcon, RedisCacheIcon, WorkersIcon, AgentRuntimeIcon, ResourceLimitsIcon, PoliciesIcon } from '@/components/icons'
+import { CheckCircleIcon, DatabaseFilledIcon, RedisCacheIcon, WorkersIcon, AgentRuntimeIcon, ResourceLimitsIcon, ControlPlaneIllustrationIcon, SettingsIllustrationIcon, APIIllustrationIcon } from '@/components/icons'
 
 export default function ControlPlanePage() {
   const [systemHealth, setSystemHealth] = useState({
@@ -50,7 +50,7 @@ export default function ControlPlanePage() {
           <Card className="border border-[#D4C4A8] bg-[#F5F1E8]">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <span className="text-2xl">🏥</span>
+                <ControlPlaneIllustrationIcon className="w-8 h-8" />
                 System Health
               </CardTitle>
               <CardDescription>All systems operational</CardDescription>
@@ -110,7 +110,7 @@ export default function ControlPlanePage() {
           <Card className="border border-[#D4C4A8] bg-[#F5F1E8]">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <span className="text-2xl">⚙️</span>
+                <SettingsIllustrationIcon className="w-8 h-8" />
                 Configuration
               </CardTitle>
               <CardDescription>Environment variables and settings</CardDescription>
@@ -120,6 +120,7 @@ export default function ControlPlanePage() {
                 {configuration.map((config, idx) => (
                   <div key={idx} className="flex items-center justify-between p-3 bg-white rounded border border-[#D4C4A8]">
                     <div className="flex items-center gap-4">
+                      <APIIllustrationIcon className="w-4 h-4" />
                       <span className="text-xs px-2 py-1 bg-blue-100 text-blue-700 rounded font-semibold">
                         {config.category}
                       </span>

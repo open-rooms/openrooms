@@ -5,25 +5,28 @@ import { usePathname } from 'next/navigation'
 import { cn } from '@/lib/utils'
 import { DashboardIcon } from './icons/DashboardIcon'
 import { RoomsIcon } from './icons/RoomsIcon'
-import { WorkflowIcon } from './icons/WorkflowIcon'
-import { AutomationIcon } from './icons/AutomationIcon'
-import { LiveRunsIcon } from './icons/LiveRunsIcon'
-import { ToolIcon } from './icons/ToolIcon'
-import { AgentIcon } from './icons/AgentIcon'
-import { RuntimeIcon } from './icons/RuntimeIcon'
-import { SettingsIcon } from './icons/SettingsIcon'
+import {
+  WorkflowsIllustrationIcon,
+  AutomationIllustrationIcon,
+  RunsIllustrationIcon,
+  ToolsIllustrationIcon,
+  AgentsIllustrationIcon,
+  MetricsIllustrationIcon,
+  SettingsIllustrationIcon,
+  ControlPlaneIllustrationIcon
+} from './icons'
 
 const navigation = [
   { name: 'Dashboard', href: '/dashboard', Icon: DashboardIcon },
   { name: 'Rooms', href: '/rooms', Icon: RoomsIcon },
-  { name: 'Workflows', href: '/workflows', Icon: WorkflowIcon },
-  { name: 'Automation', href: '/automation', Icon: AutomationIcon },
-  { name: 'Live Runs', href: '/live-runs', Icon: LiveRunsIcon },
-  { name: 'Tools', href: '/tools', Icon: ToolIcon },
-  { name: 'Agents', href: '/agents', Icon: AgentIcon },
-  { name: 'Runtime', href: '/runtime', Icon: RuntimeIcon },
-  { name: 'Settings', href: '/settings', Icon: SettingsIcon },
-  { name: 'Control Plane', href: '/control-plane', Icon: SettingsIcon },
+  { name: 'Workflows', href: '/workflows', Icon: WorkflowsIllustrationIcon },
+  { name: 'Automation', href: '/automation', Icon: AutomationIllustrationIcon },
+  { name: 'Live Runs', href: '/live-runs', Icon: RunsIllustrationIcon },
+  { name: 'Tools', href: '/tools', Icon: ToolsIllustrationIcon },
+  { name: 'Agents', href: '/agents', Icon: AgentsIllustrationIcon },
+  { name: 'Runtime', href: '/runtime', Icon: MetricsIllustrationIcon },
+  { name: 'Settings', href: '/settings', Icon: SettingsIllustrationIcon },
+  { name: 'Control Plane', href: '/control-plane', Icon: ControlPlaneIllustrationIcon },
 ]
 
 export function Sidebar() {
@@ -33,7 +36,7 @@ export function Sidebar() {
     <aside className="fixed left-0 top-0 bottom-0 w-64 bg-white border-r border-[#DED8D2] flex flex-col">
       <div className="h-16 flex items-center px-6 border-b border-[#DED8D2]">
         <Link href="/home" className="flex items-center gap-3 group">
-          <AgentIcon className="w-8 h-8" />
+          <AgentsIllustrationIcon className="w-8 h-8" />
           <div>
             <span className="text-base font-semibold text-gray-900">
               OpenRooms

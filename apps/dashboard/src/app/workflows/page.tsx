@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { Header } from '@/components/header'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
-import { WorkflowIcon, PlayIcon, ChevronRightIcon, PlusIcon, SequentialWorkflowIcon, ParallelWorkflowIcon, AgentDecisionIcon, APIIntegrationIcon } from '@/components/icons'
+import { PlayIcon, ChevronRightIcon, PlusIcon, SequentialWorkflowIcon, ParallelWorkflowIcon, AgentDecisionIcon, APIIntegrationIcon, WorkflowsIllustrationIcon, WorkflowListIcon } from '@/components/icons'
 
 interface Workflow {
   id: string
@@ -98,7 +98,7 @@ export default function WorkflowsPage() {
           {/* Workflow Templates */}
           <div>
             <h2 className="text-xl font-bold text-text-primary mb-4 flex items-center gap-2">
-              <span className="text-2xl">📋</span>
+              <WorkflowsIllustrationIcon className="w-6 h-6" />
               Quick Start Templates
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
@@ -156,7 +156,7 @@ export default function WorkflowsPage() {
           ) : filteredWorkflows.length === 0 ? (
             <Card className="border-2 border-dashed border-[#D4C4A8] bg-[#F5F1E8]">
               <CardContent className="py-12 text-center">
-                <WorkflowIcon className="w-16 h-16 mx-auto mb-4 text-gray-400" />
+                <WorkflowListIcon className="w-16 h-16 mx-auto mb-4 text-gray-400" />
                 <h3 className="text-lg font-semibold text-text-primary mb-2">No workflows yet</h3>
                 <p className="text-sm text-text-secondary mb-6">Create your first workflow from a template</p>
                 <button className="px-6 py-2 bg-[#F54E00] hover:bg-[#E24600] text-white text-sm font-bold rounded-lg transition-all">
@@ -177,7 +177,7 @@ export default function WorkflowsPage() {
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-4 flex-1 min-w-0">
                           <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                            <WorkflowIcon className="w-6 h-6 text-purple-600" />
+                            <WorkflowListIcon className="w-6 h-6 text-purple-600" />
                           </div>
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-3 mb-1">
