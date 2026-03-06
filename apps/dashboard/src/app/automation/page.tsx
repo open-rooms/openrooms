@@ -3,7 +3,8 @@
 import { useState, useEffect } from 'react'
 import { Header } from '@/components/header'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
-import { PlayIcon, PlusIcon, ClockIcon, ScheduledTaskIcon, EventTriggerIcon, WebhookIcon, QueueConsumerIcon, AutomationIllustrationIcon } from '@/components/icons'
+import { PlayIcon, PlusIcon, ClockIcon, ScheduledTaskIcon, EventTriggerIcon, WebhookIcon, QueueConsumerIcon } from '@/components/icons'
+import { AutomationIcon as AutomationProductIcon } from '@/components/icons/product/AutomationIcon'
 
 interface Trigger {
   id: string
@@ -79,25 +80,29 @@ export default function AutomationPage() {
       name: 'Scheduled Task',
       description: 'Run workflows on a fixed schedule (cron)',
       icon: ScheduledTaskIcon,
-      color: 'bg-blue-50 border-blue-200 hover:border-blue-400'
+      color: 'bg-blue-50 border-2 border-blue-200',
+      hover: 'hover:border-[#93C5FD] hover:shadow-lg hover:-translate-y-1',
     },
     {
       name: 'Event Trigger',
       description: 'Execute on system events or data changes',
       icon: EventTriggerIcon,
-      color: 'bg-orange-50 border-orange-200 hover:border-orange-400'
+      color: 'bg-orange-50 border-2 border-orange-200',
+      hover: 'hover:border-[#FDBA74] hover:shadow-lg hover:-translate-y-1',
     },
     {
       name: 'Webhook Endpoint',
       description: 'HTTP endpoint for external integrations',
       icon: WebhookIcon,
-      color: 'bg-emerald-50 border-emerald-200 hover:border-emerald-400'
+      color: 'bg-emerald-50 border-2 border-emerald-200',
+      hover: 'hover:border-[#5EEAD4] hover:shadow-lg hover:-translate-y-1',
     },
     {
       name: 'Queue Consumer',
       description: 'Process messages from job queue',
       icon: QueueConsumerIcon,
-      color: 'bg-teal-50 border-teal-200 hover:border-teal-400'
+      color: 'bg-purple-50 border-2 border-purple-200',
+      hover: 'hover:border-[#C084FC] hover:shadow-lg hover:-translate-y-1',
     }
   ]
 
@@ -155,20 +160,28 @@ export default function AutomationPage() {
             </Card>
           </div>
 
+          {/* Page hero icon */}
+          <div className="flex items-center gap-6">
+            <AutomationProductIcon className="w-20 h-20 flex-shrink-0" />
+            <div>
+              <h1 className="text-2xl font-bold text-[#111111]">Automation</h1>
+              <p className="text-gray-600 text-sm mt-1">Event-driven triggers and scheduled orchestration loops that fire workflows automatically.</p>
+            </div>
+          </div>
+
           {/* Trigger Templates */}
           <div>
-            <h2 className="text-xl font-bold text-text-primary mb-4 flex items-center gap-2">
-              <span className="text-2xl">🚀</span>
+            <h2 className="text-xl font-bold text-text-primary mb-4">
               Trigger Templates
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
               {templates.map((template, idx) => {
                 const IconComponent = template.icon
                 return (
-                  <Card key={idx} className={`border-2 ${template.color} hover:shadow-lg hover:-translate-y-1 transition-all duration-200 cursor-pointer`}>
+                  <Card key={idx} className={`${template.color} ${template.hover} transition-all duration-200 cursor-pointer group`}>
                     <CardHeader>
                       <div className="flex items-center gap-3 mb-2">
-                        <div className="w-12 h-12 flex items-center justify-center">
+                        <div className="w-12 h-12 flex items-center justify-center group-hover:scale-110 transition-transform duration-200">
                           <IconComponent className="w-10 h-10" />
                         </div>
                         <CardTitle className="text-base">{template.name}</CardTitle>

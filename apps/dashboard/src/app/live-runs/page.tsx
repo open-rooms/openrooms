@@ -3,7 +3,8 @@
 import { useState, useEffect } from 'react'
 import { Header } from '@/components/header'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { CheckCircleIcon, AlertCircleIcon, ClockIcon, RunsIllustrationIcon } from '@/components/icons'
+import { CheckCircleIcon, AlertCircleIcon, ClockIcon } from '@/components/icons'
+import { RunsIcon as RunsProductIcon } from '@/components/icons/product/RunsIcon'
 
 interface ExecutionEvent {
   id: string
@@ -115,6 +116,15 @@ export default function LiveRunsPage() {
       
       <div className="p-8 animate-fade-in">
         <div className="max-w-7xl mx-auto space-y-8">
+          {/* Page hero icon */}
+          <div className="flex items-center gap-6">
+            <RunsProductIcon className="w-20 h-20 flex-shrink-0" />
+            <div>
+              <h1 className="text-2xl font-bold text-[#111111]">Live Runs</h1>
+              <p className="text-gray-600 text-sm mt-1">Real-time execution streams — agent loops, tool calls, room events, and workflow completions.</p>
+            </div>
+          </div>
+
           {/* Stats */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
             <Card className="border border-[#D4C4A8] bg-[#F5F1E8] hover:shadow-md transition-all">

@@ -4,7 +4,8 @@ import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { Header } from '@/components/header'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
-import { PlayIcon, ChevronRightIcon, PlusIcon, SequentialWorkflowIcon, ParallelWorkflowIcon, AgentDecisionIcon, APIIntegrationIcon, WorkflowsIllustrationIcon, WorkflowListIcon } from '@/components/icons'
+import { PlayIcon, ChevronRightIcon, PlusIcon, SequentialWorkflowIcon, ParallelWorkflowIcon, AgentDecisionIcon, APIIntegrationIcon } from '@/components/icons'
+import { WorkflowIcon as WorkflowProductIcon } from '@/components/icons/product/WorkflowIcon'
 
 interface Workflow {
   id: string
@@ -55,28 +56,36 @@ export default function WorkflowsPage() {
       description: 'Linear workflow with sequential step execution',
       icon: SequentialWorkflowIcon,
       nodes: 5,
-      color: 'bg-purple-50 border-purple-200 hover:border-purple-400'
+      color: 'bg-purple-50 border-2 border-purple-200',
+      hoverBorder: 'hover:border-[#93C5FD]',
+      accent: '#93C5FD',
     },
     {
       name: 'Parallel Processing',
       description: 'Execute multiple branches concurrently',
       icon: ParallelWorkflowIcon,
       nodes: 8,
-      color: 'bg-emerald-50 border-emerald-200 hover:border-emerald-400'
+      color: 'bg-emerald-50 border-2 border-emerald-200',
+      hoverBorder: 'hover:border-emerald-400',
+      accent: '#6BCB77',
     },
     {
       name: 'Agent Decision',
       description: 'LLM-driven conditional branching',
       icon: AgentDecisionIcon,
       nodes: 10,
-      color: 'bg-teal-50 border-teal-200 hover:border-teal-400'
+      color: 'bg-teal-50 border-2 border-teal-200',
+      hoverBorder: 'hover:border-teal-400',
+      accent: '#5EEAD4',
     },
     {
       name: 'API Integration',
       description: 'External API calls with retry logic',
       icon: APIIntegrationIcon,
       nodes: 6,
-      color: 'bg-orange-50 border-orange-200 hover:border-orange-400'
+      color: 'bg-orange-50 border-2 border-orange-200',
+      hoverBorder: 'hover:border-[#FDBA74]',
+      accent: '#FDBA74',
     },
   ]
 
@@ -96,19 +105,27 @@ export default function WorkflowsPage() {
       <div className="p-8 animate-fade-in">
         <div className="max-w-7xl mx-auto space-y-8">
           {/* Workflow Templates */}
+          {/* Page hero icon */}
+          <div className="flex items-center gap-6 mb-2">
+            <WorkflowProductIcon className="w-20 h-20 flex-shrink-0" />
+            <div>
+              <h1 className="text-2xl font-bold text-[#111111]">Workflows</h1>
+              <p className="text-gray-600 text-sm mt-1">Orchestration templates connecting agents, tools and APIs into structured execution graphs.</p>
+            </div>
+          </div>
+
           <div>
             <h2 className="text-xl font-bold text-text-primary mb-4 flex items-center gap-2">
-              <WorkflowsIllustrationIcon className="w-6 h-6" />
               Quick Start Templates
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
               {templates.map((template, idx) => {
                 const IconComponent = template.icon
                 return (
-                  <Card key={idx} className={`border-2 ${template.color} hover:shadow-lg hover:-translate-y-1 transition-all duration-200 cursor-pointer`}>
+                  <Card key={idx} className={`${template.color} ${template.hoverBorder} hover:shadow-lg hover:-translate-y-1 transition-all duration-200 cursor-pointer group`}>
                     <CardHeader>
                       <div className="flex items-center gap-3 mb-2">
-                        <div className="w-12 h-12 flex items-center justify-center">
+                        <div className="w-12 h-12 flex items-center justify-center group-hover:scale-110 transition-transform duration-200">
                           <IconComponent className="w-10 h-10" />
                         </div>
                         <CardTitle className="text-lg">{template.name}</CardTitle>
