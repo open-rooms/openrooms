@@ -2,10 +2,12 @@ const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'
 
 async function request<T>(path: string, options?: RequestInit): Promise<T> {
   const hasBody = options?.body !== undefined && options?.body !== null
-  const defaultHeaders = hasBody ? { 'Content-Type': 'application/json' } : {}
+  const defaultHeaders: Record<string, string> = hasBody ? { 'Content-Type': 'application/json' } : {}
+  const extraHeaders: Record<string, string> = (options?.headers as Record<string, string>) ?? {}
+  const { headers: _headers, ...restOptions } = options ?? {}
   const res = await fetch(`${API_BASE}${path}`, {
-    headers: { ...defaultHeaders, ...options?.headers },
-    ...options,
+    headers: { ...defaultHeaders, ...extraHeaders },
+    ...restOptions,
   })
   if (!res.ok) {
     const error = await res.json().catch(() => ({ message: res.statusText }))

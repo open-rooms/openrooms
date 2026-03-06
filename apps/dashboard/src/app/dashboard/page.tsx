@@ -48,7 +48,7 @@ export default function DashboardPage() {
         const successRate = completed + failed > 0 ? (completed / (completed + failed)) * 100 : 0
 
         setStats({
-          totalRooms: roomsData.count,
+          totalRooms: roomsData.rooms.length,
           runningRooms: running,
           completedRooms: completed,
           failedRooms: failed,
