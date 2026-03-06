@@ -13,6 +13,7 @@ import { RuntimeIcon } from '@/components/icons/RuntimeIcon'
 import { SettingsIcon } from '@/components/icons/SettingsIcon'
 import { ChevronRightIcon } from '@/components/icons'
 import { useEffect, useState } from 'react'
+import { getRooms, getAgents, getWorkflows, getTools, getRoomLogs } from '@/lib/api'
 
 interface AppCard {
   id: string
@@ -76,13 +77,14 @@ const poweredByFeatures = [
 
 export default function HomePage() {
   const [currentTime, setCurrentTime] = useState('')
-  const [liveActivity, setLiveActivity] = useState([
-    { time: '12:03:12', message: 'Agent "ResearchAgent" executed workflow /market-analysis' },
-    { time: '12:02:58', message: 'Room "Sandbox-3" initialized' },
-    { time: '12:02:41', message: 'Tool call: OpenAI gpt-4.1 invoked' },
-    { time: '12:02:15', message: 'Automation trigger fired: market_update' },
-    { time: '12:01:59', message: 'Execution completed successfully' },
-  ])
+  const [liveStats, setLiveStats] = useState({
+    roomsActive: '…',
+    agentsRunning: '…',
+    workflowsDeployed: '…',
+    systemStatus: 'Operational',
+    events24h: '…',
+  })
+  const [liveActivity, setLiveActivity] = useState<{ time: string; message: string }[]>([])
 
   useEffect(() => {
     const updateTime = () => {
@@ -91,6 +93,54 @@ export default function HomePage() {
     }
     updateTime()
     const interval = setInterval(updateTime, 1000)
+    return () => clearInterval(interval)
+  }, [])
+
+  useEffect(() => {
+    async function fetchStats() {
+      try {
+        const [roomsData, agentsData, workflowsData] = await Promise.all([
+          getRooms().catch(() => ({ rooms: [] })),
+          getAgents().catch(() => ({ agents: [], count: 0 })),
+          getWorkflows().catch(() => ({ workflows: [] })),
+        ])
+
+        const rooms = roomsData.rooms || []
+        const activeRooms = rooms.filter((r) => r.status === 'RUNNING')
+        const workflows = workflowsData.workflows || []
+        const agentCount = agentsData.count ?? (agentsData.agents?.length ?? 0)
+
+        // grab recent logs from active rooms for activity feed
+        let recentLogs: { time: string; message: string }[] = []
+        const targetRooms = rooms.filter(r => ['RUNNING', 'COMPLETED'].includes(r.status)).slice(0, 3)
+        for (const room of targetRooms) {
+          try {
+            const logsData = await getRoomLogs(room.id)
+            const entries = (logsData.logs || []).slice(0, 3).map(log => ({
+              time: new Date(log.timestamp).toLocaleTimeString(),
+              message: log.message,
+            }))
+            recentLogs = [...recentLogs, ...entries]
+          } catch { /* skip */ }
+        }
+
+        setLiveStats({
+          roomsActive: String(activeRooms.length),
+          agentsRunning: String(agentCount),
+          workflowsDeployed: String(workflows.filter(w => w.status === 'ACTIVE').length),
+          systemStatus: 'Operational',
+          events24h: recentLogs.length > 0 ? `${recentLogs.length}+` : '0',
+        })
+
+        if (recentLogs.length > 0) {
+          setLiveActivity(recentLogs.slice(0, 5))
+        }
+      } catch {
+        // keep defaults on error
+      }
+    }
+    fetchStats()
+    const interval = setInterval(fetchStats, 15000)
     return () => clearInterval(interval)
   }, [])
 
@@ -150,23 +200,23 @@ export default function HomePage() {
               <div className="flex items-center gap-2 group">
                 <div className="w-2.5 h-2.5 bg-green-500 rounded-full animate-pulse"></div>
                 <span className="text-sm font-bold text-[#111111]">System Status:</span>
-                <span className="text-sm font-semibold text-green-600 transition-all duration-200 group-hover:scale-110">Operational</span>
+                <span className="text-sm font-semibold text-green-600 transition-all duration-200 group-hover:scale-110">{liveStats.systemStatus}</span>
               </div>
               <div className="flex items-center gap-2 transition-all duration-200 hover:scale-105">
                 <span className="text-sm text-gray-600">Rooms Active:</span>
-                <span className="text-sm font-bold text-[#111111]">12</span>
+                <span className="text-sm font-bold text-[#111111]">{liveStats.roomsActive}</span>
               </div>
               <div className="flex items-center gap-2 transition-all duration-200 hover:scale-105">
-                <span className="text-sm text-gray-600">Agents Running:</span>
-                <span className="text-sm font-bold text-[#111111]">38</span>
+                <span className="text-sm text-gray-600">Agents:</span>
+                <span className="text-sm font-bold text-[#111111]">{liveStats.agentsRunning}</span>
               </div>
               <div className="flex items-center gap-2 transition-all duration-200 hover:scale-105">
                 <span className="text-sm text-gray-600">Workflows Deployed:</span>
-                <span className="text-sm font-bold text-[#111111]">16</span>
+                <span className="text-sm font-bold text-[#111111]">{liveStats.workflowsDeployed}</span>
               </div>
               <div className="flex items-center gap-2 transition-all duration-200 hover:scale-105">
-                <span className="text-sm text-gray-600">Events (24h):</span>
-                <span className="text-sm font-bold text-[#111111]">4,382</span>
+                <span className="text-sm text-gray-600">Recent Events:</span>
+                <span className="text-sm font-bold text-[#111111]">{liveStats.events24h}</span>
               </div>
             </div>
           </div>
@@ -268,18 +318,22 @@ export default function HomePage() {
         <div className="max-w-[95%] 2xl:max-w-[1600px] mx-auto px-8">
           <h3 className="text-2xl font-bold text-[#111111] mb-6">Live Platform Activity</h3>
           <div className="bg-[#F5F1E8] border border-[#D4C4A8] rounded-xl p-6 font-mono hover:shadow-lg transition-all duration-300 hover:border-[#F54E00]">
-            <div className="space-y-2">
-              {liveActivity.map((activity, index) => (
-                <div 
-                  key={index} 
-                  className="text-sm text-gray-700 hover:bg-white transition-all duration-200 px-3 py-2 rounded hover:scale-[1.02] hover:shadow-sm animate-fade-in"
-                  style={{ animationDelay: `${1.9 + index * 0.1}s` }}
-                >
-                  <span className="text-[#F54E00] font-bold animate-pulse">[{activity.time}]</span>{' '}
-                  <span className="hover:text-[#111111] transition-colors duration-200">{activity.message}</span>
-                </div>
-              ))}
-            </div>
+            {liveActivity.length === 0 ? (
+              <p className="text-sm text-gray-500 px-3 py-2">No recent activity — start a Room to see live events here.</p>
+            ) : (
+              <div className="space-y-2">
+                {liveActivity.map((activity, index) => (
+                  <div
+                    key={index}
+                    className="text-sm text-gray-700 hover:bg-white transition-all duration-200 px-3 py-2 rounded hover:scale-[1.02] hover:shadow-sm animate-fade-in"
+                    style={{ animationDelay: `${1.9 + index * 0.1}s` }}
+                  >
+                    <span className="text-[#F54E00] font-bold">[{activity.time}]</span>{' '}
+                    <span className="hover:text-[#111111] transition-colors duration-200">{activity.message}</span>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -311,3 +365,4 @@ export default function HomePage() {
     </div>
   )
 }
+
