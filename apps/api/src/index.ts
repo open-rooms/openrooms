@@ -21,6 +21,29 @@ import { createAPIKeyMiddleware } from './middleware/api-key-auth';
 import { createAgentWorker } from './workers/agent-worker';
 import { createRunnerWorkers } from './workers/runner-worker';
 
+/**
+ * Parse REDIS_URL (e.g. redis://:password@host:port) into {host, port, password}.
+ * BullMQ workers need explicit host/port rather than a connection string.
+ */
+function parseRedisUrl(url?: string): { host: string; port: number; password?: string } {
+  if (url) {
+    try {
+      const parsed = new URL(url);
+      return {
+        host: parsed.hostname,
+        port: parseInt(parsed.port || '6379', 10),
+        password: parsed.password || undefined,
+      };
+    } catch {
+      // fall through to defaults
+    }
+  }
+  return {
+    host: process.env.REDIS_HOST ?? 'localhost',
+    port: parseInt(process.env.REDIS_PORT ?? '6379', 10),
+  };
+}
+
 async function main() {
   const container = createContainer();
 
@@ -90,10 +113,8 @@ async function main() {
     });
   });
 
-  const redisConnection = {
-    host: process.env.REDIS_HOST ?? 'localhost',
-    port: parseInt(process.env.REDIS_PORT ?? '6379'),
-  };
+  // Parse REDIS_URL (Railway injects this) or fall back to individual host/port vars
+  const redisConnection = parseRedisUrl(process.env.REDIS_URL);
 
   // Start workers
   const roomWorker = container.workerManager.startRoomExecutionWorker();
