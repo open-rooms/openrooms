@@ -62,7 +62,8 @@ export class AgentRuntimeLoop {
     private readonly policyEnforcer: PolicyEnforcer,
     private readonly traceLogger: TraceLogger,
     private readonly memoryManager: MemoryManager,
-    private readonly toolExecutor: ToolExecutor
+    private readonly toolExecutor: ToolExecutor,
+    private readonly agentRepo?: { updateLoopState: (id: string, state: any) => Promise<void> }
   ) {}
 
   /**
@@ -360,6 +361,12 @@ export class AgentRuntimeLoop {
   ): Promise<void> {
     agent.loopState = newState;
     agent.updatedAt = new Date().toISOString();
+    // Persist to DB if repository is available
+    if (this.agentRepo) {
+      await this.agentRepo.updateLoopState(agent.id, newState).catch(() => {
+        // Non-fatal — loop continues even if DB write fails
+      });
+    }
   }
 
   private buildSystemPrompt(agent: Agent, perception: JSONObject): string {

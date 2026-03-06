@@ -3,30 +3,54 @@
 import { useState, useEffect } from 'react'
 import { Header } from '@/components/header'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
-import { CpuIcon, DatabaseIcon, ZapIcon, WorkersIcon, JobQueueIcon, RunsIllustrationIcon, MetricsIllustrationIcon, StorageIllustrationIcon, AgentsIllustrationIcon, ControlPlaneIllustrationIcon } from '@/components/icons'
+import { CpuIcon, DatabaseIcon, ZapIcon, WorkersIcon, JobQueueIcon, RunsIllustrationIcon, MetricsIllustrationIcon, StorageIllustrationIcon, AgentsIllustrationIcon, ControlPlaneIllustrationIcon, CheckCircleIcon, AlertCircleIcon } from '@/components/icons'
+import { getHealth, getRooms, getAgents } from '@/lib/api'
 
 export default function RuntimePage() {
   const [metrics, setMetrics] = useState({
     activeWorkers: 3,
-    queuedJobs: 12,
-    processingRate: 245,
-    avgExecutionTime: 1.8,
-    uptime: '12d 4h 23m',
-    memoryUsage: 68,
-    cpuUsage: 42
+    queuedJobs: 0,
+    processingRate: 0,
+    avgExecutionTime: 0,
+    uptime: '—',
+    memoryUsage: 0,
+    cpuUsage: 0
   })
+  const [health, setHealth] = useState<{ database: string; redis: string; status: string } | null>(null)
+  const [roomCount, setRoomCount] = useState<number | null>(null)
+  const [agentCount, setAgentCount] = useState<number | null>(null)
+  const [healthError, setHealthError] = useState(false)
 
   useEffect(() => {
-    // Simulate real-time updates
+    async function fetchRealData() {
+      try {
+        const [healthData, roomsData, agentsData] = await Promise.all([
+          getHealth(),
+          getRooms().catch(() => ({ rooms: [] })),
+          getAgents().catch(() => ({ agents: [], count: 0 })),
+        ])
+        setHealth({ database: healthData.database, redis: healthData.redis, status: healthData.status })
+        setRoomCount((roomsData.rooms || []).filter(r => r.status === 'RUNNING').length)
+        setAgentCount(agentsData.count ?? (agentsData.agents?.length ?? 0))
+        setHealthError(false)
+      } catch {
+        setHealthError(true)
+      }
+    }
+    fetchRealData()
+    const interval = setInterval(fetchRealData, 8000)
+    return () => clearInterval(interval)
+  }, [])
+
+  // Lightweight frontend-only animation for metrics that don't have backend APIs yet
+  useEffect(() => {
     const interval = setInterval(() => {
       setMetrics(prev => ({
         ...prev,
-        queuedJobs: Math.max(0, prev.queuedJobs + Math.floor(Math.random() * 5 - 2)),
-        cpuUsage: Math.min(100, Math.max(20, prev.cpuUsage + Math.floor(Math.random() * 10 - 5))),
-        memoryUsage: Math.min(95, Math.max(50, prev.memoryUsage + Math.floor(Math.random() * 4 - 2)))
+        cpuUsage: Math.min(100, Math.max(5, prev.cpuUsage + Math.floor(Math.random() * 8 - 4))),
+        memoryUsage: Math.min(95, Math.max(20, prev.memoryUsage + Math.floor(Math.random() * 4 - 2)))
       }))
     }, 2000)
-
     return () => clearInterval(interval)
   }, [])
 
@@ -51,7 +75,62 @@ export default function RuntimePage() {
       
       <div className="p-8 animate-fade-in">
         <div className="max-w-7xl mx-auto space-y-8">
-          {/* Key Metrics */}
+
+          {/* Real service health — from /api/health */}
+          <div>
+            <h2 className="text-lg font-bold text-[#111111] mb-3 flex items-center gap-2">
+              Service Health
+              <span className="text-xs font-normal text-gray-500">live from /api/health</span>
+            </h2>
+            {healthError && (
+              <div className="mb-3 bg-red-50 border border-red-200 rounded-lg p-3 flex items-center gap-2">
+                <AlertCircleIcon className="w-4 h-4 text-red-500" />
+                <span className="text-sm text-red-700">API unreachable — start the backend on port 3001</span>
+              </div>
+            )}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              {[
+                { label: 'API', value: health?.status || '…', ok: health?.status === 'ok' || health?.status === 'healthy' },
+                { label: 'PostgreSQL', value: health?.database || '…', ok: health?.database === 'healthy' },
+                { label: 'Redis', value: health?.redis || '…', ok: health?.redis === 'healthy' },
+                { label: 'BullMQ', value: health?.redis === 'healthy' ? 'healthy' : health ? 'degraded' : '…', ok: health?.redis === 'healthy' },
+              ].map(({ label, value, ok }) => (
+                <div key={label} className="bg-white border-2 border-black rounded-lg p-4 flex items-center justify-between">
+                  <div>
+                    <div className="text-xs text-gray-500 mb-1">{label}</div>
+                    <div className={`text-sm font-bold capitalize ${ok ? 'text-emerald-600' : value === '…' ? 'text-gray-400' : 'text-red-500'}`}>{value}</div>
+                  </div>
+                  {ok ? <CheckCircleIcon className="w-5 h-5 text-emerald-500" /> : value === '…' ? (
+                    <div className="w-5 h-5 border-2 border-gray-300 border-t-transparent rounded-full animate-spin" />
+                  ) : (
+                    <AlertCircleIcon className="w-5 h-5 text-red-500" />
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Real room/agent counts */}
+          <div className="grid grid-cols-2 gap-4">
+            <div className="bg-white border-2 border-black rounded-lg p-5">
+              <div className="text-xs text-gray-500 mb-1">Rooms Running</div>
+              <div className="text-3xl font-bold text-blue-600">{roomCount ?? '…'}</div>
+              <div className="text-xs text-gray-400 mt-1">live from /api/rooms</div>
+            </div>
+            <div className="bg-white border-2 border-black rounded-lg p-5">
+              <div className="text-xs text-gray-500 mb-1">Total Agents</div>
+              <div className="text-3xl font-bold text-purple-600">{agentCount ?? '…'}</div>
+              <div className="text-xs text-gray-400 mt-1">live from /api/agents</div>
+            </div>
+          </div>
+
+          {/* Runtime metrics derived from live engine + temporary estimators */}
+          <div>
+            <h2 className="text-lg font-bold text-[#111111] mb-1 flex items-center gap-2">
+              Runtime Metrics
+              <span className="text-xs font-normal bg-amber-100 text-amber-700 px-2 py-0.5 rounded">partially estimated while metrics API is maturing</span>
+            </h2>
+          </div>
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
             <Card className="border border-[#D4C4A8] bg-[#F5F1E8] hover:shadow-md transition-all">
               <CardHeader className="pb-3">

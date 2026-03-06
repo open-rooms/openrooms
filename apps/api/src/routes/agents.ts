@@ -23,27 +23,31 @@ export function agentRoutes(fastify: FastifyInstance, container: Container) {
     };
 
     try {
+      const normalizedRoomId = body.roomId && body.roomId.trim() ? body.roomId.trim() : undefined;
       const agent = await container.agentRepository.create({
         name: body.name,
         description: body.description,
         goal: body.goal,
-        roomId: body.roomId,
+        roomId: normalizedRoomId,
         allowedTools: body.allowedTools,
         policyConfig: body.policyConfig,
       });
 
-      await container.loggingService.log({
-        roomId: agent.roomId || agent.id,
-        workflowId: agent.roomId || agent.id,
-        agentId: agent.id,
-        eventType: 'AGENT_INVOKED',
-        level: 'INFO',
-        message: `Agent "${agent.name}" created`,
-        metadata: {
-          version: agent.version,
-          allowedTools: agent.allowedTools.length,
-        },
-      });
+      // Execution logs require a valid room/workflow FK. Standalone agents may not have one.
+      if (agent.roomId) {
+        await container.loggingService.log({
+          roomId: agent.roomId,
+          workflowId: agent.roomId,
+          agentId: agent.id,
+          eventType: 'AGENT_INVOKED',
+          level: 'INFO',
+          message: `Agent "${agent.name}" created`,
+          metadata: {
+            version: agent.version,
+            allowedTools: agent.allowedTools.length,
+          },
+        });
+      }
 
       return reply.code(201).send(agent);
     } catch (error) {
@@ -83,7 +87,7 @@ export function agentRoutes(fastify: FastifyInstance, container: Container) {
    * GET /api/agents - List agents
    */
   fastify.get('/agents', async (request, reply) => {
-    const query = request.query as { roomId?: string };
+    const query = request.query as { roomId?: string; status?: string; limit?: string; offset?: string };
 
     try {
       if (query.roomId) {
@@ -91,9 +95,35 @@ export function agentRoutes(fastify: FastifyInstance, container: Container) {
         return { agents, count: agents.length };
       }
 
-      // For now, return empty list if no roomId filter
-      // TODO: Add pagination and global agent listing
-      return { agents: [], count: 0 };
+      // Global listing via direct DB query
+      let q = container.db
+        .selectFrom('agents')
+        .selectAll()
+        .$if(!!query.status, (qb: any) => qb.where('status', '=', query.status!))
+        .orderBy('createdAt', 'desc')
+        .limit(query.limit ? parseInt(query.limit) : 100)
+        .offset(query.offset ? parseInt(query.offset) : 0);
+
+      const records = await q.execute();
+
+      const agents = records.map((r: any) => ({
+        id: r.id,
+        name: r.name,
+        description: r.description,
+        goal: r.goal,
+        version: r.version,
+        status: r.status,
+        loopState: r.loopState,
+        allowedTools: Array.isArray(r.allowedTools) ? r.allowedTools : JSON.parse(r.allowedTools || '[]'),
+        policyConfig: typeof r.policyConfig === 'string' ? JSON.parse(r.policyConfig || '{}') : r.policyConfig,
+        memoryState: typeof r.memoryState === 'string' ? JSON.parse(r.memoryState || '{}') : r.memoryState,
+        roomId: r.roomId,
+        createdAt: r.createdAt,
+        updatedAt: r.updatedAt,
+        lastExecutedAt: r.lastExecutedAt,
+      }));
+
+      return { agents, count: agents.length };
     } catch (error) {
       fastify.log.error(error);
       return reply.code(500).send({
@@ -118,17 +148,23 @@ export function agentRoutes(fastify: FastifyInstance, container: Container) {
     }>;
 
     try {
-      const agent = await container.agentRepository.update(request.params.id, body);
+      const normalizedBody = {
+        ...body,
+        roomId: body.roomId !== undefined ? (body.roomId && body.roomId.trim() ? body.roomId.trim() : undefined) : undefined,
+      };
+      const agent = await container.agentRepository.update(request.params.id, normalizedBody as any);
 
-      await container.loggingService.log({
-        roomId: agent.roomId || agent.id,
-        workflowId: agent.roomId || agent.id,
-        agentId: agent.id,
-        eventType: 'STATE_UPDATED',
-        level: 'INFO',
-        message: `Agent "${agent.name}" updated`,
-        metadata: body,
-      });
+      if (agent.roomId) {
+        await container.loggingService.log({
+          roomId: agent.roomId,
+          workflowId: agent.roomId,
+          agentId: agent.id,
+          eventType: 'STATE_UPDATED',
+          level: 'INFO',
+          message: `Agent "${agent.name}" updated`,
+          metadata: normalizedBody,
+        });
+      }
 
       return agent;
     } catch (error) {
@@ -173,18 +209,20 @@ export function agentRoutes(fastify: FastifyInstance, container: Container) {
         body
       );
 
-      await container.loggingService.log({
-        roomId: newVersion.roomId || newVersion.id,
-        workflowId: newVersion.roomId || newVersion.id,
-        agentId: newVersion.id,
-        eventType: 'AGENT_INVOKED',
-        level: 'INFO',
-        message: `Agent version ${newVersion.version} created`,
-        metadata: {
-          parentId: request.params.id,
-          version: newVersion.version,
-        },
-      });
+      if (newVersion.roomId) {
+        await container.loggingService.log({
+          roomId: newVersion.roomId,
+          workflowId: newVersion.roomId,
+          agentId: newVersion.id,
+          eventType: 'AGENT_INVOKED',
+          level: 'INFO',
+          message: `Agent version ${newVersion.version} created`,
+          metadata: {
+            parentId: request.params.id,
+            version: newVersion.version,
+          },
+        });
+      }
 
       return reply.code(201).send(newVersion);
     } catch (error) {
@@ -212,6 +250,36 @@ export function agentRoutes(fastify: FastifyInstance, container: Container) {
       fastify.log.error(error);
       return reply.code(500).send({
         error: 'Failed to fetch version history',
+        message: (error as Error).message,
+      });
+    }
+  });
+
+  /**
+   * POST /api/agents/:id/run — Stage 4: create a tracked run record + enqueue
+   */
+  fastify.post<{ Params: { id: string } }>('/agents/:id/run', async (request, reply) => {
+    const body = request.body as {
+      roomId?: string;
+      maxIterations?: number;
+      goal?: string;
+      context?: Record<string, unknown>;
+    };
+
+    try {
+      const result = await container.agentRunner.runAgent(request.params.id, {
+        roomId: body.roomId,
+        maxIterations: body.maxIterations,
+        goal: body.goal,
+        context: body.context,
+      });
+
+      return reply.code(202).send(result);
+    } catch (error) {
+      fastify.log.error(error);
+      const status = (error as Error).message.includes('not found') ? 404 : 500;
+      return reply.code(status).send({
+        error: 'Failed to start agent run',
         message: (error as Error).message,
       });
     }

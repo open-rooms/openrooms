@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { CheckCircleIcon, AlertCircleIcon, ZapIcon, ClockIcon, DatabaseIcon, SettingsIllustrationIcon, APIIllustrationIcon } from '@/components/icons';
+import { getAPIKeys, createAPIKey, deleteAPIKey } from '@/lib/api';
 
 interface APIKey {
   id: string;
@@ -37,8 +38,7 @@ export default function SettingsPage() {
   const fetchAPIKeys = async () => {
     try {
       setLoading(true);
-      const response = await fetch('http://localhost:3001/api/api-keys');
-      const data = await response.json();
+      const data = await getAPIKeys();
       setApiKeys(data.keys || []);
     } catch (error) {
       console.error('Failed to fetch API keys:', error);
@@ -61,31 +61,20 @@ export default function SettingsPage() {
         expiresIn: parseInt(formData.expiresIn),
       };
 
-      const response = await fetch('http://localhost:3001/api/api-keys', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
+      const data = await createAPIKey(payload);
+      setNewKeyData(data.key);
+      setShowCreateForm(false);
+      setFormData({
+        name: '',
+        scopes: 'read,write',
+        rateLimit: '100',
+        rateLimitWindow: '60',
+        expiresIn: '365',
       });
-
-      if (response.ok) {
-        const data = await response.json();
-        setNewKeyData(data.key);
-        setShowCreateForm(false);
-        setFormData({
-          name: '',
-          scopes: 'read,write',
-          rateLimit: '100',
-          rateLimitWindow: '60',
-          expiresIn: '365',
-        });
-        fetchAPIKeys();
-      } else {
-        const error = await response.json();
-        alert(`Failed to create API key: ${error.message}`);
-      }
-    } catch (error) {
+      fetchAPIKeys();
+    } catch (error: any) {
       console.error('Failed to create API key:', error);
-      alert('Failed to create API key');
+      alert(`Failed to create API key: ${error.message || 'Unknown error'}`);
     } finally {
       setCreating(false);
     }
@@ -97,16 +86,10 @@ export default function SettingsPage() {
     }
 
     try {
-      const response = await fetch(`http://localhost:3001/api/api-keys/${keyId}`, {
-        method: 'DELETE',
-      });
-
-      if (response.ok) {
-        fetchAPIKeys();
-      } else {
-        alert('Failed to revoke API key');
-      }
+      await deleteAPIKey(keyId);
+      fetchAPIKeys();
     } catch (error) {
+      alert('Failed to revoke API key');
       console.error('Failed to revoke API key:', error);
       alert('Failed to revoke API key');
     }
@@ -264,8 +247,8 @@ export default function SettingsPage() {
           ) : apiKeys.length === 0 ? (
             <div className="bg-white border-2 border-black rounded-lg p-12 text-center">
               <SettingsIllustrationIcon className="w-16 h-16 mx-auto mb-4 opacity-60" />
-              <h3 className="text-xl font-bold text-[#111111] mb-2">No API keys yet</h3>
-              <p className="text-gray-600 mb-6">Generate your first API key for programmatic access.</p>
+              <h3 className="text-xl font-bold text-[#111111] mb-2">No control-plane API keys yet</h3>
+              <p className="text-gray-600 mb-6">Generate a key to invoke OpenRooms orchestration APIs programmatically.</p>
               <button
                 onClick={() => setShowCreateForm(true)}
                 className="inline-block px-6 py-3 bg-[#F54E00] hover:bg-[#E24600] text-white font-bold rounded-lg transition-all hover:scale-105"

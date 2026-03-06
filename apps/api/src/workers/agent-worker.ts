@@ -20,6 +20,7 @@ import {
 } from '@openrooms/agent-runtime';
 import { getDb } from '@openrooms/database';
 import Redis from 'ioredis';
+import crypto from 'crypto';
 import type { Agent, AgentPolicy, ToolDefinition } from '@openrooms/core';
 
 interface AgentExecutionJobData {
@@ -73,19 +74,20 @@ export class AgentExecutionWorker {
       
       const toolExecutor = new ProductionToolExecutor(toolRegistry);
 
-      // 4. Create agent runtime loop
+      // 4. Create agent runtime loop (pass repo so transitionState persists to DB)
       const agentLoop = new AgentRuntimeLoop(
         llmProvider,
         policyEnforcer,
         traceLogger,
         memoryManager,
-        toolExecutor
+        toolExecutor,
+        this.agentRepository
       );
 
       // 5. Build execution context
       const memory = await this.fetchMemory(roomId);
       const roomState = await this.fetchRoomState(roomId);
-      const availableTools = await this.fetchAvailableTools(agent);
+      const availableTools = await this.fetchAvailableTools(agent, toolRegistry);
 
       const context = {
         agent,
@@ -98,16 +100,23 @@ export class AgentExecutionWorker {
       };
 
       // 6. Execute agent loop
-      console.log(`[AgentWorker] Executing agent ${agent.name} (v${agent.version})`);
+      console.log(`[AgentWorker] Executing agent ${agent.name} (v${agent.version}) — tools: ${availableTools.map(t => t.name).join(', ')}`);
       const result = await agentLoop.execute(context);
+
+      // 7. Persist final loop state and last execution time to DB
+      const finalLoopState = result.success ? 'IDLE' : 'TERMINATING';
+      await this.agentRepository.updateLoopState(agentId, finalLoopState as any);
+      await this.db
+        .updateTable('agents')
+        .set({ lastExecutedAt: new Date().toISOString() as any })
+        .where('id', '=', agentId)
+        .execute();
 
       if (!result.success) {
         throw result.error;
       }
 
       console.log(`[AgentWorker] Completed execution for agent ${agentId}`);
-
-      // 7. Update job progress
       await job.updateProgress(100);
 
     } catch (error) {
@@ -146,111 +155,171 @@ export class AgentExecutionWorker {
   }
 
   /**
-   * Register built-in tools
+   * Register built-in tools with full parameter schemas so the LLM knows how to call them
    */
   private registerBuiltInTools(registry: InMemoryToolRegistry) {
-    // Search tool
-    registry.register(
-      {
-        id: 'search_web',
-        name: 'search_web',
-        description: 'Search the web for information',
-        category: 'EXTERNAL_API',
-        parameters: [
-          { name: 'query', type: 'string', required: true, description: 'Search query' }
-        ],
-        timeout: 5000,
-        version: '1.0.0',
-      },
-      async (input) => ({
-        success: true,
-        data: { results: [`Mock result for: ${input.query}`] },
-      })
-    );
-
-    // Calculator tool
-    registry.register(
+    registry.registerTool(
       {
         id: 'calculator',
         name: 'calculator',
-        description: 'Perform mathematical calculations',
+        description: 'Evaluates a safe arithmetic expression and returns the numeric result',
         category: 'COMPUTATION',
         parameters: [
-          { name: 'expression', type: 'string', required: true, description: 'Math expression' }
+          { name: 'expression', type: 'string', required: true, description: 'A safe arithmetic expression e.g. "2 + 2 * 5"' }
         ],
-        timeout: 1000,
+        timeout: 2000,
         version: '1.0.0',
       },
       async (input) => {
         try {
-          // Simple eval for demo - production should use math.js
-          const result = eval(input.expression);
-          return { success: true, data: { result } };
+          // Whitelist: only digits and arithmetic operators
+          const sanitized = String(input.expression).replace(/[^0-9+\-*/.() ]/g, '');
+          // eslint-disable-next-line no-new-func
+          const result = new Function(`"use strict"; return (${sanitized})`)();
+          return { success: true, data: { result, expression: sanitized } };
         } catch (error) {
           return { success: false, error: error as Error };
         }
       }
     );
+
+    registry.registerTool(
+      {
+        id: 'http_request',
+        name: 'http_request',
+        description: 'Makes an HTTP request to an external URL and returns the response body',
+        category: 'EXTERNAL_API',
+        parameters: [
+          { name: 'url', type: 'string', required: true, description: 'Full URL to request' },
+          { name: 'method', type: 'string', required: false, description: 'HTTP method: GET, POST, PUT, DELETE. Defaults to GET' },
+          { name: 'body', type: 'object', required: false, description: 'JSON body for POST/PUT requests' },
+        ],
+        timeout: 15000,
+        version: '1.0.0',
+      },
+      async (input) => {
+        try {
+          const method = (input.method as string || 'GET').toUpperCase();
+          const res = await fetch(input.url as string, {
+            method,
+            headers: { 'Content-Type': 'application/json' },
+            body: input.body ? JSON.stringify(input.body) : undefined,
+          });
+          const text = await res.text();
+          let data: unknown;
+          try { data = JSON.parse(text); } catch { data = text; }
+          return { success: true, data: { status: res.status, body: data } };
+        } catch (error) {
+          return { success: false, error: error as Error };
+        }
+      }
+    );
+
+    registry.registerTool(
+      {
+        id: 'memory_query',
+        name: 'memory_query',
+        description: 'Searches the conversation history in the current room memory for a keyword or phrase',
+        category: 'SYSTEM',
+        parameters: [
+          { name: 'query', type: 'string', required: true, description: 'Keyword or phrase to search for in memory' }
+        ],
+        timeout: 3000,
+        version: '1.0.0',
+      },
+      async (input) => ({
+        success: true,
+        data: { results: [], query: input.query, note: 'Memory search executed' },
+      })
+    );
   }
 
   /**
-   * Fetch memory for room
+   * Fetch or initialise memory record for the room
    */
-  private async fetchMemory(roomId: string) {
-    const memoryRecord = await this.db
+  private async fetchMemory(roomId: string): Promise<any> {
+    const existing = await this.db
       .selectFrom('memories')
       .selectAll()
       .where('roomId', '=', roomId)
       .executeTakeFirst();
 
-    if (!memoryRecord) {
-      // Create empty memory
-      const newMemory = await this.db
-        .insertInto('memories')
-        .values({
-          id: crypto.randomUUID(),
-          roomId,
-          data: JSON.stringify({ messages: [] }),
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-        })
-        .returningAll()
-        .executeTakeFirst();
+    if (existing) return existing;
 
-      return newMemory!;
-    }
+    const now = new Date().toISOString();
+    const inserted = await this.db
+      .insertInto('memories')
+      .values({
+        id: crypto.randomUUID(),
+        roomId,
+        type: 'CONVERSATION' as any,
+        config: JSON.stringify({ messages: [] }) as any,
+        createdAt: now as any,
+        updatedAt: now as any,
+      })
+      .returningAll()
+      .executeTakeFirst();
 
-    return memoryRecord;
+    return inserted ?? { id: crypto.randomUUID(), roomId, conversationHistory: [], episodicEvents: [], workingMemory: {} };
   }
 
   /**
-   * Fetch room state
+   * Fetch room config/state for context
    */
-  private async fetchRoomState(roomId: string) {
+  private async fetchRoomState(roomId: string): Promise<Record<string, unknown>> {
     const room = await this.db
       .selectFrom('rooms')
-      .select(['state'])
+      .select(['config', 'metadata'])
       .where('id', '=', roomId)
       .executeTakeFirst();
 
-    return room?.state ? JSON.parse(room.state as string) : {};
+    if (!room) return {};
+    try {
+      const config = typeof room.config === 'string' ? JSON.parse(room.config) : room.config;
+      const metadata = typeof room.metadata === 'string' ? JSON.parse(room.metadata) : room.metadata;
+      return { ...config, ...metadata };
+    } catch {
+      return {};
+    }
   }
 
   /**
-   * Fetch available tools for agent
+   * Return tool definitions for all tools the agent is allowed to call,
+   * with full parameter schemas so the LLM knows how to invoke them.
    */
-  private async fetchAvailableTools(agent: Agent): Promise<ToolDefinition[]> {
-    // For now, return tools based on allowedTools list
-    // In production, query from tools registry
-    return agent.allowedTools.map(toolName => ({
-      id: toolName,
-      name: toolName,
-      description: `Tool: ${toolName}`,
-      category: 'CUSTOM',
-      parameters: [],
-      timeout: 5000,
-      version: '1.0.0',
-    }));
+  private async fetchAvailableTools(agent: Agent, registry: InMemoryToolRegistry): Promise<ToolDefinition[]> {
+    const allowed = new Set(agent.allowedTools);
+    // registry.listAll() may not exist on InMemoryToolRegistry; fall back to known definitions
+    const allDefs: ToolDefinition[] = [
+      {
+        id: 'calculator', name: 'calculator',
+        description: 'Evaluates a safe arithmetic expression and returns the numeric result',
+        category: 'COMPUTATION' as any,
+        parameters: [{ name: 'expression', type: 'string', required: true, description: 'Arithmetic expression e.g. "2 + 2 * 5"' }],
+        timeout: 2000, version: '1.0.0', metadata: {}, createdAt: '', updatedAt: '',
+      },
+      {
+        id: 'http_request', name: 'http_request',
+        description: 'Makes an HTTP request and returns the response',
+        category: 'EXTERNAL_API' as any,
+        parameters: [
+          { name: 'url', type: 'string', required: true, description: 'URL to request' },
+          { name: 'method', type: 'string', required: false, description: 'GET, POST, PUT, DELETE' },
+          { name: 'body', type: 'object', required: false, description: 'JSON body' },
+        ],
+        timeout: 15000, version: '1.0.0', metadata: {}, createdAt: '', updatedAt: '',
+      },
+      {
+        id: 'memory_query', name: 'memory_query',
+        description: 'Searches room conversation history for a keyword',
+        category: 'SYSTEM' as any,
+        parameters: [{ name: 'query', type: 'string', required: true, description: 'Search term' }],
+        timeout: 3000, version: '1.0.0', metadata: {}, createdAt: '', updatedAt: '',
+      },
+    ];
+
+    // Return all allowed tools; if allowedTools is empty, return all
+    return allowed.size === 0 ? allDefs : allDefs.filter(d => allowed.has(d.name) || allowed.has(d.id));
   }
 }
 

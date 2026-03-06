@@ -5,6 +5,7 @@
 import { FastifyInstance } from 'fastify';
 import { Container } from '../container';
 import { RoomStatus } from '@openrooms/core';
+import crypto from 'crypto';
 
 export async function roomRoutes(
   fastify: FastifyInstance,
@@ -96,6 +97,54 @@ export async function roomRoutes(
     const { id } = request.params;
 
     try {
+      // Preflight + self-heal for legacy workflows with missing nodes
+      const room = await container.roomRepository.findById(id);
+      if (!room) {
+        return reply.code(404).send({ error: 'Room not found' });
+      }
+
+      const workflow = await container.workflowRepository.findById(room.workflowId);
+      if (!workflow) {
+        return reply.code(404).send({ error: 'Workflow not found for room' });
+      }
+
+      const initialNode = await container.workflowRepository.getNode(workflow.initialNodeId as any);
+      if (!initialNode) {
+        const startNodeId = workflow.initialNodeId;
+        const endNodeId = crypto.randomUUID();
+        const now = new Date().toISOString();
+
+        await container.db
+          .insertInto('workflow_nodes')
+          .values([
+            {
+              id: crypto.randomUUID(),
+              workflowId: workflow.id,
+              nodeId: startNodeId,
+              type: 'START',
+              name: 'Start',
+              description: 'Auto-recovered start node',
+              config: JSON.stringify({
+                transitions: [{ condition: 'ALWAYS', targetNodeId: endNodeId }],
+              }) as any,
+              createdAt: now as any,
+              updatedAt: now as any,
+            },
+            {
+              id: crypto.randomUUID(),
+              workflowId: workflow.id,
+              nodeId: endNodeId,
+              type: 'END',
+              name: 'End',
+              description: 'Auto-recovered end node',
+              config: JSON.stringify({ transitions: [] }) as any,
+              createdAt: now as any,
+              updatedAt: now as any,
+            },
+          ])
+          .execute();
+      }
+
       // Add job to queue for async execution
       await container.jobQueue.addJob('room-execution', 'execute', { roomId: id });
 

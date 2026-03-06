@@ -291,14 +291,15 @@ export class KyselyWorkflowRepository implements WorkflowRepository {
   }
 
   private mapNode(row: any, workflowId: string): WorkflowNode {
+    const parsedConfig = typeof row.config === 'string' ? JSON.parse(row.config) : row.config;
     return {
       id: row.nodeId,
       workflowId,
       type: row.type,
       name: row.name,
       description: row.description,
-      config: typeof row.config === 'string' ? JSON.parse(row.config) : row.config,
-      transitions: [],
+      config: parsedConfig,
+      transitions: parsedConfig?.transitions || [],
       metadata: {},
       createdAt: row.createdAt,
       updatedAt: row.updatedAt,
@@ -398,7 +399,7 @@ export class KyselyAgentRepository implements AgentRepository {
           : row.metadata || {},
       createdAt: row.createdAt,
       updatedAt: row.updatedAt,
-    };
+    } as any as Agent;
   }
 }
 

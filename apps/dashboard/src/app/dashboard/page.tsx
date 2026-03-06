@@ -83,12 +83,13 @@ export default function DashboardPage() {
         title="Dashboard" 
         subtitle="Monitor and manage your agent orchestration system"
         actions={
-          <button className="inline-flex items-center gap-2 px-4 py-2 bg-[#F54E00] hover:bg-[#E24600] text-white text-sm font-bold rounded-lg transition-all duration-200">
-            <Link href="/rooms?action=create" className="flex items-center gap-2">
+          <Link
+            href="/rooms?action=create"
+            className="inline-flex items-center gap-2 px-4 py-2 bg-[#F54E00] hover:bg-[#E24600] text-white text-sm font-bold rounded-lg transition-all duration-200"
+          >
               <PlayIcon className="w-4 h-4" />
               Launch Room
-            </Link>
-          </button>
+          </Link>
         }
       />
       
@@ -212,7 +213,7 @@ export default function DashboardPage() {
               <CardContent>
                 {rooms.length === 0 ? (
                   <div className="text-center py-12 text-text-secondary">
-                    No rooms yet. Create your first room to get started.
+                    No execution rooms yet. Launch your first room to start orchestration.
                   </div>
                 ) : (
                   <div className="space-y-2">
@@ -264,7 +265,7 @@ export default function DashboardPage() {
               <CardContent>
                 {workflows.length === 0 ? (
                   <div className="text-center py-12 text-text-secondary">
-                    No workflows yet. Create your first workflow.
+                    No workflow templates yet. Define one to wire room execution paths.
                   </div>
                 ) : (
                   <div className="space-y-2">

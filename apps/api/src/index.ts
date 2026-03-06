@@ -15,8 +15,10 @@ import { toolRoutes } from './routes/tools';
 import { healthRoutes } from './routes/health';
 import { agentRoutes } from './routes/agents';
 import { apiKeyRoutes } from './routes/api-keys';
+import { runsRoutes } from './routes/runs';
 import { createAPIKeyMiddleware } from './middleware/api-key-auth';
 import { createAgentWorker } from './workers/agent-worker';
+import { createRunnerWorkers } from './workers/runner-worker';
 
 async function main() {
   const container = createContainer();
@@ -52,18 +54,25 @@ async function main() {
     apiKeyRoutes(instance, container);
   }, { prefix: '/api' });
 
+  await fastify.register((instance) => runsRoutes(instance, container), { prefix: '/api' });
+
   // Root endpoint
   fastify.get('/', async () => {
     return {
       name: 'OpenRooms API',
-      version: '0.3.0',
-      stage: '3',
+      version: '0.4.0',
+      stage: '4',
       status: 'running',
       features: {
         agents: true,
         apiKeys: true,
         policyEnforcement: true,
         reasoningTraces: true,
+        executionRuntime: true,
+        agentRuns: true,
+        workflowRuns: true,
+        eventBus: true,
+        runTracking: true,
       },
     };
   });
@@ -79,16 +88,24 @@ async function main() {
     });
   });
 
+  const redisConnection = {
+    host: process.env.REDIS_HOST ?? 'localhost',
+    port: parseInt(process.env.REDIS_PORT ?? '6379'),
+  };
+
   // Start workers
   const roomWorker = container.workerManager.startRoomExecutionWorker();
   fastify.log.info('Room execution worker started');
 
-  // Start agent execution worker
-  const agentWorker = createAgentWorker(container.redis, {
-    host: process.env.REDIS_HOST ?? 'localhost',
-    port: parseInt(process.env.REDIS_PORT ?? '6379'),
-  });
+  const agentWorker = createAgentWorker(container.redis, redisConnection);
   fastify.log.info('Agent execution worker started');
+
+  // Stage 4: runner workers for agent_runs and workflow_runs queues
+  const { agentRunsWorker, workflowRunsWorker } = createRunnerWorkers(
+    container.redis,
+    redisConnection
+  );
+  fastify.log.info('Stage 4 runner workers started (agent_runs, workflow_runs)');
 
   // Graceful shutdown
   const shutdown = async () => {
@@ -96,6 +113,10 @@ async function main() {
     
     await roomWorker.close();
     await agentWorker.close();
+    await agentRunsWorker.close();
+    await workflowRunsWorker.close();
+    await container.agentRunner.close();
+    await container.workflowRunner.close();
     await container.jobQueue.close();
     await container.redis.quit();
     await fastify.close();

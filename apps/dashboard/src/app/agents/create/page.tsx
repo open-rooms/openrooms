@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { AgentsIllustrationIcon } from '@/components/icons';
+import { createAgent } from '@/lib/api';
 
 export default function CreateAgentPage() {
   const router = useRouter();
@@ -45,22 +46,11 @@ export default function CreateAgentPage() {
         },
       };
 
-      const response = await fetch('http://localhost:3001/api/agents', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      });
-
-      if (response.ok) {
-        const agent = await response.json();
-        router.push(`/agents/${agent.id}`);
-      } else {
-        const error = await response.json();
-        alert(`Failed to create agent: ${error.message}`);
-      }
-    } catch (error) {
+      const agent = await createAgent(payload);
+      router.push(`/agents/${agent.id}`);
+    } catch (error: any) {
       console.error('Failed to create agent:', error);
-      alert('Failed to create agent');
+      alert(`Failed to create agent: ${error.message || 'Unknown error'}`);
     } finally {
       setCreating(false);
     }

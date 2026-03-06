@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { AgentsIllustrationIcon, AgentListIcon } from '@/components/icons';
+import { getAgents } from '@/lib/api';
 
 interface Agent {
   id: string;
@@ -32,8 +33,7 @@ export default function AgentsPage() {
   const fetchAgents = async () => {
     try {
       setLoading(true);
-      const response = await fetch('http://localhost:3001/api/agents');
-      const data = await response.json();
+      const data = await getAgents();
       setAgents(data.agents || []);
     } catch (error) {
       console.error('Failed to fetch agents:', error);

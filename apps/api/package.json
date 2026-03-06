@@ -20,6 +20,7 @@
     "@openrooms/infrastructure-database": "workspace:*",
     "@openrooms/infrastructure-redis": "workspace:*",
     "@openrooms/infrastructure-queue": "workspace:*",
+    "@openrooms/runtime": "workspace:*",
     "@fastify/cors": "^8.4.2",
     "@fastify/helmet": "^11.1.1",
     "fastify": "^4.25.2",

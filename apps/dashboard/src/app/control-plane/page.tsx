@@ -3,15 +3,43 @@
 import { useState, useEffect } from 'react'
 import { Header } from '@/components/header'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
-import { CheckCircleIcon, DatabaseFilledIcon, RedisCacheIcon, WorkersIcon, AgentRuntimeIcon, ResourceLimitsIcon, ControlPlaneIllustrationIcon, SettingsIllustrationIcon, APIIllustrationIcon } from '@/components/icons'
+import { CheckCircleIcon, AlertCircleIcon, DatabaseFilledIcon, RedisCacheIcon, WorkersIcon, AgentRuntimeIcon, ResourceLimitsIcon, ControlPlaneIllustrationIcon, SettingsIllustrationIcon, APIIllustrationIcon } from '@/components/icons'
+import { getHealth } from '@/lib/api'
 
 export default function ControlPlanePage() {
-  const [systemHealth, setSystemHealth] = useState({
-    database: 'healthy',
-    redis: 'healthy',
-    workers: 'healthy',
-    api: 'healthy'
+  const [systemHealth, setSystemHealth] = useState<{
+    database: string; redis: string; api: string; timestamp?: string; overall?: string
+  }>({
+    database: '…',
+    redis: '…',
+    api: '…',
   })
+  const [healthError, setHealthError] = useState<string | null>(null)
+  const [healthLoading, setHealthLoading] = useState(true)
+
+  useEffect(() => {
+    async function fetchHealth() {
+      try {
+        const data = await getHealth()
+        setSystemHealth({
+          database: data.database || 'unknown',
+          redis: data.redis || 'unknown',
+          api: data.status || 'unknown',
+          timestamp: data.timestamp,
+          overall: data.status,
+        })
+        setHealthError(null)
+      } catch {
+        setHealthError('Backend unreachable — is the API running on port 3001?')
+        setSystemHealth({ database: 'offline', redis: 'offline', api: 'offline' })
+      } finally {
+        setHealthLoading(false)
+      }
+    }
+    fetchHealth()
+    const interval = setInterval(fetchHealth, 10000)
+    return () => clearInterval(interval)
+  }, [])
 
   const services = [
     { name: 'PostgreSQL Database', status: 'Connected', version: '16.0', IconComponent: DatabaseFilledIcon, color: 'text-emerald-600' },
@@ -37,15 +65,39 @@ export default function ControlPlanePage() {
     { name: 'Worker Concurrency', value: '5', category: 'Runtime' },
   ]
 
+  const healthEntries = [
+    { key: 'api', label: 'API Server' },
+    { key: 'database', label: 'PostgreSQL' },
+    { key: 'redis', label: 'Redis Cache' },
+  ]
+
+  const getStatusColor = (status: string) => {
+    if (status === 'healthy' || status === 'ok') return 'text-emerald-600'
+    if (status === '…') return 'text-gray-400'
+    return 'text-red-500'
+  }
+
   return (
     <div className="bg-[#E8DCC8] min-h-screen">
-      <Header 
-        title="Control Plane" 
+      <Header
+        title="Control Plane"
         subtitle="System configuration and governance"
+        actions={
+          systemHealth.timestamp ? (
+            <span className="text-xs text-gray-500">Last checked: {new Date(systemHealth.timestamp).toLocaleTimeString()}</span>
+          ) : undefined
+        }
       />
-      
+
       <div className="p-8 animate-fade-in">
         <div className="max-w-7xl mx-auto space-y-8">
+          {healthError && (
+            <div className="bg-red-50 border-2 border-red-200 rounded-lg p-4 flex items-center gap-3">
+              <AlertCircleIcon className="w-5 h-5 text-red-500 flex-shrink-0" />
+              <span className="text-red-700 text-sm font-medium">{healthError}</span>
+            </div>
+          )}
+
           {/* System Health */}
           <Card className="border border-[#D4C4A8] bg-[#F5F1E8]">
             <CardHeader>
@@ -53,19 +105,31 @@ export default function ControlPlanePage() {
                 <ControlPlaneIllustrationIcon className="w-8 h-8" />
                 System Health
               </CardTitle>
-              <CardDescription>All systems operational</CardDescription>
+              <CardDescription>
+                {healthLoading ? 'Checking services…' : healthError ? 'API unreachable' : 'Live status from /api/health'}
+              </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
-                {Object.entries(systemHealth).map(([service, status]) => (
-                  <div key={service} className="p-4 bg-white rounded-lg border border-[#D4C4A8] flex items-center justify-between">
-                    <div>
-                      <p className="text-sm font-semibold capitalize">{service}</p>
-                      <p className="text-xs text-text-secondary mt-1">Status: {status}</p>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {healthEntries.map(({ key, label }) => {
+                  const status = (systemHealth as Record<string, string>)[key] || '…'
+                  const isHealthy = status === 'healthy' || status === 'ok'
+                  return (
+                    <div key={key} className="p-4 bg-white rounded-lg border border-[#D4C4A8] flex items-center justify-between">
+                      <div>
+                        <p className="text-sm font-semibold">{label}</p>
+                        <p className={`text-xs font-bold mt-1 capitalize ${getStatusColor(status)}`}>{status}</p>
+                      </div>
+                      {isHealthy ? (
+                        <CheckCircleIcon className="w-6 h-6 text-emerald-500" />
+                      ) : status === '…' ? (
+                        <div className="w-6 h-6 border-2 border-gray-300 border-t-transparent rounded-full animate-spin" />
+                      ) : (
+                        <AlertCircleIcon className="w-6 h-6 text-red-500" />
+                      )}
                     </div>
-                    <CheckCircleIcon className="w-6 h-6 text-emerald-500" />
-                  </div>
-                ))}
+                  )
+                })}
               </div>
             </CardContent>
           </Card>

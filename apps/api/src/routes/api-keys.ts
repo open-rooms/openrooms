@@ -39,6 +39,8 @@ export function apiKeyRoutes(fastify: FastifyInstance, container: Container) {
         ? new Date(now.getTime() + body.expiresIn * 24 * 60 * 60 * 1000)
         : null;
 
+      const scopes = body.scopes || ['read'];
+
       await container.db
         .insertInto('api_keys')
         .values({
@@ -46,23 +48,22 @@ export function apiKeyRoutes(fastify: FastifyInstance, container: Container) {
           name: body.name,
           keyHash: hash,
           keyPrefix: prefix,
-          scopes: body.scopes || ['read'],
+          scopes: scopes as any,
           rateLimit: body.rateLimit || 100,
           rateLimitWindow: body.rateLimitWindow || 60,
           isActive: true,
           expiresAt: expiresAt?.toISOString() || null,
           createdAt: now.toISOString(),
-          createdBy: 'system', // TODO: Add user context
+          createdBy: 'system',
           metadata: JSON.stringify({}),
         })
         .execute();
 
-      // Return the key only once (never stored in plaintext)
       return reply.code(201).send({
-        key, // ONLY time user sees this
+        key, // ONLY time user sees this — not stored in plaintext
         prefix,
         name: body.name,
-        scopes: body.scopes || ['read'],
+        scopes,
         rateLimit: body.rateLimit || 100,
         expiresAt: expiresAt?.toISOString() || null,
         message: 'Store this key securely. It will not be shown again.',

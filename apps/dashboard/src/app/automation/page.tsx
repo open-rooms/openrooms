@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import Link from 'next/link'
 import { Header } from '@/components/header'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { PlayIcon, PlusIcon, ClockIcon, ScheduledTaskIcon, EventTriggerIcon, WebhookIcon, QueueConsumerIcon } from '@/components/icons'
@@ -18,36 +19,10 @@ interface Trigger {
 }
 
 export default function AutomationPage() {
-  const [triggers, setTriggers] = useState<Trigger[]>([
-    {
-      id: '1',
-      name: 'Daily Market Analysis',
-      type: 'schedule',
-      status: 'active',
-      targetWorkflow: 'Market Research',
-      lastRun: new Date(Date.now() - 3600000).toISOString(),
-      nextRun: new Date(Date.now() + 82800000).toISOString(),
-      runCount: 143
-    },
-    {
-      id: '2',
-      name: 'New Customer Onboarding',
-      type: 'event',
-      status: 'active',
-      targetWorkflow: 'Customer Setup',
-      lastRun: new Date(Date.now() - 7200000).toISOString(),
-      runCount: 87
-    },
-    {
-      id: '3',
-      name: 'External API Webhook',
-      type: 'webhook',
-      status: 'paused',
-      targetWorkflow: 'Data Sync',
-      lastRun: new Date(Date.now() - 86400000).toISOString(),
-      runCount: 234
-    }
-  ])
+  // Automation triggers are not yet persisted by the backend.
+  // The API does not expose a /api/automation endpoint yet.
+  // This UI shows the intended trigger model and is ready to connect.
+  const [triggers] = useState<Trigger[]>([])
 
   const getTypeIcon = (type: string) => {
     switch (type) {
@@ -112,52 +87,24 @@ export default function AutomationPage() {
         title="Automation" 
         subtitle={`${triggers.length} active triggers`}
         actions={
-          <button className="inline-flex items-center gap-2 px-4 py-2 bg-[#F54E00] hover:bg-[#E24600] text-white text-sm font-bold rounded-lg transition-all duration-200">
+          <Link href="/docs#automation" className="inline-flex items-center gap-2 px-4 py-2 bg-[#F54E00] hover:bg-[#E24600] text-white text-sm font-bold rounded-lg transition-all duration-200">
             <PlusIcon className="w-4 h-4" />
-            New Trigger
-          </button>
+            Automation Spec
+          </Link>
         }
       />
       
       <div className="p-8 animate-fade-in">
         <div className="max-w-7xl mx-auto space-y-8">
-          {/* Stats */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <Card className="border border-[#D4C4A8] bg-[#F5F1E8] hover:shadow-md transition-all">
-              <CardHeader className="pb-3">
-                <CardDescription>Active Triggers</CardDescription>
-                <CardTitle className="text-4xl font-bold text-emerald-600">
-                  {triggers.filter(t => t.status === 'active').length}
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-xs text-text-secondary">Running automation rules</p>
-              </CardContent>
-            </Card>
-
-            <Card className="border border-[#D4C4A8] bg-[#F5F1E8] hover:shadow-md transition-all">
-              <CardHeader className="pb-3">
-                <CardDescription>Total Executions</CardDescription>
-                <CardTitle className="text-4xl font-bold text-blue-600">
-                  {triggers.reduce((sum, t) => sum + t.runCount, 0)}
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-xs text-text-secondary">Workflow runs triggered</p>
-              </CardContent>
-            </Card>
-
-            <Card className="border border-[#D4C4A8] bg-[#F5F1E8] hover:shadow-md transition-all">
-              <CardHeader className="pb-3">
-                <CardDescription>Trigger Types</CardDescription>
-                <CardTitle className="text-4xl font-bold text-purple-600">
-                  {new Set(triggers.map(t => t.type)).size}
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-xs text-text-secondary">Different automation methods</p>
-              </CardContent>
-            </Card>
+          {/* Coming soon banner */}
+          <div className="bg-amber-50 border-2 border-amber-200 rounded-lg p-4 flex items-center gap-3">
+            <ClockIcon className="w-5 h-5 text-amber-500 flex-shrink-0" />
+            <div>
+              <span className="text-amber-800 font-bold text-sm">Automation engine coming soon. </span>
+              <span className="text-amber-700 text-sm">
+                Trigger UX is live and aligned to the control-plane model. Persistence + scheduler/webhook runtime are the next backend milestone.
+              </span>
+            </div>
           </div>
 
           {/* Page hero icon */}
@@ -189,9 +136,9 @@ export default function AutomationPage() {
                       <CardDescription className="text-sm">{template.description}</CardDescription>
                     </CardHeader>
                     <CardContent>
-                      <button className="w-full text-xs px-3 py-2 bg-[#F54E00] text-white rounded font-bold hover:bg-[#E24600] transition-colors">
-                        Create Trigger
-                      </button>
+                      <Link href="/docs#automation" className="block w-full text-center text-xs px-3 py-2 bg-[#F54E00] text-white rounded font-bold hover:bg-[#E24600] transition-colors">
+                        Configure Pattern
+                      </Link>
                     </CardContent>
                   </Card>
                 )
@@ -202,64 +149,15 @@ export default function AutomationPage() {
           {/* Active Triggers */}
           <div>
             <h2 className="text-xl font-bold text-text-primary mb-4">Active Triggers</h2>
-            <div className="grid grid-cols-1 gap-6">
-              {triggers.map((trigger) => {
-                const TriggerIcon = getTypeIcon(trigger.type)
-                return (
-                  <Card key={trigger.id} className="border border-[#D4C4A8] bg-[#F5F1E8] hover:bg-white hover:shadow-md transition-all duration-200">
-                    <CardContent className="p-6">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-4 flex-1">
-                          <div className="w-14 h-14 bg-white rounded-lg flex items-center justify-center border-2 border-[#D4C4A8]">
-                            <TriggerIcon className="w-10 h-10" />
-                          </div>
-                        <div className="flex-1">
-                          <div className="flex items-center gap-3 mb-2">
-                            <h3 className="font-semibold text-lg text-text-primary">{trigger.name}</h3>
-                            <span className={`text-xs px-3 py-1 rounded-full font-bold border-2 ${getTypeColor(trigger.type)}`}>
-                              {trigger.type}
-                            </span>
-                            {trigger.status === 'active' ? (
-                              <span className="flex items-center gap-1 text-xs text-emerald-600 font-semibold">
-                                <span className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" />
-                                Active
-                              </span>
-                            ) : (
-                              <span className="text-xs text-gray-500 font-semibold">Paused</span>
-                            )}
-                          </div>
-                          <p className="text-sm text-text-secondary mb-3">Target: {trigger.targetWorkflow}</p>
-                          <div className="flex items-center gap-6 text-xs text-text-secondary">
-                            <span className="flex items-center gap-1">
-                              <ClockIcon className="w-4 h-4" />
-                              Runs: {trigger.runCount}
-                            </span>
-                            {trigger.lastRun && (
-                              <span>Last: {new Date(trigger.lastRun).toLocaleString()}</span>
-                            )}
-                            {trigger.nextRun && (
-                              <span className="text-emerald-600 font-semibold">
-                                Next: {new Date(trigger.nextRun).toLocaleString()}
-                              </span>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <button className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-bold rounded transition-colors">
-                          {trigger.status === 'active' ? 'Pause' : 'Resume'}
-                        </button>
-                        <button className="px-4 py-2 bg-[#F54E00] hover:bg-[#E24600] text-white text-xs font-bold rounded transition-colors flex items-center gap-2">
-                          <PlayIcon className="w-4 h-4" />
-                          Run Now
-                        </button>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              )
-              })}
-            </div>
+            <Card className="border border-[#D4C4A8] bg-[#F5F1E8]">
+              <CardContent className="py-12 text-center">
+                <AutomationProductIcon className="w-20 h-20 mx-auto mb-4 opacity-30" />
+                <h3 className="font-semibold text-[#111111] mb-2">No active automation policies</h3>
+                <p className="text-sm text-gray-600 max-w-md mx-auto">
+                  Define trigger patterns above, then wire them to room/workflow execution once the automation API is enabled.
+                </p>
+              </CardContent>
+            </Card>
           </div>
         </div>
       </div>

@@ -20,11 +20,11 @@ import {
 import {
   KyselyRoomRepository,
   KyselyWorkflowRepository,
-  KyselyAgentRepository,
   KyselyExecutionLogRepository,
   KyselyMemoryRepository,
   DefaultLoggingService,
 } from '@openrooms/database';
+import { PostgreSQLAgentRepository } from '@openrooms/agent-runtime';
 import {
   WorkflowExecutionEngine,
   createDefaultNodeExecutors,
@@ -35,6 +35,7 @@ import { LLMService, OpenAIProvider } from '@openrooms/execution';
 import { BullMQJobQueue } from '@openrooms/infrastructure-queue';
 import { WorkerManager } from '@openrooms/execution';
 import { NodeType } from '@openrooms/core';
+import { AgentRunner, WorkflowRunner, RunManager, EventBus } from '@openrooms/runtime';
 
 export interface Container {
   // Repositories
@@ -50,6 +51,12 @@ export interface Container {
   toolRegistry: ToolRegistry;
   llmService: LLMService;
   workflowEngine: WorkflowEngine;
+
+  // Stage 4 Runtime
+  runManager: RunManager;
+  eventBus: EventBus;
+  agentRunner: AgentRunner;
+  workflowRunner: WorkflowRunner;
   
   // Infrastructure
   db: Kysely<Database>;
@@ -68,7 +75,7 @@ export function createContainer(): Container {
   // Repositories
   const roomRepository = new KyselyRoomRepository();
   const workflowRepository = new KyselyWorkflowRepository();
-  const agentRepository = new KyselyAgentRepository();
+  const agentRepository = new PostgreSQLAgentRepository(db);
   const executionLogRepository = new KyselyExecutionLogRepository();
   const memoryRepository = new KyselyMemoryRepository();
 
@@ -118,16 +125,21 @@ export function createContainer(): Container {
   }
 
   // Job Queue
-  const jobQueue = new BullMQJobQueue({
+  const redisConnection = {
     host: process.env.REDIS_HOST ?? 'localhost',
     port: parseInt(process.env.REDIS_PORT ?? '6379'),
-  });
+  };
+
+  const jobQueue = new BullMQJobQueue(redisConnection);
 
   // Worker Manager
-  const workerManager = new WorkerManager(workflowEngine, {
-    host: process.env.REDIS_HOST ?? 'localhost',
-    port: parseInt(process.env.REDIS_PORT ?? '6379'),
-  });
+  const workerManager = new WorkerManager(workflowEngine, redisConnection);
+
+  // Stage 4 Runtime
+  const runManager = new RunManager(db);
+  const eventBus = new EventBus(redis);
+  const agentRunner = new AgentRunner(db, redis, redisConnection);
+  const workflowRunner = new WorkflowRunner(db, redis, redisConnection);
 
   return {
     roomRepository,
@@ -140,6 +152,10 @@ export function createContainer(): Container {
     toolRegistry,
     llmService,
     workflowEngine,
+    runManager,
+    eventBus,
+    agentRunner,
+    workflowRunner,
     db,
     redis,
     jobQueue,

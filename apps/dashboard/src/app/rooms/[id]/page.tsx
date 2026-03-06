@@ -56,6 +56,14 @@ export default function RoomDetailPage() {
     }
   }
 
+  const handleRetryRoom = async () => {
+    try {
+      await api.runRoom(roomId)
+    } catch (error) {
+      console.error('Failed to retry room:', error)
+    }
+  }
+
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center h-screen">
@@ -90,7 +98,7 @@ export default function RoomDetailPage() {
               <PlayIcon className="w-4 h-4 mr-2" />
               {room.status === 'RUNNING' ? 'Running...' : 'Run Room'}
             </Button>
-            <Button variant="outline">
+            <Button variant="outline" onClick={handleRetryRoom}>
               <RefreshIcon className="w-4 h-4 mr-2" />
               Retry
             </Button>
@@ -194,7 +202,7 @@ export default function RoomDetailPage() {
                           }`}
                         >
                           <span className="text-text-secondary w-20 flex-shrink-0">
-                            {new Date(log.createdAt).toLocaleTimeString()}
+                            {new Date(log.timestamp || log.createdAt).toLocaleTimeString()}
                           </span>
                           <span className="w-16 flex-shrink-0 font-semibold">
                             [{log.level}]
@@ -214,11 +222,11 @@ export default function RoomDetailPage() {
             <Card className="border border-[#E5E7EB] bg-white hover:bg-[#FBF7F2] transition-colors duration-150 ease-in-out rounded-lg">
               <CardHeader>
                 <CardTitle>Memory State</CardTitle>
-                <CardDescription>Room memory and context</CardDescription>
+                <CardDescription>Conversation context and execution memory snapshots</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="text-text-secondary text-center py-12">
-                  Memory viewer coming soon
+                  Memory visualization is being expanded. Current memory is still used by agent/runtime execution under the hood.
                 </div>
               </CardContent>
             </Card>
@@ -228,11 +236,11 @@ export default function RoomDetailPage() {
             <Card className="border border-[#E5E7EB] bg-white hover:bg-[#FBF7F2] transition-colors duration-150 ease-in-out rounded-lg">
               <CardHeader>
                 <CardTitle>Execution Timeline</CardTitle>
-                <CardDescription>Node execution flow</CardDescription>
+                <CardDescription>Node-by-node orchestration trace</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="text-text-secondary text-center py-12">
-                  Timeline view coming soon
+                  Timeline view is being upgraded. Use the Logs tab for the authoritative execution sequence.
                 </div>
               </CardContent>
             </Card>

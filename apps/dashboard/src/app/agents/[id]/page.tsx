@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { AgentsIllustrationIcon } from '@/components/icons';
+import { getAgent, getAgentTraces, executeAgent, updateAgent, runAgent } from '@/lib/api';
 
 interface Agent {
   id: string;
@@ -42,6 +43,7 @@ export default function AgentDetailPage() {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<'overview' | 'traces' | 'policy' | 'memory'>('overview');
   const [executing, setExecuting] = useState(false);
+  const [lastRunId, setLastRunId] = useState<string | null>(null);
 
   useEffect(() => {
     fetchAgent();
@@ -51,13 +53,8 @@ export default function AgentDetailPage() {
   const fetchAgent = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`http://localhost:3001/api/agents/${agentId}`);
-      if (response.ok) {
-        const data = await response.json();
-        setAgent(data);
-      } else {
-        console.error('Agent not found');
-      }
+      const data = await getAgent(agentId);
+      setAgent(data);
     } catch (error) {
       console.error('Failed to fetch agent:', error);
     } finally {
@@ -67,11 +64,8 @@ export default function AgentDetailPage() {
 
   const fetchTraces = async () => {
     try {
-      const response = await fetch(`http://localhost:3001/api/agents/${agentId}/traces?limit=50`);
-      if (response.ok) {
-        const data = await response.json();
-        setTraces(data.traces || []);
-      }
+      const data = await getAgentTraces(agentId, 50);
+      setTraces(data.traces || []);
     } catch (error) {
       console.error('Failed to fetch traces:', error);
     }
@@ -79,27 +73,31 @@ export default function AgentDetailPage() {
 
   const handleExecute = async () => {
     if (!agent) return;
-    
+
     setExecuting(true);
+    setLastRunId(null);
     try {
-      const response = await fetch(`http://localhost:3001/api/agents/${agentId}/execute`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
+      // Stage 4: use /run which creates a tracked run record
+      const data = await runAgent(agentId, {
+        roomId: agent.roomId || undefined,
+        maxIterations: 10,
+      });
+      setLastRunId(data.runId);
+      fetchAgent();
+      setTimeout(fetchTraces, 1500);
+    } catch (error) {
+      console.error('Failed to run agent:', error);
+      // Fallback to legacy execute endpoint
+      try {
+        const data = await executeAgent(agentId, {
           roomId: agent.roomId || agentId,
           maxIterations: 10,
-        }),
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        alert(`Agent execution queued: ${data.executionId}`);
+        });
+        alert(`Agent execution queued (legacy): ${data.executionId}`);
         fetchAgent();
-        setTimeout(fetchTraces, 1000);
+      } catch {
+        alert('Failed to run agent. Ensure the agent has a roomId assigned.');
       }
-    } catch (error) {
-      console.error('Failed to execute agent:', error);
-      alert('Failed to execute agent');
     } finally {
       setExecuting(false);
     }
@@ -107,13 +105,9 @@ export default function AgentDetailPage() {
 
   const handleUpdateStatus = async (newStatus: 'ACTIVE' | 'PAUSED' | 'ARCHIVED') => {
     try {
-      const response = await fetch(`http://localhost:3001/api/agents/${agentId}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status: newStatus }),
-      });
+      await updateAgent(agentId, { status: newStatus });
 
-      if (response.ok) {
+      if (true) {
         fetchAgent();
       }
     } catch (error) {
@@ -195,13 +189,25 @@ export default function AgentDetailPage() {
               </div>
             </div>
 
+            {lastRunId && (
+              <div className="mb-3 p-2 bg-emerald-50 border border-emerald-300 rounded-lg flex items-center justify-between text-xs">
+                <span className="font-semibold text-emerald-800">
+                  ✓ Run queued — <code className="font-mono">{lastRunId}</code>
+                </span>
+                <div className="flex items-center gap-2">
+                  <Link href="/live-runs" className="font-bold text-emerald-700 hover:underline">Live Runs →</Link>
+                  <button onClick={() => setLastRunId(null)} className="text-emerald-500 hover:text-emerald-700">✕</button>
+                </div>
+              </div>
+            )}
+
             <div className="flex gap-2">
               <button
                 onClick={handleExecute}
                 disabled={executing || agent.status !== 'ACTIVE'}
                 className="px-4 py-2 bg-[#F54E00] hover:bg-[#E24600] text-white font-bold rounded-lg transition-all hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {executing ? 'Executing...' : '▶ Execute'}
+                {executing ? 'Starting Run…' : '▶ Run Agent'}
               </button>
               <select
                 value={agent.status}
