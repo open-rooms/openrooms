@@ -199,6 +199,8 @@ export interface CreateAgentInput {
   roomId?: string
   allowedTools: string[]
   policyConfig?: {
+    provider?: string
+    model?: string
     maxLoopIterations?: number
     maxTokensPerRequest?: number
     maxCostPerExecution?: number
