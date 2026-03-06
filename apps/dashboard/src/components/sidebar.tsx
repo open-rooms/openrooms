@@ -72,7 +72,7 @@ const developersNav: NavItem[] = [
 const enterpriseNav: NavItem[] = [
   { name: 'Enterprise', href: '/enterprise', Icon: ControlPlaneIllustrationIcon },
   { name: 'Rooms', href: '/rooms', Icon: RoomsIcon },
-  { name: 'Agent Clusters', href: '/agent-clusters', Icon: AgentClustersIcon },
+  { name: 'Swarms', href: '/agent-clusters', Icon: AgentClustersIcon },
   { name: 'Observability', href: '/observability', Icon: ObservabilityIcon },
   { name: 'Automation', href: '/automation', Icon: AutomationIcon },
   { name: 'Integrations', href: '/integrations', Icon: IntegrationsIcon },

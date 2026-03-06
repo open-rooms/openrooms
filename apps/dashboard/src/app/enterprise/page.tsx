@@ -25,8 +25,8 @@ const features = [
   },
   {
     icon: AgentClustersIcon,
-    title: 'Agent Clusters',
-    description: 'Deploy networks of specialised agents that coordinate across shared tasks and data.',
+    title: 'Swarms',
+    description: 'Deploy coordinated swarms of specialised agents that work in parallel across shared tasks.',
     href: '/agents',
   },
   {
@@ -82,7 +82,7 @@ const stats = [
 
 const dockItems = [
   { id: 'rooms', name: 'Rooms', icon: RoomsIcon, href: '/rooms' },
-  { id: 'clusters', name: 'Agent Clusters', icon: AgentClustersIcon, href: '/agents' },
+  { id: 'clusters', name: 'Swarms', icon: AgentClustersIcon, href: '/agents' },
   { id: 'dist', name: 'Distributed Exec', icon: DistributedExecutionIcon, href: '/runtime' },
   { id: 'obs', name: 'Observability', icon: ObservabilityIcon, href: '/live-runs' },
   { id: 'auto', name: 'Automation', icon: AutomationIcon, href: '/automation' },

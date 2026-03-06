@@ -27,7 +27,7 @@ export const SDKIcon = ({ className = "w-6 h-6" }: { className?: string }) => (
   </svg>
 )
 
-// Agent Clusters - Three robot heads grouped together
+// Swarms - Three robot heads grouped together
 export const AgentClustersIcon = ({ className = "w-6 h-6" }: { className?: string }) => (
   <svg className={className} viewBox="0 0 96 96" fill="none" xmlns="http://www.w3.org/2000/svg">
     {/* Left robot */}
