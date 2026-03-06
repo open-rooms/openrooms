@@ -28,4 +28,7 @@ export {
   DistributedExecutionIcon,
   ObservabilityIcon,
   EnterpriseArchitectureIcon,
+  DeveloperIcon,
+  BuildIcon,
+  GovernIcon,
 } from './NewIcons'

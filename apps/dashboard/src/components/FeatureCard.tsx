@@ -12,11 +12,11 @@ interface FeatureCardProps {
 
 export function FeatureCard({ icon: Icon, title, description, href, accent = '#F54E00' }: FeatureCardProps) {
   const inner = (
-    <div className="group relative bg-[#F5F1E8] border-2 border-[#D4C4A8] rounded-2xl p-6 flex flex-col items-center text-center
-                    hover:border-[#F54E00] hover:-translate-y-1.5 hover:shadow-[4px_4px_0px_0px_rgba(245,78,0,0.3)]
-                    transition-all duration-200 cursor-pointer overflow-hidden h-full">
+    <div className="group relative bg-[#F5F1E8] border border-[#D4C4A8] rounded-2xl p-6 flex flex-col items-center text-center
+                    hover:border-[#F54E00] hover:-translate-y-0.5 hover:shadow-[0_4px_16px_rgba(0,0,0,0.08)]
+                    transition-all duration-300 cursor-pointer overflow-hidden h-full">
       {/* Icon */}
-      <div className="mb-4 transition-all duration-200 group-hover:scale-110 group-hover:-translate-y-1">
+      <div className="mb-4 transition-transform duration-300 group-hover:scale-105">
         <Icon className="w-16 h-16" />
       </div>
 
@@ -32,7 +32,7 @@ export function FeatureCard({ icon: Icon, title, description, href, accent = '#F
       </p>
 
       {/* Bottom accent line */}
-      <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#F54E00] scale-x-0 group-hover:scale-x-100 transition-transform duration-200 origin-left" />
+      <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#F54E00] scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left" />
     </div>
   )
 

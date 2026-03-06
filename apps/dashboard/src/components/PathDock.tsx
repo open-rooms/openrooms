@@ -31,7 +31,7 @@ export function PathDock({ items, accentColor = '#F54E00' }: { items: DockItem[]
                   style={{ backgroundColor: accentColor }}
                 />
               </div>
-              <div className="transition-all duration-300 hover:scale-150 hover:-translate-y-3 cursor-pointer">
+              <div className="transition-all duration-200 hover:scale-125 hover:-translate-y-1.5 cursor-pointer">
                 <Icon className="w-8 h-8 sm:w-9 sm:h-9" />
               </div>
             </Link>

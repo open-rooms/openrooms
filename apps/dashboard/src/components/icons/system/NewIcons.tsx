@@ -170,6 +170,67 @@ export const EnterpriseArchitectureIcon = ({ className = "w-6 h-6" }: { classNam
   </svg>
 )
 
+// Developer - Laptop with </> code brackets (teal fill, distinct from AgentIcon robot)
+export const DeveloperIcon = ({ className = "w-6 h-6" }: { className?: string }) => (
+  <svg className={className} viewBox="0 0 96 96" fill="none" xmlns="http://www.w3.org/2000/svg">
+    {/* Laptop lid / screen */}
+    <rect x="10" y="20" width="76" height="48" rx="8" fill="#5EEAD4" stroke="#000" strokeWidth="2.5"/>
+    {/* Screen bezel inner */}
+    <rect x="18" y="28" width="60" height="34" rx="4" fill="#fff" opacity="0.85"/>
+    {/* < bracket */}
+    <path d="M32 38 L24 45 L32 52" stroke="#111" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
+    {/* > bracket */}
+    <path d="M52 38 L60 45 L52 52" stroke="#111" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
+    {/* / slash */}
+    <line x1="44" y1="36" x2="40" y2="54" stroke="#111" strokeWidth="2.5" strokeLinecap="round"/>
+    {/* Laptop hinge */}
+    <rect x="10" y="66" width="76" height="4" rx="2" fill="#000" opacity="0.15"/>
+    {/* Keyboard base */}
+    <rect x="6" y="70" width="84" height="8" rx="4" fill="#5EEAD4" stroke="#000" strokeWidth="2"/>
+    {/* Trackpad */}
+    <rect x="34" y="72" width="28" height="4" rx="2" fill="#000" opacity="0.25"/>
+  </svg>
+)
+
+// Build - Hammer and wrench crossed (orange, for BUILD category)
+export const BuildIcon = ({ className = "w-6 h-6" }: { className?: string }) => (
+  <svg className={className} viewBox="0 0 96 96" fill="none" xmlns="http://www.w3.org/2000/svg">
+    {/* Wrench body */}
+    <rect x="20" y="42" width="56" height="14" rx="7" fill="#FDBA74" stroke="#000" strokeWidth="2.5" transform="rotate(-45 48 49)"/>
+    {/* Wrench head circle */}
+    <circle cx="26" cy="26" r="12" fill="#FDBA74" stroke="#000" strokeWidth="2.5"/>
+    <circle cx="26" cy="26" r="5" fill="#fff" stroke="#000" strokeWidth="1.5"/>
+    {/* Hammer head */}
+    <rect x="58" y="16" width="22" height="16" rx="4" fill="#FB923C" stroke="#000" strokeWidth="2.5"/>
+    {/* Hammer handle */}
+    <line x1="62" y1="32" x2="42" y2="72" stroke="#000" strokeWidth="6" strokeLinecap="round"/>
+    <line x1="62" y1="32" x2="42" y2="72" stroke="#FDBA74" strokeWidth="3" strokeLinecap="round"/>
+    {/* Sparkle */}
+    <circle cx="72" cy="68" r="4" fill="#FB923C" stroke="#000" strokeWidth="1.5"/>
+    <circle cx="80" cy="52" r="3" fill="#FDBA74" stroke="#000" strokeWidth="1.5"/>
+  </svg>
+)
+
+// Govern / Observe - Telescope pointing at data (rose fill)
+export const GovernIcon = ({ className = "w-6 h-6" }: { className?: string }) => (
+  <svg className={className} viewBox="0 0 96 96" fill="none" xmlns="http://www.w3.org/2000/svg">
+    {/* Telescope barrel */}
+    <rect x="18" y="38" width="52" height="20" rx="8" fill="#F9A8D4" stroke="#000" strokeWidth="2.5" transform="rotate(-30 44 48)"/>
+    {/* Wide end cap */}
+    <ellipse cx="22" cy="62" rx="10" ry="6" fill="#F9A8D4" stroke="#000" strokeWidth="2" transform="rotate(-30 22 62)"/>
+    {/* Lens / eyepiece */}
+    <circle cx="72" cy="28" r="10" fill="#F9A8D4" stroke="#000" strokeWidth="2.5"/>
+    <circle cx="72" cy="28" r="4" fill="#fff" stroke="#000" strokeWidth="1.5"/>
+    {/* Tripod legs */}
+    <line x1="40" y1="68" x2="26" y2="84" stroke="#000" strokeWidth="2.5" strokeLinecap="round"/>
+    <line x1="44" y1="68" x2="44" y2="84" stroke="#000" strokeWidth="2.5" strokeLinecap="round"/>
+    <line x1="48" y1="68" x2="62" y2="84" stroke="#000" strokeWidth="2.5" strokeLinecap="round"/>
+    {/* Star sparkles (observing) */}
+    <circle cx="84" cy="48" r="3" fill="#F9A8D4" stroke="#000" strokeWidth="1.5"/>
+    <circle cx="78" cy="58" r="2" fill="#F9A8D4"/>
+  </svg>
+)
+
 // Integrations - Puzzle pieces connecting
 export const IntegrationsIcon = ({ className = "w-6 h-6" }: { className?: string }) => (
   <svg className={className} viewBox="0 0 96 96" fill="none" xmlns="http://www.w3.org/2000/svg">

@@ -18,6 +18,9 @@ import {
   LiveActivityIcon,
   LogsIcon,
   MemoryIcon,
+  DeveloperIcon,
+  BuildIcon,
+  GovernIcon,
 } from '@/components/icons/system'
 
 const dockApps = [
@@ -32,51 +35,21 @@ const dockApps = [
   { id: 'control-plane', name: 'Control Plane', icon: DashboardIcon, href: '/control-plane' },
 ]
 
-const platformModules = [
-  {
-    label: 'AGENT://AGENTS',
-    icon: AgentIcon,
-    title: 'Agents',
-    desc: 'Design and deploy autonomous AI units',
-    href: '/agents',
-  },
-  {
-    label: 'AGENT://RUNTIME',
-    icon: RuntimeIcon,
-    title: 'Runtime',
-    desc: 'Execution engine powering rooms and workflows',
-    href: '/runtime',
-  },
-  {
-    label: 'AGENT://SETTINGS',
-    icon: DashboardIcon,
-    title: 'Control Plane',
-    desc: 'System configuration',
-    href: '/control-plane',
-  },
-]
-
 const categoryGroups = [
   {
     tag: 'BUILD',
-    icon: AgentIcon,
-    tagBg: 'bg-[#A855F7]',
+    icon: BuildIcon,
     items: ['Agents', 'Workflows', 'Tools'],
-    href: '/agents',
   },
   {
     tag: 'DEPLOY & RUN',
-    icon: LiveRunsIcon,
-    tagBg: 'bg-[#3B82F6]',
+    icon: RuntimeIcon,
     items: ['Rooms', 'Runtime', 'Automation'],
-    href: '/live-runs',
   },
   {
     tag: 'OBSERVE & GOVERN',
-    icon: LiveActivityIcon,
-    tagBg: 'bg-[#EC4899]',
+    icon: GovernIcon,
     items: ['Live Runs', 'Dashboard', 'Control Plane'],
-    href: '/live-runs',
   },
 ]
 
@@ -246,7 +219,7 @@ export default function HomePage() {
                 textColor: 'text-white',
               },
               {
-                icon: AgentIcon,
+                icon: DeveloperIcon,
                 title: 'Developers',
                 description: 'Build, deploy, and orchestrate autonomous agents using APIs, workflows, and tools.',
                 href: '/developers',
@@ -301,64 +274,59 @@ export default function HomePage() {
             <p className="text-xs font-bold tracking-widest text-gray-500 uppercase mb-2">Core Modules</p>
             <h2 className="text-2xl sm:text-3xl font-bold text-[#111111]">Platform Architecture</h2>
           </div>
-
-          {/* Top 3 module cards */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-            {platformModules.map((mod) => {
-              const Icon = mod.icon
-              return (
-                <Link key={mod.title} href={mod.href} className="group bg-[#E8DCC8] border border-[#D4C4A8] rounded-xl p-6 hover:border-[#F54E00] hover:shadow-md hover:-translate-y-1 transition-all duration-200">
-                  <p className="text-[10px] font-bold tracking-widest text-gray-500 mb-3">{mod.label}</p>
-                  <Icon className="w-12 h-12 mb-3 group-hover:scale-110 transition-transform duration-200" />
-                  <h3 className="text-lg font-bold text-[#111111] mb-1">{mod.title}</h3>
-                  <p className="text-sm text-gray-600 mb-3">{mod.desc}</p>
-                  <span className="text-[#F54E00] text-sm font-semibold flex items-center gap-1 group-hover:gap-2 transition-all duration-150">
-                    Open <ChevronRightIcon className="w-4 h-4" />
-                  </span>
-                </Link>
-              )
-            })}
-          </div>
-
-          {/* Category groups */}
+          {/* Non-clickable compact category chips */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             {categoryGroups.map((group) => {
               const Icon = group.icon
               return (
-                <Link key={group.tag} href={group.href} className="group bg-[#E8DCC8] border border-[#D4C4A8] rounded-xl p-6 hover:border-[#F54E00] hover:shadow-md hover:-translate-y-1 transition-all duration-200 flex flex-col items-center text-center">
-                  <Icon className="w-10 h-10 mb-3 group-hover:scale-110 transition-transform duration-200" />
-                  <span className={`px-4 py-1.5 ${group.tagBg} text-white text-xs font-black rounded mb-4 tracking-wide`}>{group.tag}</span>
-                  <ul className="space-y-1">
-                    {group.items.map(item => (
-                      <li key={item} className="text-sm text-gray-700 font-medium">{item}</li>
-                    ))}
-                  </ul>
-                </Link>
+                <div key={group.tag} className="bg-[#E8DCC8] border border-[#D4C4A8] rounded-2xl p-5 flex items-start gap-4">
+                  <div className="p-2.5 bg-[#F54E00] rounded-xl flex-shrink-0">
+                    <Icon className="w-8 h-8" />
+                  </div>
+                  <div>
+                    <span className="inline-block px-2.5 py-0.5 bg-[#F54E00] text-white text-[10px] font-black rounded tracking-widest mb-2">{group.tag}</span>
+                    <ul className="space-y-0.5">
+                      {group.items.map(item => (
+                        <li key={item} className="text-sm text-gray-700 font-medium leading-snug">{item}</li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
               )
             })}
           </div>
         </div>
       </div>
 
-      {/* ── Feature Highlights ── */}
+      {/* ── Feature Highlights — horizontal numbered rows ── */}
       <div className="bg-[#E8DCC8] py-12 border-b-2 border-black">
         <div className="max-w-[95%] 2xl:max-w-[1600px] mx-auto px-4 sm:px-6 md:px-8">
-          <div className="mb-8">
+          <div className="mb-10">
             <p className="text-xs font-bold tracking-widest text-gray-500 uppercase mb-2">Infrastructure</p>
             <h2 className="text-2xl sm:text-3xl font-bold text-[#111111]">Built for scale from day one</h2>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+          <div className="divide-y divide-[#D4C4A8]">
             {featureHighlights.map((feat, i) => {
               const Icon = feat.icon
               return (
                 <div
                   key={feat.title}
-                  className="group bg-[#F5F1E8] border border-[#D4C4A8] rounded-2xl p-6 hover:border-[#F54E00] hover:shadow-[4px_4px_0px_0px_rgba(245,78,0,0.25)] hover:-translate-y-1 transition-all duration-200 animate-slide-up"
-                  style={{ animationDelay: `${0.05 * i}s` }}
+                  className="group flex items-start gap-6 py-6 hover:bg-[#F5F1E8] hover:px-4 rounded-xl transition-all duration-200 -mx-4 px-4"
+                  style={{ animationDelay: `${0.04 * i}s` }}
                 >
-                  <Icon className="w-12 h-12 mb-4 group-hover:scale-110 transition-transform duration-200" />
-                  <h3 className="text-base font-bold text-[#111111] mb-2">{feat.title}</h3>
-                  <p className="text-sm text-gray-600 leading-relaxed">{feat.desc}</p>
+                  {/* Index */}
+                  <span className="text-xs font-black text-gray-400 w-6 pt-1 flex-shrink-0 tabular-nums">{String(i + 1).padStart(2, '0')}</span>
+                  {/* Icon */}
+                  <div className="flex-shrink-0 transition-transform duration-200 group-hover:scale-110">
+                    <Icon className="w-10 h-10" />
+                  </div>
+                  {/* Text */}
+                  <div className="flex-1 min-w-0">
+                    <h3 className="text-sm font-bold text-[#111111] mb-1">{feat.title}</h3>
+                    <p className="text-sm text-gray-500 leading-relaxed">{feat.desc}</p>
+                  </div>
+                  {/* Right arrow on hover */}
+                  <ChevronRightIcon className="w-4 h-4 text-gray-300 group-hover:text-[#F54E00] flex-shrink-0 mt-1 transition-colors duration-200" />
                 </div>
               )
             })}
@@ -460,7 +428,7 @@ export default function HomePage() {
                 className="group relative flex-shrink-0 animate-bounce-in"
                 style={{ animationDelay: `${2.4 + index * 0.05}s` }}
               >
-                <div className="transition-all duration-500 cursor-pointer hover:scale-150 hover:-translate-y-3 active:scale-90">
+                <div className="transition-all duration-300 cursor-pointer hover:scale-125 hover:-translate-y-2 active:scale-95">
                   <Icon className="w-8 h-8 sm:w-10 sm:h-10" />
                 </div>
                 <div className="absolute -top-16 left-1/2 -translate-x-1/2 px-3 py-2 bg-[#F54E00] text-white text-xs font-bold rounded-lg opacity-0 group-hover:opacity-100 transition-all duration-300 whitespace-nowrap pointer-events-none group-hover:-translate-y-2 shadow-xl">
