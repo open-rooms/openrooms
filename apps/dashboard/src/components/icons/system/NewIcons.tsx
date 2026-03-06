@@ -111,6 +111,65 @@ export const ArchitectureIcon = ({ className = "w-6 h-6" }: { className?: string
   </svg>
 )
 
+// Distributed Execution - Stacked parallel worker layers
+export const DistributedExecutionIcon = ({ className = "w-6 h-6" }: { className?: string }) => (
+  <svg className={className} viewBox="0 0 96 96" fill="none" xmlns="http://www.w3.org/2000/svg">
+    {/* Top layer */}
+    <rect x="14" y="16" width="68" height="16" rx="6" fill="#C4B5FD" stroke="#000" strokeWidth="2.5"/>
+    <circle cx="28" cy="24" r="4" fill="#000"/>
+    <circle cx="42" cy="24" r="4" fill="#000"/>
+    <circle cx="56" cy="24" r="4" fill="#000"/>
+    {/* Middle layer */}
+    <rect x="14" y="40" width="68" height="16" rx="6" fill="#C4B5FD" stroke="#000" strokeWidth="2.5"/>
+    <circle cx="28" cy="48" r="4" fill="#000"/>
+    <circle cx="42" cy="48" r="4" fill="#000"/>
+    <circle cx="56" cy="48" r="4" fill="#000"/>
+    {/* Bottom layer */}
+    <rect x="14" y="64" width="68" height="16" rx="6" fill="#C4B5FD" stroke="#000" strokeWidth="2.5"/>
+    <circle cx="28" cy="72" r="4" fill="#000"/>
+    <circle cx="42" cy="72" r="4" fill="#000"/>
+    <circle cx="56" cy="72" r="4" fill="#000"/>
+    {/* Right status indicators */}
+    <circle cx="74" cy="24" r="3" fill="#4ADE80"/>
+    <circle cx="74" cy="48" r="3" fill="#4ADE80"/>
+    <circle cx="74" cy="72" r="3" fill="#FBBF24"/>
+  </svg>
+)
+
+// Observability - Eye with waveform monitor
+export const ObservabilityIcon = ({ className = "w-6 h-6" }: { className?: string }) => (
+  <svg className={className} viewBox="0 0 96 96" fill="none" xmlns="http://www.w3.org/2000/svg">
+    {/* Screen */}
+    <rect x="12" y="20" width="72" height="44" rx="10" fill="#86EFAC" stroke="#000" strokeWidth="2.5"/>
+    {/* Waveform */}
+    <path d="M20 42 L30 42 L36 28 L44 56 L50 42 L60 42 L66 34 L72 42 L76 42"
+      stroke="#000" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
+    {/* Stand */}
+    <rect x="42" y="64" width="12" height="8" rx="2" fill="#86EFAC" stroke="#000" strokeWidth="2"/>
+    <rect x="32" y="72" width="32" height="6" rx="3" fill="#86EFAC" stroke="#000" strokeWidth="2"/>
+    {/* Live dot */}
+    <circle cx="74" cy="26" r="5" fill="#EF4444" stroke="#000" strokeWidth="2"/>
+  </svg>
+)
+
+// Enterprise Architecture - Floor plan / blueprint layout
+export const EnterpriseArchitectureIcon = ({ className = "w-6 h-6" }: { className?: string }) => (
+  <svg className={className} viewBox="0 0 96 96" fill="none" xmlns="http://www.w3.org/2000/svg">
+    {/* Outer building frame */}
+    <rect x="10" y="14" width="76" height="68" rx="4" fill="#FDE68A" stroke="#000" strokeWidth="2.5"/>
+    {/* Inner rooms / floor plan */}
+    <rect x="18" y="22" width="28" height="24" rx="3" fill="#FFF" opacity="0.6" stroke="#000" strokeWidth="2"/>
+    <rect x="50" y="22" width="28" height="24" rx="3" fill="#FFF" opacity="0.6" stroke="#000" strokeWidth="2"/>
+    <rect x="18" y="52" width="60" height="22" rx="3" fill="#FFF" opacity="0.6" stroke="#000" strokeWidth="2"/>
+    {/* Door gap */}
+    <rect x="42" y="38" width="8" height="8" rx="1" fill="#FDE68A"/>
+    {/* Room labels */}
+    <circle cx="32" cy="34" r="4" fill="#000"/>
+    <circle cx="64" cy="34" r="4" fill="#000"/>
+    <line x1="28" y1="63" x2="70" y2="63" stroke="#000" strokeWidth="1.5" strokeDasharray="4 3"/>
+  </svg>
+)
+
 // Integrations - Puzzle pieces connecting
 export const IntegrationsIcon = ({ className = "w-6 h-6" }: { className?: string }) => (
   <svg className={className} viewBox="0 0 96 96" fill="none" xmlns="http://www.w3.org/2000/svg">

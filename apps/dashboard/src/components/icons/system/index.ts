@@ -25,4 +25,7 @@ export {
   ReportsIcon,
   ArchitectureIcon,
   IntegrationsIcon,
+  DistributedExecutionIcon,
+  ObservabilityIcon,
+  EnterpriseArchitectureIcon,
 } from './NewIcons'

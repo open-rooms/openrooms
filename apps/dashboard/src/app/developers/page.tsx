@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { ChevronRightIcon } from '@/components/icons'
 import { FeatureGrid } from '@/components/FeatureCard'
+import { PathDock } from '@/components/PathDock'
 import {
   DashboardIcon,
   AgentIcon,
@@ -72,9 +73,21 @@ const features = [
   },
 ]
 
+const dockItems = [
+  { id: 'control-plane', name: 'Control Plane', icon: DashboardIcon, href: '/control-plane' },
+  { id: 'agents', name: 'Agents', icon: AgentIcon, href: '/agents' },
+  { id: 'workflows', name: 'Workflows', icon: WorkflowIcon, href: '/workflows' },
+  { id: 'tools', name: 'Tools', icon: ToolIcon, href: '/tools' },
+  { id: 'runtime', name: 'Runtime', icon: RuntimeIcon, href: '/runtime' },
+  { id: 'runs', name: 'Live Runs', icon: LiveRunsIcon, href: '/live-runs' },
+  { id: 'logs', name: 'Logs', icon: LogsIcon, href: '/live-runs' },
+  { id: 'api', name: 'API', icon: APIIcon, href: '/settings' },
+  { id: 'sdk', name: 'SDK', icon: SDKIcon, href: '/docs' },
+]
+
 export default function DevelopersPage() {
   return (
-    <div className="min-h-screen bg-[#E8DCC8]">
+    <div className="min-h-screen bg-[#E8DCC8] pb-28">
       {/* Hero */}
       <div className="bg-[#F5F1E8] border-b-2 border-black">
         <div className="max-w-[95%] 2xl:max-w-[1600px] mx-auto px-6 md:px-8 py-12 md:py-16">
@@ -87,7 +100,7 @@ export default function DevelopersPage() {
               OpenRooms is a full control plane. Design agents, compose workflows, register tools, and observe execution — all through a programmable runtime.
             </p>
             <div className="flex flex-wrap gap-3">
-              <Link href="/control-plane" className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#F54E00] hover:bg-[#E24600] text-white text-sm font-bold rounded-xl transition-colors">
+              <Link href="/control-plane" className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#5EEAD4] hover:bg-[#4dd4be] text-[#111111] text-sm font-bold rounded-xl transition-colors">
                 <span>Open Control Plane</span>
                 <ChevronRightIcon className="w-4 h-4" />
               </Link>
@@ -141,6 +154,9 @@ Content-Type: application/json
           </div>
         </div>
       </div>
+
+      {/* Path Dock */}
+      <PathDock items={dockItems} accentColor="#5EEAD4" />
     </div>
   )
 }

@@ -73,6 +73,8 @@ module.exports = {
         'float': 'float 3s ease-in-out infinite',
         'gradient-shift': 'gradient-shift 3s ease infinite',
         'shimmer': 'shimmer 2s linear infinite',
+        'marquee': 'marquee 30s linear infinite',
+        'marquee-fast': 'marquee 18s linear infinite',
       },
       keyframes: {
         float: {
@@ -86,6 +88,10 @@ module.exports = {
         shimmer: {
           '0%': { backgroundPosition: '-200% center' },
           '100%': { backgroundPosition: '200% center' },
+        },
+        marquee: {
+          '0%': { transform: 'translateX(0%)' },
+          '100%': { transform: 'translateX(-50%)' },
         },
       },
     },

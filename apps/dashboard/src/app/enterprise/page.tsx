@@ -3,16 +3,17 @@
 import Link from 'next/link'
 import { ChevronRightIcon } from '@/components/icons'
 import { FeatureGrid } from '@/components/FeatureCard'
+import { PathDock } from '@/components/PathDock'
 import {
   RoomsIcon,
   AgentClustersIcon,
-  WorkflowIcon,
-  LiveActivityIcon,
+  DistributedExecutionIcon,
+  ObservabilityIcon,
   AutomationIcon,
   IntegrationsIcon,
   SecurityIcon,
   ComplianceIcon,
-  ArchitectureIcon,
+  EnterpriseArchitectureIcon,
 } from '@/components/icons/system'
 
 const features = [
@@ -29,13 +30,13 @@ const features = [
     href: '/agents',
   },
   {
-    icon: WorkflowIcon,
+    icon: DistributedExecutionIcon,
     title: 'Distributed Execution',
     description: 'BullMQ worker pools that scale horizontally — no bottlenecks, no single point of failure.',
     href: '/runtime',
   },
   {
-    icon: LiveActivityIcon,
+    icon: ObservabilityIcon,
     title: 'Observability',
     description: 'Full telemetry across every agent action, tool call, reasoning trace, and workflow step.',
     href: '/live-runs',
@@ -65,7 +66,7 @@ const features = [
     href: '/live-runs',
   },
   {
-    icon: ArchitectureIcon,
+    icon: EnterpriseArchitectureIcon,
     title: 'Architecture',
     description: 'Modular infrastructure: swap LLM providers, extend tool registries, and customise runtime.',
     href: '/control-plane',
@@ -79,9 +80,21 @@ const stats = [
   { value: 'REST API', label: 'Fully programmable' },
 ]
 
+const dockItems = [
+  { id: 'rooms', name: 'Rooms', icon: RoomsIcon, href: '/rooms' },
+  { id: 'clusters', name: 'Agent Clusters', icon: AgentClustersIcon, href: '/agents' },
+  { id: 'dist', name: 'Distributed Exec', icon: DistributedExecutionIcon, href: '/runtime' },
+  { id: 'obs', name: 'Observability', icon: ObservabilityIcon, href: '/live-runs' },
+  { id: 'auto', name: 'Automation', icon: AutomationIcon, href: '/automation' },
+  { id: 'int', name: 'Integrations', icon: IntegrationsIcon, href: '/tools' },
+  { id: 'sec', name: 'Security', icon: SecurityIcon, href: '/settings' },
+  { id: 'comp', name: 'Compliance', icon: ComplianceIcon, href: '/live-runs' },
+  { id: 'arch', name: 'Architecture', icon: EnterpriseArchitectureIcon, href: '/control-plane' },
+]
+
 export default function EnterprisePage() {
   return (
-    <div className="min-h-screen bg-[#E8DCC8]">
+    <div className="min-h-screen bg-[#E8DCC8] pb-28">
       {/* Hero */}
       <div className="bg-[#F5F1E8] border-b-2 border-black">
         <div className="max-w-[95%] 2xl:max-w-[1600px] mx-auto px-6 md:px-8 py-12 md:py-20">
@@ -94,7 +107,7 @@ export default function EnterprisePage() {
               OpenRooms gives enterprise teams a control plane for deploying, orchestrating, and observing autonomous AI systems at scale — across teams, APIs, and data pipelines.
             </p>
             <div className="flex flex-wrap gap-3">
-              <Link href="/control-plane" className="inline-flex items-center gap-2 px-6 py-3 bg-[#F54E00] hover:bg-[#E24600] text-white text-sm font-bold rounded-xl transition-colors">
+              <Link href="/control-plane" className="inline-flex items-center gap-2 px-6 py-3 bg-[#FB923C] hover:bg-[#e87d2a] text-white text-sm font-bold rounded-xl transition-colors">
                 <span>Open Control Plane</span>
                 <ChevronRightIcon className="w-4 h-4" />
               </Link>
@@ -112,7 +125,7 @@ export default function EnterprisePage() {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
             {stats.map((s) => (
               <div key={s.label} className="text-center">
-                <div className="text-lg md:text-xl font-bold text-[#F54E00]">{s.value}</div>
+                <div className="text-lg md:text-xl font-bold text-[#FB923C]">{s.value}</div>
                 <div className="text-xs text-gray-400 mt-0.5">{s.label}</div>
               </div>
             ))}
@@ -140,7 +153,7 @@ export default function EnterprisePage() {
               </p>
             </div>
             <div className="flex flex-col sm:flex-row gap-3 flex-shrink-0">
-              <Link href="/agents/create" className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-[#F54E00] hover:bg-[#E24600] text-white text-sm font-bold rounded-xl transition-colors whitespace-nowrap">
+              <Link href="/agents/create" className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-[#FB923C] hover:bg-[#e87d2a] text-white text-sm font-bold rounded-xl transition-colors whitespace-nowrap">
                 <span>Create an Agent</span>
                 <ChevronRightIcon className="w-4 h-4" />
               </Link>
@@ -151,6 +164,9 @@ export default function EnterprisePage() {
           </div>
         </div>
       </div>
+
+      {/* Path Dock */}
+      <PathDock items={dockItems} accentColor="#FB923C" />
     </div>
   )
 }

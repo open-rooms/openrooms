@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { ChevronRightIcon } from '@/components/icons'
 import { FeatureGrid } from '@/components/FeatureCard'
+import { PathDock } from '@/components/PathDock'
 import {
   RoomsIcon,
   AgentIcon,
@@ -72,9 +73,21 @@ const features = [
   },
 ]
 
+const dockItems = [
+  { id: 'rooms', name: 'Rooms', icon: RoomsIcon, href: '/rooms' },
+  { id: 'agents', name: 'Agents', icon: AgentIcon, href: '/agents' },
+  { id: 'workflows', name: 'Workflows', icon: WorkflowIcon, href: '/workflows' },
+  { id: 'automation', name: 'Automations', icon: AutomationIcon, href: '/automation' },
+  { id: 'live', name: 'Live Activity', icon: LiveActivityIcon, href: '/live-runs' },
+  { id: 'knowledge', name: 'Knowledge', icon: MemoryIcon, href: '/rooms' },
+  { id: 'reports', name: 'Reports', icon: ReportsIcon, href: '/live-runs' },
+  { id: 'integrations', name: 'Integrations', icon: IntegrationsIcon, href: '/tools' },
+  { id: 'tools', name: 'Tools', icon: ToolIcon, href: '/tools' },
+]
+
 export default function ClientsPage() {
   return (
-    <div className="min-h-screen bg-[#E8DCC8]">
+    <div className="min-h-screen bg-[#E8DCC8] pb-28">
       {/* Hero */}
       <div className="bg-[#F5F1E8] border-b-2 border-black">
         <div className="max-w-[95%] 2xl:max-w-[1600px] mx-auto px-6 md:px-8 py-12 md:py-16">
@@ -87,7 +100,7 @@ export default function ClientsPage() {
               OpenRooms runs AI agents that research, monitor, and automate tasks on your behalf — inside isolated Rooms built for your goals.
             </p>
             <div className="flex flex-wrap gap-3">
-              <Link href="/rooms" className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#F54E00] hover:bg-[#E24600] text-white text-sm font-bold rounded-xl transition-colors">
+              <Link href="/rooms" className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#A78BFA] hover:bg-[#9270f0] text-white text-sm font-bold rounded-xl transition-colors">
                 <span>Browse Rooms</span>
                 <ChevronRightIcon className="w-4 h-4" />
               </Link>
@@ -113,12 +126,15 @@ export default function ClientsPage() {
         <div className="max-w-[95%] 2xl:max-w-[1600px] mx-auto px-6 md:px-8 text-center">
           <h3 className="text-2xl font-bold text-[#111111] mb-3">Ready to launch your first Room?</h3>
           <p className="text-gray-600 mb-6 max-w-md mx-auto text-sm">Create a Room, add agents, and watch them automate your workflow in real time.</p>
-          <Link href="/rooms?action=create" className="inline-flex items-center gap-2 px-7 py-3 bg-[#F54E00] hover:bg-[#E24600] text-white font-bold rounded-xl transition-colors">
+          <Link href="/rooms?action=create" className="inline-flex items-center gap-2 px-7 py-3 bg-[#A78BFA] hover:bg-[#9270f0] text-white font-bold rounded-xl transition-colors">
             <span>Create a Room</span>
             <ChevronRightIcon className="w-4 h-4" />
           </Link>
         </div>
       </div>
+
+      {/* Path Dock */}
+      <PathDock items={dockItems} accentColor="#A78BFA" />
     </div>
   )
 }
