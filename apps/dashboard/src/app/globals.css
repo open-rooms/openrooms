@@ -83,6 +83,20 @@
     50%       { transform: translateY(-4px); }
   }
 
+  /* Vertical ticker — continuous upward scroll */
+  .animate-scroll-up {
+    animation: scrollUp 22s linear infinite;
+  }
+
+  .animate-scroll-up-slow {
+    animation: scrollUp 32s linear infinite;
+  }
+
+  @keyframes scrollUp {
+    0%   { transform: translateY(0); }
+    100% { transform: translateY(-50%); }
+  }
+
   /* Smooth, precise easing across all transitions */
   * {
     transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1);

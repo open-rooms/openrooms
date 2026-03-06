@@ -54,12 +54,12 @@ const categoryGroups = [
 ]
 
 const featureHighlights = [
-  { icon: RuntimeIcon, title: 'Deterministic Runtime', desc: 'Every agent execution is tracked, reproducible, and auditable with full trace visibility.' },
-  { icon: LiveActivityIcon, title: 'Event-Driven Automation', desc: 'Trigger agents from webhooks, schedules, API calls, or cross-room events.' },
-  { icon: WorkflowIcon, title: 'Multi-Agent Workflows', desc: 'Compose complex pipelines where agents hand off tasks, share context, and coordinate outcomes.' },
-  { icon: LogsIcon, title: 'Structured Logs & Traces', desc: 'Every step emits structured logs. Filter, search, and replay any execution at any time.' },
-  { icon: MemoryIcon, title: 'Shared Knowledge', desc: 'Agents read from and write to persistent memory stores — vectorised knowledge bases across rooms.' },
-  { icon: ToolIcon, title: 'Pluggable Tool Registry', desc: 'Connect any external API, database, or service as a first-class agent tool in minutes.' },
+  { icon: RuntimeIcon, title: 'Zero-Drift Execution', desc: 'Agents run on rails. Every token, tool call, and decision is logged — reproducible in production, auditable forever.' },
+  { icon: LiveActivityIcon, title: 'Trigger Anything', desc: 'Webhooks, schedules, API calls, agent signals. If something can emit an event, OpenRooms will act on it — without code.' },
+  { icon: WorkflowIcon, title: 'Parallel Agent Networks', desc: 'Deploy clusters of specialist agents that divide work, share context, and converge on results — no human handholding.' },
+  { icon: LogsIcon, title: 'Execution X-Ray', desc: 'Not just logs. Structured telemetry on every step — filter, replay, and debug any execution in milliseconds.' },
+  { icon: MemoryIcon, title: 'Memory That Compounds', desc: "Agents don't start blank. Vectorised memory lets them accumulate context across every room and every run." },
+  { icon: ToolIcon, title: 'Infinite Surface Area', desc: 'Any REST API, database, or platform becomes an agent-native tool in one config block. No SDK. No boilerplate.' },
 ]
 
 const poweredByItems = [
@@ -246,8 +246,10 @@ export default function HomePage() {
                   className="group bg-[#F5F1E8] border-2 border-[#D4C4A8] rounded-2xl p-6 sm:p-8 flex flex-col hover:border-[#F54E00] hover:shadow-[4px_4px_0px_0px_rgba(245,78,0,0.4)] hover:-translate-y-1.5 transition-all duration-200 animate-slide-up"
                   style={{ animationDelay: `${0.4 + i * 0.1}s` }}
                 >
-                  <div className="mb-5 transition-all duration-200 group-hover:scale-110 group-hover:-translate-y-1">
-                    <Icon className="w-20 h-20 sm:w-24 sm:h-24" />
+                  <div className="mb-5 transition-all duration-300 group-hover:scale-105">
+                    <div className={`inline-block rounded-2xl p-2 ${card.title === 'Developers' ? 'bg-[#5EEAD4]/15' : ''}`}>
+                      <Icon className="w-20 h-20 sm:w-24 sm:h-24" />
+                    </div>
                   </div>
                   <div className="flex-1">
                     <h3 className="text-xl font-bold text-[#111111] mb-2">{card.title}</h3>
@@ -274,20 +276,21 @@ export default function HomePage() {
             <p className="text-xs font-bold tracking-widest text-gray-500 uppercase mb-2">Core Modules</p>
             <h2 className="text-2xl sm:text-3xl font-bold text-[#111111]">Platform Architecture</h2>
           </div>
-          {/* Non-clickable compact category chips */}
+          {/* Non-clickable compact category chips — CTA orange fill */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             {categoryGroups.map((group) => {
               const Icon = group.icon
               return (
-                <div key={group.tag} className="bg-[#E8DCC8] border border-[#D4C4A8] rounded-2xl p-5 flex items-start gap-4">
-                  <div className="p-2.5 bg-[#F54E00] rounded-xl flex-shrink-0">
-                    <Icon className="w-8 h-8" />
+                <div key={group.tag} className="bg-[#F54E00] rounded-2xl p-5 flex items-start gap-4">
+                  {/* Icon in natural color on a semi-transparent white circle */}
+                  <div className="p-2 bg-white/20 rounded-xl flex-shrink-0 backdrop-blur-sm">
+                    <Icon className="w-9 h-9" />
                   </div>
                   <div>
-                    <span className="inline-block px-2.5 py-0.5 bg-[#F54E00] text-white text-[10px] font-black rounded tracking-widest mb-2">{group.tag}</span>
+                    <span className="inline-block px-2.5 py-0.5 bg-black/20 text-white text-[10px] font-black rounded tracking-widest mb-2">{group.tag}</span>
                     <ul className="space-y-0.5">
                       {group.items.map(item => (
-                        <li key={item} className="text-sm text-gray-700 font-medium leading-snug">{item}</li>
+                        <li key={item} className="text-sm text-white/90 font-medium leading-snug">{item}</li>
                       ))}
                     </ul>
                   </div>
@@ -298,38 +301,74 @@ export default function HomePage() {
         </div>
       </div>
 
-      {/* ── Feature Highlights — horizontal numbered rows ── */}
-      <div className="bg-[#E8DCC8] py-12 border-b-2 border-black">
+      {/* ── Runtime Capabilities — split layout with vertical ticker ── */}
+      <div className="bg-[#111111] py-16 border-b-2 border-black overflow-hidden">
         <div className="max-w-[95%] 2xl:max-w-[1600px] mx-auto px-4 sm:px-6 md:px-8">
-          <div className="mb-10">
-            <p className="text-xs font-bold tracking-widest text-gray-500 uppercase mb-2">Infrastructure</p>
-            <h2 className="text-2xl sm:text-3xl font-bold text-[#111111]">Built for scale from day one</h2>
-          </div>
-          <div className="divide-y divide-[#D4C4A8]">
-            {featureHighlights.map((feat, i) => {
-              const Icon = feat.icon
-              return (
-                <div
-                  key={feat.title}
-                  className="group flex items-start gap-6 py-6 hover:bg-[#F5F1E8] hover:px-4 rounded-xl transition-all duration-200 -mx-4 px-4"
-                  style={{ animationDelay: `${0.04 * i}s` }}
-                >
-                  {/* Index */}
-                  <span className="text-xs font-black text-gray-400 w-6 pt-1 flex-shrink-0 tabular-nums">{String(i + 1).padStart(2, '0')}</span>
-                  {/* Icon */}
-                  <div className="flex-shrink-0 transition-transform duration-200 group-hover:scale-110">
-                    <Icon className="w-10 h-10" />
-                  </div>
-                  {/* Text */}
-                  <div className="flex-1 min-w-0">
-                    <h3 className="text-sm font-bold text-[#111111] mb-1">{feat.title}</h3>
-                    <p className="text-sm text-gray-500 leading-relaxed">{feat.desc}</p>
-                  </div>
-                  {/* Right arrow on hover */}
-                  <ChevronRightIcon className="w-4 h-4 text-gray-300 group-hover:text-[#F54E00] flex-shrink-0 mt-1 transition-colors duration-200" />
+          <div className="flex flex-col lg:flex-row gap-12 lg:gap-20 items-start">
+
+            {/* Left — static content */}
+            <div className="lg:w-2/5 lg:sticky lg:top-24 flex-shrink-0">
+              <span className="text-[10px] font-black tracking-widest text-[#F54E00] uppercase mb-3 inline-block">Runtime Capabilities</span>
+              <h2 className="text-3xl sm:text-4xl font-black text-white leading-tight mb-5">
+                Infrastructure<br />That Doesn&apos;t Flinch.
+              </h2>
+              <p className="text-base text-gray-400 leading-relaxed mb-8 max-w-sm">
+                While you sleep, agents run. Every decision logged, every execution auditable, every failure recoverable. Built to operate without supervision.
+              </p>
+              <div className="flex flex-col gap-3">
+                <Link href="/control-plane" className="inline-flex items-center gap-2 px-5 py-3 bg-[#F54E00] hover:bg-[#E24600] text-white text-sm font-bold rounded-xl transition-colors duration-200 w-fit">
+                  <span>See it in action</span>
+                  <ChevronRightIcon className="w-4 h-4" />
+                </Link>
+                <Link href="/live-runs" className="inline-flex items-center gap-2 px-5 py-3 border border-gray-700 hover:border-[#F54E00] text-gray-400 hover:text-white text-sm font-semibold rounded-xl transition-colors duration-200 w-fit">
+                  Live Runs
+                </Link>
+              </div>
+
+              {/* Counter strip */}
+              <div className="mt-10 grid grid-cols-2 gap-4">
+                <div className="bg-white/5 rounded-xl p-4">
+                  <div className="text-xl font-black text-[#F54E00]">∞</div>
+                  <div className="text-xs text-gray-500 mt-0.5">Agents per workspace</div>
                 </div>
-              )
-            })}
+                <div className="bg-white/5 rounded-xl p-4">
+                  <div className="text-xl font-black text-white">100%</div>
+                  <div className="text-xs text-gray-500 mt-0.5">Execution logged</div>
+                </div>
+              </div>
+            </div>
+
+            {/* Right — vertical scrolling ticker */}
+            <div className="lg:w-3/5 relative">
+              {/* Fade masks */}
+              <div className="pointer-events-none absolute top-0 left-0 right-0 h-16 bg-gradient-to-b from-[#111111] to-transparent z-10" />
+              <div className="pointer-events-none absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-[#111111] to-transparent z-10" />
+
+              {/* Scrolling container */}
+              <div className="overflow-hidden h-[420px]">
+                <div className="animate-scroll-up flex flex-col gap-3">
+                  {/* Items duplicated for seamless loop */}
+                  {[...featureHighlights, ...featureHighlights].map((feat, i) => {
+                    const Icon = feat.icon
+                    return (
+                      <div
+                        key={`${feat.title}-${i}`}
+                        className="bg-white/5 border border-white/10 rounded-2xl p-5 flex items-start gap-4 hover:bg-white/10 hover:border-white/20 transition-colors duration-200 flex-shrink-0"
+                      >
+                        <div className="p-2 bg-white/10 rounded-lg flex-shrink-0">
+                          <Icon className="w-7 h-7" />
+                        </div>
+                        <div>
+                          <h3 className="text-sm font-bold text-white mb-1">{feat.title}</h3>
+                          <p className="text-xs text-gray-400 leading-relaxed">{feat.desc}</p>
+                        </div>
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
+            </div>
+
           </div>
         </div>
       </div>
