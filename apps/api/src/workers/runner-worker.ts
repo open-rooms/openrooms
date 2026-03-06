@@ -157,11 +157,24 @@ async function simulateAgentLoop(
 
           if (category === 'HTTP_API' || category === 'EXTERNAL_API') {
             const url = (meta.url as string) || '';
+            const method = ((meta.method as string) || 'GET').toUpperCase();
+            const headers = (meta.headers as Record<string, string>) || {};
             if (url) {
-              const res = await fetch(url, { signal: AbortSignal.timeout(5000) });
-              toolResult = { status: res.status, ok: res.ok };
+              try {
+                const res = await fetch(url, {
+                  method,
+                  headers: { 'User-Agent': 'OpenRooms/1.0', ...headers },
+                  signal: AbortSignal.timeout(8000),
+                });
+                const body = await res.text();
+                let parsed: unknown = body;
+                try { parsed = JSON.parse(body); } catch { /* keep as string */ }
+                toolResult = { status: res.status, ok: res.ok, data: parsed };
+              } catch (fetchErr: any) {
+                toolResult = { error: `HTTP fetch failed: ${fetchErr.message}`, simulated: false };
+              }
             } else {
-              toolResult = { simulated: true, message: 'HTTP tool has no URL — returning sample data' };
+              toolResult = { simulated: true, message: 'HTTP tool has no URL configured' };
             }
           } else if (category === 'COMPUTATION') {
             const expr = ((toolInput.expression as string) || '42 * 7').replace(/[^0-9+\-*/.()\s]/g, '');
@@ -383,20 +396,38 @@ export function createRunnerWorkers(redis: Redis, connection: ConnectionOpts) {
 
           await sleep(300 + Math.random() * 400);
 
-          // Handle AGENT nodes — run the embedded agent
-          if (nodeType === 'AGENT' && node.agentId) {
+          // Handle AGENT nodes — agentId lives in node.config (JSONB)
+          const nodeConfig = typeof node.config === 'string'
+            ? JSON.parse(node.config) : (node.config ?? {});
+          const nodeAgentId = nodeConfig.agentId;
+          const nodeMaxIter = nodeConfig.maxIterations ?? 3;
+
+          if (nodeType === 'AGENT' && nodeAgentId) {
             const agent = await (db as any)
-              .selectFrom('agents').selectAll().where('id', '=', node.agentId).executeTakeFirst();
+              .selectFrom('agents').selectAll().where('id', '=', nodeAgentId).executeTakeFirst();
 
             if (agent && effectiveRoomId) {
-              const toolDefs = await (db as any)
-                .selectFrom('tools').select(['name', 'description', 'category', 'metadata']).limit(2).execute();
+              const agentToolNames: string[] = Array.isArray(agent.allowedTools)
+                ? agent.allowedTools
+                : [];
+
+              let agentTools: any[] = [];
+              if (agentToolNames.length > 0) {
+                agentTools = await (db as any).selectFrom('tools')
+                  .select(['name', 'description', 'category', 'metadata'])
+                  .where('name', 'in', agentToolNames).execute().catch(() => []);
+              }
+              // Synthetic stubs for any tools not in DB
+              const dbNames = new Set(agentTools.map((t: any) => t.name));
+              const stubs = agentToolNames.filter(n => !dbNames.has(n))
+                .map(n => ({ name: n, description: `Tool: ${n}`, category: 'COMPUTATION', metadata: {} }));
+              const toolDefs = [...agentTools, ...stubs];
 
               await logEvent(db, effectiveRoomId, workflowId, agent.id, 'AGENT_LOOP_STARTED',
-                `Agent "${agent.name}" called by workflow node`, { nodeId: node.id });
+                `Agent "${agent.name}" called by workflow — Goal: ${agent.goal?.slice(0, 80)}`, { nodeId: node.id });
 
               await simulateAgentLoop(db, redis, eventBus, runId, agent.id, effectiveRoomId, workflowId,
-                2, agent.goal ?? 'Execute workflow task', toolDefs);
+                nodeMaxIter, agent.goal ?? 'Execute workflow task', toolDefs);
 
               await logEvent(db, effectiveRoomId, workflowId, agent.id, 'AGENT_LOOP_COMPLETED',
                 `Agent "${agent.name}" finished workflow step`, { nodeId: node.id });
