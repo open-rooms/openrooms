@@ -1,10 +1,10 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { AgentsIllustrationIcon } from '@/components/icons';
-import { getAgent, getAgentTraces, executeAgent, updateAgent, runAgent } from '@/lib/api';
+import { getAgent, getAgentTraces, executeAgent, updateAgent, runAgent, getRuns, getLogsByRun, type Run, type ExecutionLog } from '@/lib/api';
 
 interface Agent {
   id: string;
@@ -44,6 +44,9 @@ export default function AgentDetailPage() {
   const [activeTab, setActiveTab] = useState<'overview' | 'traces' | 'policy' | 'memory'>('overview');
   const [executing, setExecuting] = useState(false);
   const [lastRunId, setLastRunId] = useState<string | null>(null);
+  const [activeRun, setActiveRun] = useState<Run | null>(null);
+  const [runLogs, setRunLogs] = useState<ExecutionLog[]>([]);
+  const runPollRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     fetchAgent();
@@ -71,37 +74,52 @@ export default function AgentDetailPage() {
     }
   };
 
+  const pollRun = async (runId: string) => {
+    try {
+      const runsData = await getRuns({ targetId: agentId });
+      const run = (runsData.runs || []).find(r => r.id === runId) || null;
+      setActiveRun(run);
+      if (run) {
+        const logsData = await getLogsByRun(runId).catch(() => ({ logs: [], runId, count: 0 }));
+        setRunLogs(logsData.logs || []);
+      }
+      if (run && (run.status === 'completed' || run.status === 'failed')) {
+        if (runPollRef.current) clearInterval(runPollRef.current);
+        fetchAgent();
+        fetchTraces();
+      }
+    } catch { /* silent */ }
+  };
+
   const handleExecute = async () => {
     if (!agent) return;
 
     setExecuting(true);
     setLastRunId(null);
+    setActiveRun(null);
+    setRunLogs([]);
+    if (runPollRef.current) clearInterval(runPollRef.current);
+
     try {
-      // Stage 4: use /run which creates a tracked run record
       const data = await runAgent(agentId, {
         roomId: agent.roomId || undefined,
-        maxIterations: 10,
+        maxIterations: 5,
       });
       setLastRunId(data.runId);
-      fetchAgent();
-      setTimeout(fetchTraces, 1500);
+      // Poll run status every 2 seconds
+      runPollRef.current = setInterval(() => pollRun(data.runId), 2000);
+      pollRun(data.runId);
     } catch (error) {
       console.error('Failed to run agent:', error);
-      // Fallback to legacy execute endpoint
-      try {
-        const data = await executeAgent(agentId, {
-          roomId: agent.roomId || agentId,
-          maxIterations: 10,
-        });
-        alert(`Agent execution queued (legacy): ${data.executionId}`);
-        fetchAgent();
-      } catch {
-        alert('Failed to run agent. Ensure the agent has a roomId assigned.');
-      }
+      alert(`Could not start agent run: ${(error as Error).message}`);
     } finally {
       setExecuting(false);
     }
   };
+
+  useEffect(() => {
+    return () => { if (runPollRef.current) clearInterval(runPollRef.current); };
+  }, []);
 
   const handleUpdateStatus = async (newStatus: 'ACTIVE' | 'PAUSED' | 'ARCHIVED') => {
     try {
@@ -128,12 +146,21 @@ export default function AgentDetailPage() {
 
   if (!agent) {
     return (
-      <div className="min-h-screen bg-[#E8DCC8] flex items-center justify-center">
-        <div className="text-center">
+      <div className="min-h-screen bg-[#E8DCC8] flex items-center justify-center p-8">
+        <div className="text-center max-w-sm">
+          <div className="text-5xl mb-4">🤖</div>
           <h2 className="text-2xl font-bold text-[#111111] mb-2">Agent not found</h2>
-          <Link href="/agents" className="text-[#F54E00] hover:underline">
-            ← Back to agents
-          </Link>
+          <p className="text-gray-600 text-sm mb-6">
+            This agent may have been deleted or you may have an outdated link.
+          </p>
+          <div className="flex gap-3 justify-center">
+            <Link href="/agents" className="px-5 py-2 bg-[#F54E00] text-white font-bold rounded-lg text-sm hover:bg-[#E24600]">
+              ← View All Agents
+            </Link>
+            <Link href="/agents/create" className="px-5 py-2 bg-white border-2 border-black text-[#111111] font-bold rounded-lg text-sm hover:bg-gray-50">
+              + Create Agent
+            </Link>
+          </div>
         </div>
       </div>
     );
@@ -220,6 +247,46 @@ export default function AgentDetailPage() {
               </select>
             </div>
           </div>
+
+          {/* Live Run Status Panel */}
+          {activeRun && (
+            <div className={`mb-4 rounded-xl border-2 p-4 ${
+              activeRun.status === 'running' ? 'border-blue-300 bg-blue-50'
+              : activeRun.status === 'completed' ? 'border-emerald-300 bg-emerald-50'
+              : 'border-red-300 bg-red-50'
+            }`}>
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2">
+                  {activeRun.status === 'running' && <div className="w-3 h-3 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />}
+                  {activeRun.status === 'completed' && <span className="text-emerald-600">✓</span>}
+                  {activeRun.status === 'failed' && <span className="text-red-600">✗</span>}
+                  <span className="font-bold text-sm">
+                    {activeRun.status === 'running' ? 'Agent is executing…'
+                      : activeRun.status === 'completed' ? 'Run completed'
+                      : `Run failed: ${activeRun.error}`}
+                  </span>
+                </div>
+                <code className="text-xs font-mono text-gray-500">{activeRun.id.slice(0, 8)}…</code>
+              </div>
+              {runLogs.length > 0 && (
+                <div className="space-y-1.5 max-h-52 overflow-y-auto">
+                  {runLogs.map((log, i) => (
+                    <div key={log.id ?? i} className="flex gap-2 text-xs bg-white/70 rounded p-2">
+                      <span className={`shrink-0 px-1.5 py-0.5 rounded font-bold text-[10px] ${
+                        log.eventType?.startsWith('AGENT') ? 'bg-purple-100 text-purple-700'
+                        : log.eventType?.startsWith('TOOL') ? 'bg-orange-100 text-orange-700'
+                        : 'bg-gray-100 text-gray-600'
+                      }`}>{log.eventType?.replace(/_/g,' ')}</span>
+                      <span className="text-gray-700">{log.message}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+              <Link href="/live-runs" className="mt-2 inline-block text-xs font-bold text-[#F54E00] hover:underline">
+                Full execution log →
+              </Link>
+            </div>
+          )}
 
           <p className="text-gray-700 mb-4">
             <span className="font-semibold text-gray-900">Goal:</span> {agent.goal}

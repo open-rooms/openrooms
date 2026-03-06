@@ -1,37 +1,44 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
+import Link from 'next/link'
 import { Header } from '@/components/header'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { CheckCircleIcon, AlertCircleIcon, ClockIcon } from '@/components/icons'
+import { CheckCircleIcon, AlertCircleIcon, ClockIcon, PlayIcon } from '@/components/icons'
 import { RunsIcon as RunsProductIcon } from '@/components/icons/product/RunsIcon'
-import { getRooms, getRoomLogs, getAgents, type ExecutionLog, type Room } from '@/lib/api'
-
-interface EnrichedEvent extends ExecutionLog {
-  roomName?: string
-}
+import { getRooms, getRoomLogs, getAgents, getRuns, getLogsByRun, type ExecutionLog, type Room, type Run } from '@/lib/api'
 
 export default function LiveRunsPage() {
-  const [events, setEvents] = useState<EnrichedEvent[]>([])
-  const [rooms, setRooms] = useState<Room[]>([])
+  const [runs, setRuns] = useState<Run[]>([])
+  const [roomEvents, setRoomEvents] = useState<(ExecutionLog & { roomName?: string })[]>([])
+  const [selectedRun, setSelectedRun] = useState<string | null>(null)
+  const [runLogs, setRunLogs] = useState<ExecutionLog[]>([])
+  const [stats, setStats] = useState({ totalRooms: 0, activeRooms: 0, agents: 0, totalRuns: 0 })
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [stats, setStats] = useState({ totalRooms: 0, activeNow: 0, agents: 0 })
   const pollingRef = useRef<NodeJS.Timeout | null>(null)
 
-  async function fetchLiveData() {
+  async function fetchAll() {
     try {
       setError(null)
-      const [roomsData, agentsData] = await Promise.all([getRooms(), getAgents()])
+      const [roomsData, agentsData, runsData] = await Promise.all([
+        getRooms().catch(() => ({ rooms: [] })),
+        getAgents().catch(() => ({ agents: [], count: 0 })),
+        getRuns({ limit: 20 }).catch(() => ({ runs: [], count: 0 })),
+      ])
+
       const allRooms = roomsData.rooms || []
-      setRooms(allRooms)
+      const allRuns = runsData.runs || []
+
+      setRuns(allRuns)
       setStats({
         totalRooms: allRooms.length,
-        activeNow: allRooms.filter(r => r.status === 'RUNNING').length,
-        agents: agentsData.count || 0,
+        activeRooms: allRooms.filter(r => r.status === 'RUNNING').length,
+        agents: agentsData.count || agentsData.agents?.length || 0,
+        totalRuns: allRuns.length,
       })
 
-      // Fetch logs from active + recently completed rooms (up to 5)
+      // Fetch events from recent rooms for the event stream
       const targetRooms = allRooms
         .filter(r => ['RUNNING', 'COMPLETED', 'FAILED'].includes(r.status))
         .slice(0, 5)
@@ -39,37 +46,58 @@ export default function LiveRunsPage() {
       const logsArrays = await Promise.all(
         targetRooms.map(room =>
           getRoomLogs(room.id)
-            .then(data => (data.logs || []).map(log => ({ ...log, roomName: room.name })))
-            .catch(() => [] as EnrichedEvent[])
+            .then(d => (d.logs || []).map(log => ({ ...log, roomName: room.name })))
+            .catch(() => [])
         )
       )
 
-      const allLogs = logsArrays
+      const merged = logsArrays
         .flat()
         .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
-        .slice(0, 40)
+        .slice(0, 50)
 
-      setEvents(allLogs)
+      setRoomEvents(merged)
     } catch {
-      setError('Could not connect to API. Is the backend running on port 3001?')
+      setError('Cannot reach API. Make sure the backend is running on port 3001.')
     } finally {
       setLoading(false)
     }
   }
 
+  async function loadRunLogs(runId: string) {
+    setSelectedRun(runId)
+    try {
+      const data = await getLogsByRun(runId)
+      setRunLogs(data.logs || [])
+    } catch {
+      setRunLogs([])
+    }
+  }
+
   useEffect(() => {
-    fetchLiveData()
-    pollingRef.current = setInterval(fetchLiveData, 4000)
+    fetchAll()
+    pollingRef.current = setInterval(fetchAll, 3000)
     return () => { if (pollingRef.current) clearInterval(pollingRef.current) }
   }, [])
 
-  const getStatusIcon = (level: string, eventType: string) => {
-    if (level === 'ERROR' || eventType.includes('FAILED')) return <AlertCircleIcon className="w-5 h-5 text-red-500" />
-    if (eventType.includes('COMPLETED')) return <CheckCircleIcon className="w-5 h-5 text-emerald-500" />
-    if (eventType.includes('STARTED') || eventType.includes('RUNNING')) return (
-      <div className="w-5 h-5 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
-    )
-    return <ClockIcon className="w-5 h-5 text-gray-400" />
+  // Refresh logs for selected run when runs update
+  useEffect(() => {
+    if (selectedRun) loadRunLogs(selectedRun)
+  }, [runs])
+
+  const getStatusBadge = (status: string) => {
+    switch (status) {
+      case 'running':  return <span className="flex items-center gap-1.5 px-2 py-0.5 bg-blue-100 text-blue-700 text-xs font-bold rounded-full"><div className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-pulse"/>RUNNING</span>
+      case 'completed': return <span className="flex items-center gap-1.5 px-2 py-0.5 bg-emerald-100 text-emerald-700 text-xs font-bold rounded-full">✓ COMPLETED</span>
+      case 'failed':    return <span className="flex items-center gap-1.5 px-2 py-0.5 bg-red-100 text-red-700 text-xs font-bold rounded-full">✗ FAILED</span>
+      case 'pending':   return <span className="flex items-center gap-1.5 px-2 py-0.5 bg-yellow-100 text-yellow-700 text-xs font-bold rounded-full"><div className="w-1.5 h-1.5 bg-yellow-500 rounded-full animate-pulse"/>QUEUED</span>
+      default: return <span className="px-2 py-0.5 bg-gray-100 text-gray-600 text-xs font-bold rounded-full">{status.toUpperCase()}</span>
+    }
+  }
+
+  const getTypeBadge = (type: string) => {
+    if (type === 'agent') return <span className="px-2 py-0.5 bg-purple-100 text-purple-700 text-xs font-bold rounded">AGENT</span>
+    return <span className="px-2 py-0.5 bg-indigo-100 text-indigo-700 text-xs font-bold rounded">WORKFLOW</span>
   }
 
   const getEventBadgeColor = (eventType: string) => {
@@ -81,179 +109,249 @@ export default function LiveRunsPage() {
   }
 
   const formatTime = (ts: string) => {
-    const d = new Date(ts)
-    const diff = Math.floor((Date.now() - d.getTime()) / 1000)
+    const diff = Math.floor((Date.now() - new Date(ts).getTime()) / 1000)
     if (diff < 60) return `${diff}s ago`
     if (diff < 3600) return `${Math.floor(diff / 60)}m ago`
-    return d.toLocaleTimeString()
+    return new Date(ts).toLocaleTimeString()
   }
 
-  const activeRooms = rooms.filter(r => r.status === 'RUNNING')
+  const formatDuration = (run: Run) => {
+    if (!run.startedAt) return '—'
+    const end = run.endedAt ? new Date(run.endedAt) : new Date()
+    const ms = end.getTime() - new Date(run.startedAt).getTime()
+    if (ms < 1000) return `${ms}ms`
+    if (ms < 60000) return `${(ms / 1000).toFixed(1)}s`
+    return `${Math.floor(ms / 60000)}m ${Math.floor((ms % 60000) / 1000)}s`
+  }
+
+  const activeRuns = runs.filter(r => r.status === 'running' || r.status === 'pending')
+  const completedRuns = runs.filter(r => r.status === 'completed' || r.status === 'failed')
 
   return (
     <div className="bg-[#E8DCC8] min-h-screen">
       <Header
         title="Live Runs"
-        subtitle="Real-time execution streams and system events"
+        subtitle="Real-time orchestration — agent loops, workflow executions, tool calls"
         actions={
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3">
             <div className="flex items-center gap-2 px-3 py-2 bg-emerald-100 rounded-lg">
               <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" />
-              <span className="text-sm font-semibold text-emerald-700">Live · 4s</span>
+              <span className="text-sm font-semibold text-emerald-700">Live · 3s</span>
             </div>
+            <Link href="/rooms" className="px-4 py-2 bg-[#F54E00] hover:bg-[#E24600] text-white text-sm font-bold rounded-lg transition-colors">
+              + New Run
+            </Link>
           </div>
         }
       />
 
-      <div className="p-8 animate-fade-in">
-        <div className="max-w-7xl mx-auto space-y-8">
+      <div className="p-6 md:p-8">
+        <div className="max-w-7xl mx-auto space-y-6">
 
-          {/* Hero */}
-          <div className="flex items-center gap-6">
-            <RunsProductIcon className="w-20 h-20 flex-shrink-0" />
-            <div>
-              <h1 className="text-2xl font-bold text-[#111111]">Live Runs</h1>
-              <p className="text-gray-600 text-sm mt-1">
-                Real-time execution events from rooms, agent loops, tool calls and workflow transitions.
-              </p>
-            </div>
-          </div>
-
-          {/* Error */}
           {error && (
             <div className="bg-red-50 border-2 border-red-200 rounded-lg p-4 flex items-center gap-3">
               <AlertCircleIcon className="w-5 h-5 text-red-500 flex-shrink-0" />
               <span className="text-red-700 text-sm">{error}</span>
-              <button onClick={fetchLiveData} className="ml-auto text-sm font-bold text-red-600">Retry</button>
+              <button onClick={fetchAll} className="ml-auto text-sm font-bold text-red-600">Retry</button>
             </div>
           )}
 
           {/* Stats */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {[
-              { label: 'Total Rooms', value: stats.totalRooms, color: 'text-[#111111]' },
-              { label: 'Active Now', value: stats.activeNow, color: 'text-blue-600', pulse: stats.activeNow > 0 },
-              { label: 'Agents', value: stats.agents, color: 'text-purple-600' },
-              { label: 'Log Events', value: events.length, color: 'text-[#F97316]' },
+              { label: 'Total Runs', value: stats.totalRuns, color: 'text-[#111111]' },
+              { label: 'Active Now', value: activeRuns.length, color: 'text-blue-600', pulse: activeRuns.length > 0 },
+              { label: 'Agents Deployed', value: stats.agents, color: 'text-purple-600' },
+              { label: 'Rooms', value: stats.totalRooms, color: 'text-[#F54E00]' },
             ].map(stat => (
               <Card key={stat.label} className="border border-[#D4C4A8] bg-[#F5F1E8]">
-                <CardHeader className="pb-3">
-                  <div className="text-sm text-gray-500">{stat.label}</div>
+                <CardContent className="pt-5 pb-4">
+                  <div className="text-xs text-gray-500 mb-1">{stat.label}</div>
                   <div className={`text-3xl font-bold flex items-center gap-2 ${stat.color}`}>
-                    {stat.value}
+                    {loading ? '…' : stat.value}
                     {stat.pulse && <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse" />}
                   </div>
-                </CardHeader>
+                </CardContent>
               </Card>
             ))}
           </div>
 
-          {/* Active rooms */}
-          {activeRooms.length > 0 && (
-            <Card className="border border-[#D4C4A8] bg-[#F5F1E8]">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-base">
-                  <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse" />
-                  Currently Executing Rooms
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-2">
-                  {activeRooms.map(room => (
-                    <div key={room.id} className="flex items-center justify-between p-3 bg-white rounded-lg border border-[#D4C4A8]">
-                      <div>
-                        <span className="font-semibold text-sm">{room.name}</span>
-                        <span className="ml-3 text-xs font-mono text-gray-500">{room.id.slice(0, 8)}...</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <div className="w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
-                        <span className="text-xs font-bold text-blue-600">RUNNING</span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          )}
+          {/* Main layout: run list + log inspector */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
-          {/* Event stream */}
-          <Card className="border border-[#D4C4A8] bg-[#F5F1E8]">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                Execution Event Stream
-                <div className="ml-auto flex items-center gap-2">
-                  <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" />
-                  <span className="text-sm font-normal text-emerald-600">Auto-updating</span>
-                </div>
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              {loading && (
-                <div className="text-center py-12">
-                  <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-[#F54E00] mb-3" />
-                  <p className="text-sm text-gray-500">Connecting to execution stream...</p>
-                </div>
-              )}
-
-              {!loading && events.length === 0 && !error && (
-                <div className="text-center py-12">
-                  <RunsProductIcon className="w-16 h-16 mx-auto mb-4 opacity-30" />
-                  <h3 className="font-semibold text-[#111111] mb-1">No live execution events yet</h3>
-                  <p className="text-sm text-gray-500">
-                    Launch a room run or agent execution to stream orchestration events in real time.
-                  </p>
-                </div>
-              )}
-
-              {!loading && events.length > 0 && (
-                <div className="space-y-2">
-                  {events.map((event, idx) => (
-                    <div
-                      key={event.id}
-                      className="flex items-center gap-4 p-4 bg-white rounded-lg border border-[#D4C4A8] hover:shadow-sm transition-all"
-                      style={{ animationDelay: `${idx * 20}ms` }}
-                    >
-                      <div className="flex-shrink-0">{getStatusIcon(event.level, event.eventType)}</div>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 mb-1 flex-wrap">
-                          <span className={`text-xs px-2 py-0.5 rounded font-semibold ${getEventBadgeColor(event.eventType)}`}>
-                            {event.eventType}
-                          </span>
-                          {event.roomName && (
-                            <span className="text-xs text-gray-500">Room: <strong>{event.roomName}</strong></span>
-                          )}
-                          {event.duration && (
-                            <span className="text-xs text-gray-400">{event.duration}ms</span>
-                          )}
+            {/* ── Run List ─────────────────────────────────────── */}
+            <div className="space-y-4">
+              {/* Active runs */}
+              {activeRuns.length > 0 && (
+                <Card className="border-2 border-blue-200 bg-blue-50">
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-sm flex items-center gap-2">
+                      <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse" />
+                      Active Executions ({activeRuns.length})
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-2">
+                    {activeRuns.map(run => (
+                      <button
+                        key={run.id}
+                        onClick={() => loadRunLogs(run.id)}
+                        className={`w-full text-left p-3 rounded-lg border-2 transition-all ${selectedRun === run.id ? 'border-[#F54E00] bg-white' : 'border-blue-200 bg-white hover:border-[#F54E00]'}`}
+                      >
+                        <div className="flex items-center justify-between mb-2">
+                          <div className="flex items-center gap-2">
+                            {getTypeBadge(run.type)}
+                            {getStatusBadge(run.status)}
+                          </div>
+                          <span className="text-xs text-gray-400">{formatDuration(run)}</span>
                         </div>
-                        <p className="text-sm text-[#111111] truncate">{event.message}</p>
-                      </div>
-                      <div className="text-xs text-gray-400 whitespace-nowrap flex-shrink-0">
-                        {formatTime(event.timestamp)}
+                        <div className="text-xs font-mono text-gray-500 truncate">{run.targetId}</div>
+                        {run.input && Object.keys(run.input).length > 0 && (
+                          <div className="text-xs text-gray-600 mt-1 truncate">
+                            {JSON.stringify(run.input).substring(0, 60)}
+                          </div>
+                        )}
+                      </button>
+                    ))}
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* Completed runs */}
+              <Card className="border border-[#D4C4A8] bg-[#F5F1E8]">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-sm">Run History</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {loading && (
+                    <div className="text-center py-8">
+                      <div className="inline-block animate-spin rounded-full h-6 w-6 border-b-2 border-[#F54E00]" />
+                    </div>
+                  )}
+                  {!loading && runs.length === 0 && (
+                    <div className="text-center py-10">
+                      <RunsProductIcon className="w-14 h-14 mx-auto mb-3 opacity-25" />
+                      <p className="text-sm font-semibold text-gray-600 mb-1">No runs yet</p>
+                      <p className="text-xs text-gray-500 mb-4">
+                        Click <strong>Run</strong> on a workflow or <strong>Run Agent</strong> on an agent to start execution.
+                      </p>
+                      <div className="flex justify-center gap-3">
+                        <Link href="/workflows" className="text-xs font-bold text-[#F54E00] hover:underline">→ Workflows</Link>
+                        <Link href="/agents" className="text-xs font-bold text-[#F54E00] hover:underline">→ Agents</Link>
                       </div>
                     </div>
-                  ))}
-                </div>
-              )}
-            </CardContent>
-          </Card>
+                  )}
+                  {!loading && completedRuns.length > 0 && (
+                    <div className="space-y-2">
+                      {completedRuns.map(run => (
+                        <button
+                          key={run.id}
+                          onClick={() => loadRunLogs(run.id)}
+                          className={`w-full text-left p-3 rounded-lg border transition-all ${selectedRun === run.id ? 'border-[#F54E00] bg-white shadow-sm' : 'border-[#D4C4A8] bg-white hover:border-[#F54E00]'}`}
+                        >
+                          <div className="flex items-center justify-between mb-1.5">
+                            <div className="flex items-center gap-2">
+                              {getTypeBadge(run.type)}
+                              {getStatusBadge(run.status)}
+                            </div>
+                            <span className="text-xs text-gray-400">{formatTime(run.createdAt)}</span>
+                          </div>
+                          <div className="text-xs font-mono text-gray-400 truncate">{run.id.slice(0, 16)}…</div>
+                          <div className="flex justify-between text-xs text-gray-500 mt-1">
+                            <span>Duration: {formatDuration(run)}</span>
+                            {run.error && <span className="text-red-500 truncate max-w-[120px]">{run.error}</span>}
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
 
-          {/* Legend */}
-          <Card className="border border-[#D4C4A8] bg-[#F5F1E8]">
-            <CardContent className="py-3 px-4">
-              <div className="flex items-center gap-6 flex-wrap text-xs">
-                <span className="font-semibold text-gray-500">Event types:</span>
-                {[
-                  { label: 'AGENT_*', color: 'bg-purple-100 text-purple-700' },
-                  { label: 'ROOM_*', color: 'bg-blue-100 text-blue-700' },
-                  { label: 'TOOL_*', color: 'bg-orange-100 text-orange-700' },
-                  { label: 'NODE_*', color: 'bg-teal-100 text-teal-700' },
-                ].map(e => (
-                  <span key={e.label} className={`px-2 py-0.5 rounded font-semibold ${e.color}`}>{e.label}</span>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
+            {/* ── Log Inspector ─────────────────────────────────── */}
+            <div>
+              <Card className="border border-[#D4C4A8] bg-[#F5F1E8] h-full">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-sm flex items-center gap-2">
+                    {selectedRun ? (
+                      <>
+                        <PlayIcon className="w-4 h-4 text-[#F54E00]" />
+                        Run Execution Log
+                        <code className="text-xs font-mono bg-gray-100 px-2 py-0.5 rounded ml-2">{selectedRun.slice(0, 8)}…</code>
+                      </>
+                    ) : (
+                      <>Execution Event Stream</>
+                    )}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {selectedRun ? (
+                    /* Per-run logs */
+                    runLogs.length === 0 ? (
+                      <p className="text-sm text-gray-500 text-center py-8">No logs yet for this run. They appear as the execution progresses.</p>
+                    ) : (
+                      <div className="space-y-2 max-h-[520px] overflow-y-auto">
+                        {runLogs.map((log, i) => (
+                          <div key={log.id ?? i} className="flex gap-3 p-3 bg-white rounded-lg border border-[#D4C4A8] text-xs">
+                            <div className="flex-shrink-0 mt-0.5">
+                              {log.level === 'ERROR' ? <AlertCircleIcon className="w-4 h-4 text-red-500" />
+                                : log.eventType?.includes('COMPLETED') ? <CheckCircleIcon className="w-4 h-4 text-emerald-500" />
+                                : <ClockIcon className="w-4 h-4 text-gray-400" />}
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2 mb-1">
+                                <span className={`px-1.5 py-0.5 rounded font-bold text-[10px] ${getEventBadgeColor(log.eventType)}`}>
+                                  {log.eventType}
+                                </span>
+                                <span className="text-gray-400">{formatTime(log.timestamp)}</span>
+                              </div>
+                              <p className="text-gray-800">{log.message}</p>
+                              {log.data && Object.keys(log.data).length > 0 && (
+                                <pre className="text-[10px] text-gray-500 mt-1 bg-gray-50 rounded p-1 overflow-x-auto">{JSON.stringify(log.data, null, 1).slice(0, 200)}</pre>
+                              )}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )
+                  ) : (
+                    /* General room event stream */
+                    roomEvents.length === 0 ? (
+                      <div className="text-center py-12">
+                        <RunsProductIcon className="w-14 h-14 mx-auto mb-3 opacity-25" />
+                        <p className="text-sm font-semibold text-gray-600 mb-1">No events yet</p>
+                        <p className="text-xs text-gray-500">
+                          Start a run and click it in the list to inspect its execution logs.
+                        </p>
+                      </div>
+                    ) : (
+                      <div className="space-y-2 max-h-[520px] overflow-y-auto">
+                        {roomEvents.map((event, i) => (
+                          <div key={event.id ?? i} className="flex items-start gap-3 p-3 bg-white rounded-lg border border-[#D4C4A8] text-xs">
+                            <div className="flex-shrink-0 mt-0.5">
+                              {event.level === 'ERROR' ? <AlertCircleIcon className="w-4 h-4 text-red-500" />
+                                : event.eventType.includes('COMPLETED') ? <CheckCircleIcon className="w-4 h-4 text-emerald-500" />
+                                : <ClockIcon className="w-4 h-4 text-gray-400" />}
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2 flex-wrap mb-0.5">
+                                <span className={`px-1.5 py-0.5 rounded font-bold text-[10px] ${getEventBadgeColor(event.eventType)}`}>
+                                  {event.eventType}
+                                </span>
+                                {event.roomName && <span className="text-gray-500">Room: <strong>{event.roomName}</strong></span>}
+                                <span className="text-gray-400 ml-auto">{formatTime(event.timestamp)}</span>
+                              </div>
+                              <p className="text-gray-800 truncate">{event.message}</p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )
+                  )}
+                </CardContent>
+              </Card>
+            </div>
+          </div>
 
         </div>
       </div>

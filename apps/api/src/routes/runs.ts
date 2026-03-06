@@ -88,8 +88,12 @@ export async function runsRoutes(
 
       let logs: any[];
 
-      if (run.type === 'agent') {
-        logs = await container.db
+      if (run.roomId) {
+        // For both agent and workflow runs, fetch by roomId (most accurate)
+        logs = await container.loggingService.getLogs(run.roomId, { limit, offset });
+      } else if (run.type === 'agent') {
+        // Fallback: match by agentId if no room exists
+        logs = await (container.db as any)
           .selectFrom('execution_logs')
           .selectAll()
           .where('agentId', '=', run.targetId)
@@ -97,8 +101,6 @@ export async function runsRoutes(
           .limit(limit)
           .offset(offset)
           .execute();
-      } else if (run.roomId) {
-        logs = await container.loggingService.getLogs(run.roomId, { limit, offset });
       } else {
         logs = [];
       }

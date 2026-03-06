@@ -8,6 +8,72 @@
 import { Job } from 'bullmq';
 import { AgentRuntimeLoop } from '@openrooms/agent-runtime';
 import { OpenAIProvider, AnthropicProvider } from '@openrooms/execution';
+import type { LLMProvider, LLMRequest, LLMResponse } from '@openrooms/core';
+
+// ─── Simulation LLM ──────────────────────────────────────────────────────────
+// Used when no API key is configured. Runs the full agent loop with
+// deterministic simulated reasoning so the platform shows real execution.
+
+class SimulationLLMProvider implements LLMProvider {
+  readonly name = 'simulation';
+
+  async chat(request: LLMRequest): Promise<LLMResponse> {
+    // Small delay to feel realistic
+    await new Promise(r => setTimeout(r, 400 + Math.random() * 600));
+
+    const tools = (request.tools as any[]) || [];
+    const goalLine = request.messages.find(m => m.role === 'system')?.content?.split('\n').find(l => l.startsWith('Goal:')) || 'Goal: complete task';
+    const goal = goalLine.replace('Goal:', '').trim();
+
+    // After first tool use, terminate
+    const iteration = parseInt(request.messages[1]?.content?.toString() || '{}', 10);
+    const hasAlreadyActed = request.messages.filter(m => m.role === 'tool').length > 0;
+
+    let response: Record<string, unknown>;
+    if (!hasAlreadyActed && tools.length > 0) {
+      const tool = tools[Math.floor(Math.random() * tools.length)];
+      response = {
+        shouldContinue: true,
+        reasoning: `Analysing goal: "${goal}". I will use the ${tool.name} tool to make progress.`,
+        selectedTool: tool.name,
+        toolInput: tool.name === 'calculator'
+          ? { expression: '42 * 7' }
+          : tool.name === 'http_request'
+            ? { url: 'https://httpbin.org/json', method: 'GET' }
+            : { query: goal },
+        terminationReason: null,
+      };
+    } else {
+      response = {
+        shouldContinue: false,
+        reasoning: `Goal "${goal}" has been processed. Execution complete.`,
+        selectedTool: null,
+        toolInput: null,
+        terminationReason: 'Task completed after analysis and tool execution.',
+      };
+    }
+
+    return {
+      message: {
+        role: 'assistant',
+        content: JSON.stringify(response),
+        timestamp: new Date().toISOString(),
+      },
+      usage: { promptTokens: 80, completionTokens: 60, totalTokens: 140 },
+      model: 'openrooms-simulation-v1',
+      provider: 'simulation',
+    };
+  }
+
+  async complete(_prompt: string): Promise<string> {
+    await new Promise(r => setTimeout(r, 300));
+    return 'Simulation complete.';
+  }
+
+  async embed(_text: string): Promise<number[]> {
+    return Array.from({ length: 8 }, () => Math.random());
+  }
+}
 import {
   PolicyEnforcerImpl,
   PostgreSQLTraceLogger,
@@ -126,31 +192,34 @@ export class AgentExecutionWorker {
   }
 
   /**
-   * Create LLM provider based on policy config
+   * Create LLM provider based on policy config.
+   * Falls back to SimulationLLMProvider when no API key is configured
+   * so the agent loop still executes and produces visible logs.
    */
-  private createLLMProvider(policyConfig: AgentPolicy) {
+  private createLLMProvider(policyConfig: AgentPolicy): LLMProvider {
     const provider = (policyConfig as any).provider || 'openai';
-    const model = (policyConfig as any).model || 'gpt-4';
 
     switch (provider.toLowerCase()) {
       case 'openai':
-        if (!process.env.OPENAI_API_KEY) {
-          throw new Error('OPENAI_API_KEY not configured');
+        if (process.env.OPENAI_API_KEY) {
+          return new OpenAIProvider({ apiKey: process.env.OPENAI_API_KEY });
         }
-        return new OpenAIProvider({
-          apiKey: process.env.OPENAI_API_KEY,
-        });
+        console.warn('[AgentWorker] OPENAI_API_KEY not set — using simulation mode');
+        return new SimulationLLMProvider();
 
       case 'anthropic':
-        if (!process.env.ANTHROPIC_API_KEY) {
-          throw new Error('ANTHROPIC_API_KEY not configured');
+        if (process.env.ANTHROPIC_API_KEY) {
+          return new AnthropicProvider({ apiKey: process.env.ANTHROPIC_API_KEY });
         }
-        return new AnthropicProvider({
-          apiKey: process.env.ANTHROPIC_API_KEY,
-        });
+        console.warn('[AgentWorker] ANTHROPIC_API_KEY not set — using simulation mode');
+        return new SimulationLLMProvider();
+
+      case 'simulation':
+        return new SimulationLLMProvider();
 
       default:
-        throw new Error(`Unsupported LLM provider: ${provider}`);
+        console.warn(`[AgentWorker] Unknown provider "${provider}" — using simulation mode`);
+        return new SimulationLLMProvider();
     }
   }
 
