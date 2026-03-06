@@ -238,10 +238,10 @@ export default function HomePage() {
                 description: 'Build, deploy, and orchestrate autonomous agents using APIs, workflows, and tools.',
                 href: '/developers',
                 cta: 'Open Control Plane',
-                bg: 'bg-[#5EEAD4]',
-                hoverBg: 'hover:bg-[#4dd4be]',
-                textColor: 'text-[#111111]',
-                iconBg: 'bg-[#5EEAD4]',
+                bg: 'bg-[#F54E00]',
+                hoverBg: 'hover:bg-[#E24600]',
+                textColor: 'text-white',
+                iconBg: '',
               },
               {
                 icon: ArchitectureIcon,
@@ -285,11 +285,11 @@ export default function HomePage() {
 
           {/* BUILD / DEPLOY & RUN / OBSERVE & GOVERN — same section, beneath path cards */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            {/* BUILD — only the word is CTA colored */}
+            {/* BUILD — same pill badge style as the others */}
             <div className="bg-[#F5F1E8] border border-[#D4C4A8] rounded-2xl p-5 flex items-start gap-4">
               <BuildIcon className="w-9 h-9 flex-shrink-0" />
               <div>
-                <span className="text-[#F54E00] text-xs font-black tracking-widest uppercase block mb-1.5">BUILD</span>
+                <span className="inline-block px-2.5 py-0.5 bg-[#F54E00] text-white rounded text-[10px] font-black tracking-widest mb-1.5">BUILD</span>
                 <ul className="space-y-0.5">
                   {['Agents', 'Workflows', 'Tools'].map(item => (
                     <li key={item} className="text-sm text-gray-700 font-medium leading-snug">{item}</li>

@@ -191,23 +191,23 @@ export const ClientsIcon = ({ className = "w-6 h-6" }: { className?: string }) =
   </svg>
 )
 
-// Developer - Laptop with </> code brackets (teal fill, distinct from AgentIcon robot)
+// Developer - Laptop with </> code brackets (CTA orange fill, distinct from AgentIcon robot)
 export const DeveloperIcon = ({ className = "w-6 h-6" }: { className?: string }) => (
   <svg className={className} viewBox="0 0 96 96" fill="none" xmlns="http://www.w3.org/2000/svg">
     {/* Laptop lid / screen */}
-    <rect x="10" y="20" width="76" height="48" rx="8" fill="#5EEAD4" stroke="#000" strokeWidth="2.5"/>
+    <rect x="10" y="20" width="76" height="48" rx="8" fill="#F54E00" stroke="#000" strokeWidth="2.5"/>
     {/* Screen bezel inner */}
-    <rect x="18" y="28" width="60" height="34" rx="4" fill="#fff" opacity="0.85"/>
+    <rect x="18" y="28" width="60" height="34" rx="4" fill="#fff" opacity="0.9"/>
     {/* < bracket */}
-    <path d="M32 38 L24 45 L32 52" stroke="#111" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
+    <path d="M32 38 L24 45 L32 52" stroke="#F54E00" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
     {/* > bracket */}
-    <path d="M52 38 L60 45 L52 52" stroke="#111" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
+    <path d="M52 38 L60 45 L52 52" stroke="#F54E00" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
     {/* / slash */}
-    <line x1="44" y1="36" x2="40" y2="54" stroke="#111" strokeWidth="2.5" strokeLinecap="round"/>
+    <line x1="44" y1="36" x2="40" y2="54" stroke="#F54E00" strokeWidth="2.5" strokeLinecap="round"/>
     {/* Laptop hinge */}
     <rect x="10" y="66" width="76" height="4" rx="2" fill="#000" opacity="0.15"/>
     {/* Keyboard base */}
-    <rect x="6" y="70" width="84" height="8" rx="4" fill="#5EEAD4" stroke="#000" strokeWidth="2"/>
+    <rect x="6" y="70" width="84" height="8" rx="4" fill="#F54E00" stroke="#000" strokeWidth="2"/>
     {/* Trackpad */}
     <rect x="34" y="72" width="28" height="4" rx="2" fill="#000" opacity="0.25"/>
   </svg>
