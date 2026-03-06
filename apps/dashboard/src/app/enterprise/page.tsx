@@ -99,11 +99,11 @@ export default function EnterprisePage() {
       <div className="bg-white border-b border-gray-200">
         <div className="max-w-[95%] 2xl:max-w-[1600px] mx-auto px-6 md:px-8 py-12 md:py-20">
           <div className="max-w-3xl">
-            <span className="text-[10px] font-bold tracking-widest text-gray-500 uppercase px-3 py-1 bg-gray-100 rounded-full">For Enterprise</span>
-            <h1 className="text-3xl md:text-5xl lg:text-6xl font-bold text-gray-900 mt-5 mb-5 leading-tight">
+            <span className="text-[10px] font-bold tracking-widest text-gray-500 uppercase px-3 py-1 bg-gray-100 rounded-full animate-hero-enter" style={{ animationDelay: '0s' }}>For Enterprise</span>
+            <h1 className="text-3xl md:text-5xl lg:text-6xl font-bold text-gray-900 mt-5 mb-5 leading-tight animate-hero-enter" style={{ animationDelay: '0.08s' }}>
               Operate Distributed<br />Intelligent Infrastructure
             </h1>
-            <p className="text-base md:text-lg text-gray-500 leading-relaxed mb-8 max-w-2xl">
+            <p className="text-base md:text-lg text-gray-500 leading-relaxed mb-8 max-w-2xl animate-hero-enter" style={{ animationDelay: '0.16s' }}>
               OpenRooms gives enterprise teams a control plane for deploying, orchestrating, and observing autonomous AI systems at scale — across teams, APIs, and data pipelines.
             </p>
             <div className="flex flex-wrap gap-3">

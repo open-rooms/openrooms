@@ -92,11 +92,11 @@ export default function DevelopersPage() {
       <div className="bg-[#F5F1E8] border-b-2 border-black">
         <div className="max-w-[95%] 2xl:max-w-[1600px] mx-auto px-6 md:px-8 py-12 md:py-16">
           <div className="max-w-2xl">
-            <span className="text-[10px] font-bold tracking-widest text-gray-500 uppercase px-3 py-1 bg-[#E8DCC8] rounded-full">For Developers</span>
-            <h1 className="text-3xl md:text-5xl font-bold text-[#111111] mt-4 mb-4 leading-tight">
+            <span className="text-[10px] font-bold tracking-widest text-gray-500 uppercase px-3 py-1 bg-[#E8DCC8] rounded-full animate-hero-enter" style={{ animationDelay: '0s' }}>For Developers</span>
+            <h1 className="text-3xl md:text-5xl font-bold text-[#111111] mt-4 mb-4 leading-tight animate-hero-enter" style={{ animationDelay: '0.08s' }}>
               Build Agent<br />Infrastructure
             </h1>
-            <p className="text-base text-gray-600 leading-relaxed mb-6 max-w-xl">
+            <p className="text-base text-gray-600 leading-relaxed mb-6 max-w-xl animate-hero-enter" style={{ animationDelay: '0.16s' }}>
               OpenRooms is a full control plane. Design agents, compose workflows, register tools, and observe execution — all through a programmable runtime.
             </p>
             <div className="flex flex-wrap gap-3">

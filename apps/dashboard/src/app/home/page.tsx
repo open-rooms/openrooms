@@ -227,9 +227,9 @@ export default function HomePage() {
                 description: 'Deploy intelligent agents that research, monitor, and automate tasks for you.',
                 href: '/clients',
                 cta: 'Explore Rooms',
-                bg: 'bg-[#A78BFA]',
-                hoverBg: 'hover:bg-[#9270f0]',
-                textColor: 'text-white',
+                bg: 'bg-[#FDA4AF]',
+                hoverBg: 'hover:bg-[#fb7185]',
+                textColor: 'text-[#111111]',
                 iconBg: '',
               },
               {

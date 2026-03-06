@@ -92,15 +92,15 @@ export default function ClientsPage() {
       <div className="bg-[#F5F1E8] border-b-2 border-black">
         <div className="max-w-[95%] 2xl:max-w-[1600px] mx-auto px-6 md:px-8 py-12 md:py-16">
           <div className="max-w-2xl">
-            <span className="text-[10px] font-bold tracking-widest text-gray-500 uppercase px-3 py-1 bg-[#E8DCC8] rounded-full">For Clients</span>
-            <h1 className="text-3xl md:text-5xl font-bold text-[#111111] mt-4 mb-4 leading-tight">
+            <span className="text-[10px] font-bold tracking-widest text-gray-500 uppercase px-3 py-1 bg-[#E8DCC8] rounded-full animate-hero-enter" style={{ animationDelay: '0s' }}>For Clients</span>
+            <h1 className="text-3xl md:text-5xl font-bold text-[#111111] mt-4 mb-4 leading-tight animate-hero-enter" style={{ animationDelay: '0.08s' }}>
               Deploy Intelligent<br />Automation
             </h1>
-            <p className="text-base text-gray-600 leading-relaxed mb-6 max-w-xl">
+            <p className="text-base text-gray-600 leading-relaxed mb-6 max-w-xl animate-hero-enter" style={{ animationDelay: '0.16s' }}>
               OpenRooms runs AI agents that research, monitor, and automate tasks on your behalf — inside isolated Rooms built for your goals.
             </p>
             <div className="flex flex-wrap gap-3">
-              <Link href="/rooms" className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#A78BFA] hover:bg-[#9270f0] text-white text-sm font-bold rounded-xl transition-colors">
+              <Link href="/rooms" className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#FDA4AF] hover:bg-[#fb7185] text-[#111111] text-sm font-bold rounded-xl transition-colors">
                 <span>Browse Rooms</span>
                 <ChevronRightIcon className="w-4 h-4" />
               </Link>
@@ -126,7 +126,7 @@ export default function ClientsPage() {
         <div className="max-w-[95%] 2xl:max-w-[1600px] mx-auto px-6 md:px-8 text-center">
           <h3 className="text-2xl font-bold text-[#111111] mb-3">Ready to launch your first Room?</h3>
           <p className="text-gray-600 mb-6 max-w-md mx-auto text-sm">Create a Room, add agents, and watch them automate your workflow in real time.</p>
-          <Link href="/rooms?action=create" className="inline-flex items-center gap-2 px-7 py-3 bg-[#A78BFA] hover:bg-[#9270f0] text-white font-bold rounded-xl transition-colors">
+          <Link href="/rooms?action=create" className="inline-flex items-center gap-2 px-7 py-3 bg-[#FDA4AF] hover:bg-[#fb7185] text-[#111111] font-bold rounded-xl transition-colors">
             <span>Create a Room</span>
             <ChevronRightIcon className="w-4 h-4" />
           </Link>

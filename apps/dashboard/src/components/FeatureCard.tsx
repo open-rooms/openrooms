@@ -54,8 +54,8 @@ export function FeatureGrid({ features, variant = 'cream' }: FeatureGridProps) {
       {features.map((feature, i) => (
         <div
           key={feature.title}
-          className="animate-slide-up"
-          style={{ animationDelay: `${i * 0.06}s` }}
+          className="animate-card-pop"
+          style={{ animationDelay: `${i * 0.07}s` }}
         >
           <FeatureCard {...feature} variant={variant} />
         </div>

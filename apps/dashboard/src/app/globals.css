@@ -83,6 +83,42 @@
     50%       { transform: translateY(-4px); }
   }
 
+  /* ── Path-page card entrance — spring pop with stagger ── */
+  .animate-card-pop {
+    animation: cardPop 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  }
+
+  /* Hero text entrance on path pages — slides in from left */
+  .animate-hero-enter {
+    animation: heroEnter 0.55s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+
+  @keyframes cardPop {
+    0% {
+      opacity: 0;
+      transform: scale(0.88) translateY(18px);
+    }
+    65% {
+      opacity: 1;
+      transform: scale(1.03) translateY(-2px);
+    }
+    100% {
+      opacity: 1;
+      transform: scale(1) translateY(0);
+    }
+  }
+
+  @keyframes heroEnter {
+    from {
+      opacity: 0;
+      transform: translateX(-20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
   /* Vertical ticker — continuous upward scroll */
   .animate-scroll-up {
     animation: scrollUp 22s linear infinite;
