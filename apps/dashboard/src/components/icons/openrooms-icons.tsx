@@ -185,6 +185,79 @@ export const AlertsIllustrationIcon = ({ className = "w-6 h-6" }: { className?: 
   </svg>
 )
 
+// Client Room - Robot assistant inside a monitor window
+export const ClientRoomIllustrationIcon = ({ className = "w-6 h-6" }: { className?: string }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    {/* Monitor */}
+    <rect x="2" y="3" width="20" height="14" rx="2" fill={colors.agents} stroke={strokeColor} strokeWidth={strokeWidth}/>
+    <rect x="4" y="5" width="16" height="10" rx="1" fill="#FFF" opacity="0.25"/>
+    {/* Robot face inside monitor */}
+    <rect x="8" y="6.5" width="8" height="7" rx="2" fill="#FFF" opacity="0.9" stroke={strokeColor} strokeWidth={1.2}/>
+    {/* Robot eyes */}
+    <rect x="9.5" y="8.5" width="1.5" height="2" rx="0.5" fill={colors.agents}/>
+    <rect x="13" y="8.5" width="1.5" height="2" rx="0.5" fill={colors.agents}/>
+    {/* Robot mouth */}
+    <rect x="10.5" y="11.5" width="3" height="1" rx="0.5" fill={colors.agents} opacity="0.7"/>
+    {/* Antenna */}
+    <line x1="12" y1="6.5" x2="12" y2="5.2" stroke={strokeColor} strokeWidth={1.2}/>
+    <circle cx="12" cy="4.8" r="0.8" fill={colors.agents} stroke={strokeColor} strokeWidth={1}/>
+    {/* Monitor stand */}
+    <rect x="10" y="17" width="4" height="2" rx="0.5" fill={colors.agents} stroke={strokeColor} strokeWidth={strokeWidth}/>
+    <rect x="8" y="19" width="8" height="1.5" rx="0.5" fill={colors.agents} stroke={strokeColor} strokeWidth={strokeWidth}/>
+  </svg>
+)
+
+// Developer - Terminal with connected automation nodes
+export const DeveloperIllustrationIcon = ({ className = "w-6 h-6" }: { className?: string }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    {/* Terminal window */}
+    <rect x="2" y="4" width="20" height="13" rx="2" fill={colors.runs} stroke={strokeColor} strokeWidth={strokeWidth}/>
+    {/* Title bar */}
+    <rect x="2" y="4" width="20" height="3.5" rx="2" fill={colors.runs} stroke={strokeColor} strokeWidth={strokeWidth}/>
+    <circle cx="5" cy="5.75" r="0.8" fill="#FFF" opacity="0.6"/>
+    <circle cx="7.5" cy="5.75" r="0.8" fill="#FFF" opacity="0.6"/>
+    <circle cx="10" cy="5.75" r="0.8" fill="#FFF" opacity="0.6"/>
+    {/* Terminal prompt lines */}
+    <text x="4" y="11.5" fontSize="3" fill="#FFF" opacity="0.8" fontFamily="monospace">{'>'} connect</text>
+    <text x="4" y="14.5" fontSize="3" fill="#4ADE80" fontFamily="monospace">● nodes linked</text>
+    {/* Connected nodes below */}
+    <circle cx="6" cy="20" r="1.8" fill={colors.runs} stroke={strokeColor} strokeWidth={strokeWidth}/>
+    <circle cx="12" cy="20" r="1.8" fill={colors.runs} stroke={strokeColor} strokeWidth={strokeWidth}/>
+    <circle cx="18" cy="20" r="1.8" fill={colors.runs} stroke={strokeColor} strokeWidth={strokeWidth}/>
+    <line x1="7.8" y1="20" x2="10.2" y2="20" stroke={strokeColor} strokeWidth={strokeWidth}/>
+    <line x1="13.8" y1="20" x2="16.2" y2="20" stroke={strokeColor} strokeWidth={strokeWidth}/>
+    <line x1="12" y1="17" x2="12" y2="18.2" stroke={strokeColor} strokeWidth={1.2}/>
+  </svg>
+)
+
+// Enterprise - Cluster of connected monitors
+export const EnterpriseIllustrationIcon = ({ className = "w-6 h-6" }: { className?: string }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    {/* Center monitor */}
+    <rect x="8" y="7" width="8" height="6" rx="1.5" fill={colors.workflows} stroke={strokeColor} strokeWidth={strokeWidth}/>
+    <rect x="9" y="8" width="6" height="4" rx="0.5" fill="#FFF" opacity="0.3"/>
+    <circle cx="12" cy="10" r="1.2" fill="#FFF" opacity="0.7"/>
+    {/* Left monitor */}
+    <rect x="1" y="9" width="6" height="5" rx="1.5" fill={colors.workflows} stroke={strokeColor} strokeWidth={strokeWidth} opacity="0.85"/>
+    <rect x="2" y="10" width="4" height="3" rx="0.5" fill="#FFF" opacity="0.25"/>
+    {/* Right monitor */}
+    <rect x="17" y="9" width="6" height="5" rx="1.5" fill={colors.workflows} stroke={strokeColor} strokeWidth={strokeWidth} opacity="0.85"/>
+    <rect x="18" y="10" width="4" height="3" rx="0.5" fill="#FFF" opacity="0.25"/>
+    {/* Connection lines */}
+    <line x1="7" y1="11.5" x2="8" y2="11" stroke={strokeColor} strokeWidth={strokeWidth}/>
+    <line x1="16" y1="11" x2="17" y2="11.5" stroke={strokeColor} strokeWidth={strokeWidth}/>
+    {/* Stands */}
+    <rect x="11" y="13" width="2" height="1.5" rx="0.5" fill={colors.workflows} stroke={strokeColor} strokeWidth={1}/>
+    <rect x="9.5" y="14.5" width="5" height="1" rx="0.5" fill={colors.workflows} stroke={strokeColor} strokeWidth={1}/>
+    {/* Status dots */}
+    <circle cx="4" cy="20" r="1" fill="#4ADE80"/>
+    <circle cx="12" cy="20" r="1" fill="#4ADE80"/>
+    <circle cx="20" cy="20" r="1" fill="#FBBF24"/>
+    <line x1="5" y1="20" x2="11" y2="20" stroke={strokeColor} strokeWidth={1}/>
+    <line x1="13" y1="20" x2="19" y2="20" stroke={strokeColor} strokeWidth={1}/>
+  </svg>
+)
+
 // Settings - Wrench and screwdriver
 export const SettingsIllustrationIcon = ({ className = "w-6 h-6" }: { className?: string }) => (
   <svg className={className} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">

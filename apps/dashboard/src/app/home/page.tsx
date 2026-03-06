@@ -14,6 +14,7 @@ import { SettingsIcon } from '@/components/icons/SettingsIcon'
 import { ChevronRightIcon } from '@/components/icons'
 import { useEffect, useState } from 'react'
 import { getRooms, getAgents, getWorkflows, getTools, getRoomLogs } from '@/lib/api'
+import { ClientRoomIllustrationIcon, DeveloperIllustrationIcon, EnterpriseIllustrationIcon } from '@/components/icons/openrooms-icons'
 
 interface AppCard {
   id: string
@@ -177,7 +178,9 @@ export default function HomePage() {
               Orchestrate Intelligent Systems at Runtime
             </h1>
             <p className="text-sm sm:text-base md:text-lg text-gray-700 mb-6 sm:mb-8 max-w-2xl leading-relaxed animate-slide-up" style={{ animationDelay: '0.2s' }}>
-              OpenRooms is an infrastructure layer for coordinating AI agents, workflows, tools and execution environments across models, APIs and chains.
+              OpenRooms is a control plane for autonomous systems.<br className="hidden sm:block" />
+              It orchestrates AI agents, workflows, APIs, and external tools into coordinated execution environments called Rooms.<br className="hidden sm:block" />
+              Teams can deploy intelligent agents, automate complex tasks, and observe system behavior in real time.
             </p>
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4 animate-slide-up" style={{ animationDelay: '0.3s' }}>
             <Link href="/control-plane" className="px-6 py-3 bg-[#F54E00] hover:bg-[#E24600] text-white text-sm sm:text-base font-bold rounded-lg transition-colors duration-150 inline-flex items-center justify-center gap-2">
@@ -187,6 +190,68 @@ export default function HomePage() {
             <Link href="/live-runs" className="px-6 py-3 bg-white border-2 border-black hover:bg-[#F54E00] hover:border-[#F54E00] text-[#111111] hover:text-white text-sm sm:text-base font-bold rounded-lg transition-colors duration-150 text-center">
               View Live System
             </Link>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Product Path Cards */}
+      <div className="bg-[#E8DCC8] py-12 sm:py-16 border-b-2 border-black">
+        <div className="max-w-[95%] 2xl:max-w-[1600px] mx-auto px-4 sm:px-6 md:px-8">
+          <div className="mb-8 animate-slide-up" style={{ animationDelay: '0.35s' }}>
+            <p className="text-xs font-bold tracking-widest text-gray-500 uppercase mb-2">Choose your path</p>
+            <h2 className="text-2xl sm:text-3xl font-bold text-[#111111]">Who are you building for?</h2>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-5 sm:gap-6">
+            {/* Clients Card */}
+            <div className="group bg-[#F5F1E8] border-2 border-[#D4C4A8] rounded-2xl p-6 sm:p-8 flex flex-col hover:border-[#F54E00] hover:shadow-[4px_4px_0px_0px_rgba(245,78,0,1)] hover:-translate-y-1 transition-all duration-200 animate-slide-up" style={{ animationDelay: '0.4s' }}>
+              <div className="mb-5 transition-transform duration-200 group-hover:scale-110">
+                <ClientRoomIllustrationIcon className="w-16 h-16 sm:w-20 sm:h-20" />
+              </div>
+              <div className="flex-1">
+                <h3 className="text-xl font-bold text-[#111111] mb-2">Clients</h3>
+                <p className="text-sm text-gray-600 leading-relaxed mb-6">
+                  Deploy intelligent agents that research, monitor, and automate tasks for you.
+                </p>
+              </div>
+              <Link href="/rooms" className="inline-flex items-center justify-center gap-2 w-full py-3 bg-[#69B6A4] group-hover:bg-[#5aa393] text-white text-sm font-bold rounded-xl transition-colors duration-150 group-hover:shadow-md">
+                <span>Explore Rooms</span>
+                <ChevronRightIcon className="w-4 h-4" />
+              </Link>
+            </div>
+
+            {/* Developers Card */}
+            <div className="group bg-[#F5F1E8] border-2 border-[#D4C4A8] rounded-2xl p-6 sm:p-8 flex flex-col hover:border-[#F54E00] hover:shadow-[4px_4px_0px_0px_rgba(245,78,0,1)] hover:-translate-y-1 transition-all duration-200 animate-slide-up" style={{ animationDelay: '0.5s' }}>
+              <div className="mb-5 transition-transform duration-200 group-hover:scale-110">
+                <DeveloperIllustrationIcon className="w-16 h-16 sm:w-20 sm:h-20" />
+              </div>
+              <div className="flex-1">
+                <h3 className="text-xl font-bold text-[#111111] mb-2">Developers</h3>
+                <p className="text-sm text-gray-600 leading-relaxed mb-6">
+                  Build, deploy, and orchestrate autonomous agents using APIs, workflows, and tools.
+                </p>
+              </div>
+              <Link href="/control-plane" className="inline-flex items-center justify-center gap-2 w-full py-3 bg-[#F54E00] group-hover:bg-[#E24600] text-white text-sm font-bold rounded-xl transition-colors duration-150 group-hover:shadow-md">
+                <span>Open Control Plane</span>
+                <ChevronRightIcon className="w-4 h-4" />
+              </Link>
+            </div>
+
+            {/* Enterprise Card */}
+            <div className="group bg-[#F5F1E8] border-2 border-[#D4C4A8] rounded-2xl p-6 sm:p-8 flex flex-col hover:border-[#F54E00] hover:shadow-[4px_4px_0px_0px_rgba(245,78,0,1)] hover:-translate-y-1 transition-all duration-200 animate-slide-up" style={{ animationDelay: '0.6s' }}>
+              <div className="mb-5 transition-transform duration-200 group-hover:scale-110">
+                <EnterpriseIllustrationIcon className="w-16 h-16 sm:w-20 sm:h-20" />
+              </div>
+              <div className="flex-1">
+                <h3 className="text-xl font-bold text-[#111111] mb-2">Enterprise</h3>
+                <p className="text-sm text-gray-600 leading-relaxed mb-6">
+                  Operate large-scale intelligent systems across teams, infrastructure, and data pipelines.
+                </p>
+              </div>
+              <Link href="/enterprise" className="inline-flex items-center justify-center gap-2 w-full py-3 bg-[#7FA7D8] group-hover:bg-[#6a92c3] text-white text-sm font-bold rounded-xl transition-colors duration-150 group-hover:shadow-md">
+                <span>Enterprise Architecture</span>
+                <ChevronRightIcon className="w-4 h-4" />
+              </Link>
             </div>
           </div>
         </div>
