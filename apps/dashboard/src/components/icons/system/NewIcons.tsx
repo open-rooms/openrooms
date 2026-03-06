@@ -91,10 +91,10 @@ export const ReportsIcon = ({ className = "w-6 h-6" }: { className?: string }) =
   </svg>
 )
 
-// Architecture - Blueprint/grid with nodes
+// Architecture - Blueprint/grid with nodes (orange, matching Control Plane)
 export const ArchitectureIcon = ({ className = "w-6 h-6" }: { className?: string }) => (
   <svg className={className} viewBox="0 0 96 96" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <rect x="12" y="12" width="72" height="72" rx="12" fill="#93C5FD" stroke="#000" strokeWidth="2.5"/>
+    <rect x="12" y="12" width="72" height="72" rx="12" fill="#FB923C" stroke="#000" strokeWidth="2.5"/>
     {/* Grid lines */}
     <line x1="12" y1="36" x2="84" y2="36" stroke="#000" strokeWidth="1" opacity="0.3"/>
     <line x1="12" y1="60" x2="84" y2="60" stroke="#000" strokeWidth="1" opacity="0.3"/>

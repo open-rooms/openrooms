@@ -1,10 +1,9 @@
 'use client'
 
 import Link from 'next/link'
-import { Card, CardContent } from '@/components/ui/card'
 import { ChevronRightIcon } from '@/components/icons'
 import { useEffect, useState } from 'react'
-import { getRooms, getAgents, getWorkflows, getTools, getRoomLogs } from '@/lib/api'
+import { getRooms, getAgents, getWorkflows, getRoomLogs } from '@/lib/api'
 import {
   DashboardIcon,
   RoomsIcon,
@@ -18,64 +17,16 @@ import {
   ArchitectureIcon,
 } from '@/components/icons/system'
 
-interface AppCard {
-  id: string
-  name: string
-  description: string
-  icon: React.ComponentType<any>
-  href: string
-  category: string
-}
-
-const apps: AppCard[] = [
-  { id: 'dashboard', name: 'Dashboard', description: 'System overview & real-time metrics', icon: DashboardIcon, href: '/dashboard', category: 'AGENT://DASHBOARD' },
-  { id: 'rooms', name: 'Rooms', description: 'Agent execution environments', icon: RoomsIcon, href: '/rooms', category: 'AGENT://ROOMS' },
-  { id: 'workflows', name: 'Workflows', description: 'Orchestration templates', icon: WorkflowIcon, href: '/workflows', category: 'AGENT://WORKFLOWS' },
-  { id: 'automation', name: 'Automation', description: 'Event-driven triggers and scheduled loops', icon: AutomationIcon, href: '/automation', category: 'AGENT://AUTOMATION' },
-  { id: 'live-runs', name: 'Live Runs', description: 'Real-time execution streams and system events', icon: LiveRunsIcon, href: '/live-runs', category: 'AGENT://LIVE-RUNS' },
-  { id: 'tools', name: 'Tools', description: 'Plugin marketplace', icon: ToolIcon, href: '/tools', category: 'AGENT://TOOLS' },
-  { id: 'agents', name: 'Agents', description: 'Design and deploy autonomous AI units', icon: AgentIcon, href: '/agents', category: 'AGENT://AGENTS' },
-  { id: 'runtime', name: 'Runtime', description: 'Execution engine powering rooms and workflows', icon: RuntimeIcon, href: '/runtime', category: 'AGENT://RUNTIME' },
-  { id: 'control-plane', name: 'Control Plane', description: 'System configuration', icon: SettingsIcon, href: '/control-plane', category: 'AGENT://SETTINGS' },
-]
-
-const BuildIcon = ({ className = "w-6 h-6" }: { className?: string }) => (
-  <svg className={className} viewBox="0 0 96 96" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <rect x="20" y="28" width="56" height="40" rx="8" fill="#A78BFA" stroke="#000" strokeWidth="2.5"/>
-    <rect x="32" y="40" width="32" height="16" rx="4" fill="#000"/>
-    <circle cx="38" cy="48" r="3" fill="#A78BFA"/>
-    <circle cx="58" cy="48" r="3" fill="#A78BFA"/>
-  </svg>
-)
-
-const DeployRunIcon = ({ className = "w-6 h-6" }: { className?: string }) => (
-  <svg className={className} viewBox="0 0 96 96" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <circle cx="48" cy="48" r="28" fill="#60A5FA" stroke="#000" strokeWidth="2.5"/>
-    <path d="M40 35 L40 61 L65 48 Z" fill="#000"/>
-  </svg>
-)
-
-const ObserveGovernIcon = ({ className = "w-6 h-6" }: { className?: string }) => (
-  <svg className={className} viewBox="0 0 96 96" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <rect x="18" y="28" width="60" height="40" rx="8" fill="#FDA4AF" stroke="#000" strokeWidth="2.5"/>
-    <path d="M28 48 L38 48 L44 38 L52 58 L58 48 L68 48" stroke="#000" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
-    <circle cx="72" cy="48" r="4" fill="#000"/>
-  </svg>
-)
-
-const categoryGroups = [
-  { title: 'BUILD', icon: BuildIcon, items: ['Agents', 'Workflows', 'Tools'] },
-  { title: 'DEPLOY & RUN', icon: DeployRunIcon, items: ['Rooms', 'Runtime', 'Automation'] },
-  { title: 'OBSERVE & GOVERN', icon: ObserveGovernIcon, items: ['Live Runs', 'Dashboard', 'Control Plane'] },
-]
-
-const poweredByFeatures = [
-  'Deterministic Runtime',
-  'Event-Driven Automation',
-  'Multi-Model AI Execution',
-  'Secure Room Isolation',
-  'API & Tool Connectors',
-  'Blockchain Integrations',
+const dockApps = [
+  { id: 'rooms', name: 'Rooms', icon: RoomsIcon, href: '/rooms' },
+  { id: 'agents', name: 'Agents', icon: AgentIcon, href: '/agents' },
+  { id: 'workflows', name: 'Workflows', icon: WorkflowIcon, href: '/workflows' },
+  { id: 'automation', name: 'Automation', icon: AutomationIcon, href: '/automation' },
+  { id: 'live-runs', name: 'Live Runs', icon: LiveRunsIcon, href: '/live-runs' },
+  { id: 'tools', name: 'Tools', icon: ToolIcon, href: '/tools' },
+  { id: 'runtime', name: 'Runtime', icon: RuntimeIcon, href: '/runtime' },
+  { id: 'settings', name: 'Settings', icon: SettingsIcon, href: '/settings' },
+  { id: 'control-plane', name: 'Control Plane', icon: DashboardIcon, href: '/control-plane' },
 ]
 
 export default function HomePage() {
@@ -212,8 +163,9 @@ export default function HomePage() {
                 description: 'Deploy intelligent agents that research, monitor, and automate tasks for you.',
                 href: '/clients',
                 cta: 'Explore Rooms',
-                bg: 'bg-[#5EEAD4]',
-                hoverBg: 'hover:bg-[#4dd4be]',
+                bg: 'bg-[#A78BFA]',
+                hoverBg: 'hover:bg-[#9270f0]',
+                textColor: 'text-white',
               },
               {
                 icon: AgentIcon,
@@ -221,8 +173,9 @@ export default function HomePage() {
                 description: 'Build, deploy, and orchestrate autonomous agents using APIs, workflows, and tools.',
                 href: '/developers',
                 cta: 'Open Control Plane',
-                bg: 'bg-[#F54E00]',
-                hoverBg: 'hover:bg-[#E24600]',
+                bg: 'bg-[#5EEAD4]',
+                hoverBg: 'hover:bg-[#4dd4be]',
+                textColor: 'text-[#111111]',
               },
               {
                 icon: ArchitectureIcon,
@@ -230,8 +183,9 @@ export default function HomePage() {
                 description: 'Operate large-scale intelligent systems across teams, infrastructure, and data pipelines.',
                 href: '/enterprise',
                 cta: 'Enterprise Architecture',
-                bg: 'bg-[#7FA7D8]',
-                hoverBg: 'hover:bg-[#6a92c3]',
+                bg: 'bg-[#FB923C]',
+                hoverBg: 'hover:bg-[#e87d2a]',
+                textColor: 'text-white',
               },
             ].map((card, i) => {
               const Icon = card.icon
@@ -250,7 +204,7 @@ export default function HomePage() {
                   </div>
                   <Link
                     href={card.href}
-                    className={`inline-flex items-center justify-center gap-2 w-full py-3 ${card.bg} ${card.hoverBg} text-white text-sm font-bold rounded-xl transition-colors duration-150 group-hover:shadow-md`}
+                    className={`inline-flex items-center justify-center gap-2 w-full py-3 ${card.bg} ${card.hoverBg} ${card.textColor} text-sm font-bold rounded-xl transition-colors duration-150 group-hover:shadow-md`}
                   >
                     <span>{card.cta}</span>
                     <ChevronRightIcon className="w-4 h-4" />
@@ -293,117 +247,41 @@ export default function HomePage() {
         </div>
       </div>
 
-      {/* Platform Modules Section */}
-      <div className="py-12">
+      {/* Live Platform Activity — dark terminal */}
+      <div className="py-12 border-t border-[#D4C4A8] animate-slide-up" style={{ animationDelay: '0.7s' }}>
         <div className="max-w-[95%] 2xl:max-w-[1600px] mx-auto px-8">
-          <div className="mb-8 animate-slide-up" style={{ animationDelay: '0.5s' }}>
-            <h2 className="text-3xl font-bold text-[#111111] mb-2">Platform Modules</h2>
-            <p className="text-base text-gray-700">Build, deploy, execute and observe autonomous systems.</p>
-          </div>
-
-          {/* Main 3x3 Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 md:gap-6 mb-8">
-            {apps.map((app, index) => {
-              const Icon = app.icon
-              const moduleId = app.id === 'live-runs' ? 'logs' : app.id
-              return (
-                <div 
-                  key={app.id} 
-                  className="module-card border-2 border-[#D4C4A8] rounded-2xl overflow-hidden group cursor-pointer"
-                  data-module={moduleId}
-                  style={{ animationDelay: `${0.6 + index * 0.05}s` }}
-                >
-                  <div className="module-header px-4 py-3 relative">
-                    <div className="absolute inset-0 bg-gradient-to-b from-transparent via-black/5 to-transparent pointer-events-none" 
-                         style={{ backgroundImage: 'repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.03) 2px, rgba(0,0,0,0.03) 4px)' }} />
-                    <div className="flex items-center gap-2 relative">
-                      <div className="dot w-2.5 h-2.5 rounded-full"></div>
-                      <span className="text-[10px] font-semibold tracking-wide">{app.category}</span>
-                    </div>
-                  </div>
-                  <div className="bg-[#F5F1E8] group-hover:bg-white transition-colors duration-200 p-5 sm:p-6">
-                    <div className="mb-4 transition-transform duration-150">
-                      <Icon className="w-12 h-12 sm:w-14 sm:h-14" />
-                    </div>
-                    <h3 className="text-base sm:text-lg font-bold text-[#111111] mb-2">{app.name}</h3>
-                    <p className="text-xs sm:text-sm text-gray-600 mb-4">{app.description}</p>
-                    <Link href={app.href} className="inline-flex items-center gap-1 text-sm font-bold text-[#F54E00] hover:text-[#E24600] transition-colors duration-150">
-                      <span>Open</span>
-                      <ChevronRightIcon className="w-4 h-4" />
-                    </Link>
-                  </div>
-                </div>
-              )
-            })}
-          </div>
-
-          {/* Category Groups */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {categoryGroups.map((group, index) => {
-              const Icon = group.icon
-              return (
-                <div 
-                  key={group.title} 
-                  className="bg-[#F5F1E8] border border-[#D4C4A8] rounded-lg p-6 text-center hover:shadow-xl transition-all duration-300 hover:-translate-y-1 hover:border-[#F54E00] group animate-slide-up"
-                  style={{ animationDelay: `${1.1 + index * 0.1}s` }}
-                >
-                  <div className="flex justify-center mb-4 transition-transform duration-300 group-hover:scale-110 group-hover:rotate-6">
-                    <Icon className="w-12 h-12" />
-                  </div>
-                  <div className="inline-flex items-center justify-center px-4 py-2 bg-[#F54E00] text-white text-sm font-bold rounded-lg mb-4 transition-all duration-200 group-hover:bg-[#E24600] group-hover:scale-105 group-hover:shadow-lg">
-                    {group.title}
-                  </div>
-                  <div className="space-y-1.5">
-                    {group.items.map((item) => (
-                      <div key={item} className="text-xs text-gray-700 font-medium transition-all duration-200 hover:text-[#F54E00] hover:scale-105">{item}</div>
-                    ))}
-                  </div>
-                </div>
-              )
-            })}
-          </div>
-        </div>
-      </div>
-
-      {/* Powered By Section */}
-      <div className="py-12 border-t border-[#D4C4A8] animate-fade-in" style={{ animationDelay: '1.4s' }}>
-        <div className="max-w-[95%] 2xl:max-w-[1600px] mx-auto px-8">
-          <h3 className="text-2xl font-bold text-[#111111] mb-6">Powered by</h3>
-          <div className="flex flex-wrap gap-3">
-            {poweredByFeatures.map((feature, index) => (
-              <div 
-                key={feature} 
-                className="px-4 py-2 bg-[#F5F1E8] border border-[#D4C4A8] rounded-lg text-sm font-semibold text-gray-700 hover:bg-white hover:border-[#F54E00] hover:text-[#F54E00] hover:scale-105 transition-all duration-200 hover:shadow-md cursor-default animate-scale-in"
-                style={{ animationDelay: `${1.5 + index * 0.05}s` }}
-              >
-                {feature}
+          <div className="bg-black rounded-2xl overflow-hidden">
+            {/* Terminal title bar */}
+            <div className="flex items-center gap-2 px-5 py-3 border-b border-gray-800">
+              <div className="w-3 h-3 rounded-full bg-red-500" />
+              <div className="w-3 h-3 rounded-full bg-yellow-500" />
+              <div className="w-3 h-3 rounded-full bg-green-500" />
+              <span className="ml-3 text-xs text-gray-400 font-mono">live-activity — openrooms runtime</span>
+              <div className="ml-auto flex items-center gap-1.5">
+                <div className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse" />
+                <span className="text-xs text-green-400 font-mono">live</span>
               </div>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      {/* Live Platform Activity */}
-      <div className="py-12 border-t border-[#D4C4A8] animate-slide-up" style={{ animationDelay: '1.8s' }}>
-        <div className="max-w-[95%] 2xl:max-w-[1600px] mx-auto px-8">
-          <h3 className="text-2xl font-bold text-[#111111] mb-6">Live Platform Activity</h3>
-          <div className="bg-[#F5F1E8] border border-[#D4C4A8] rounded-xl p-6 font-mono hover:shadow-lg transition-all duration-300 hover:border-[#F54E00]">
-            {liveActivity.length === 0 ? (
-              <p className="text-sm text-gray-500 px-3 py-2">No recent activity — start a Room to see live events here.</p>
-            ) : (
-              <div className="space-y-2">
-                {liveActivity.map((activity, index) => (
-                  <div
-                    key={index}
-                    className="text-sm text-gray-700 hover:bg-white transition-all duration-200 px-3 py-2 rounded hover:scale-[1.02] hover:shadow-sm animate-fade-in"
-                    style={{ animationDelay: `${1.9 + index * 0.1}s` }}
-                  >
-                    <span className="text-[#F54E00] font-bold">[{activity.time}]</span>{' '}
-                    <span className="hover:text-[#111111] transition-colors duration-200">{activity.message}</span>
-                  </div>
-                ))}
-              </div>
-            )}
+            </div>
+            {/* Terminal body */}
+            <div className="p-6 font-mono min-h-[180px]">
+              {liveActivity.length === 0 ? (
+                <div className="space-y-1">
+                  <p className="text-sm text-gray-500">$ waiting for activity...</p>
+                  <p className="text-sm text-gray-600">Start a Room or run an agent to see live events here.</p>
+                  <span className="inline-block w-2 h-4 bg-gray-500 animate-pulse ml-0.5" />
+                </div>
+              ) : (
+                <div className="space-y-1.5">
+                  {liveActivity.map((activity, index) => (
+                    <div key={index} className="flex items-start gap-3 text-sm animate-fade-in" style={{ animationDelay: `${index * 0.08}s` }}>
+                      <span className="text-[#FB923C] font-bold shrink-0">[{activity.time}]</span>
+                      <span className="text-[#86EFAC]">{activity.message}</span>
+                    </div>
+                  ))}
+                  <span className="inline-block w-2 h-4 bg-green-400 animate-pulse ml-0.5 mt-1" />
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>
@@ -411,7 +289,7 @@ export default function HomePage() {
       {/* Bottom Dock */}
       <div className="fixed bottom-4 sm:bottom-8 left-1/2 -translate-x-1/2 z-50 animate-slide-up px-4" style={{ animationDelay: '2.3s' }}>
         <div className="bg-white/95 backdrop-blur-md border-2 border-black rounded-2xl px-3 sm:px-6 py-3 sm:py-4 flex items-center gap-2 sm:gap-4 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-[8px_8px_0px_0px_rgba(245,78,0,1)] transition-all duration-500 hover:scale-105 overflow-x-auto">
-          {apps.map((app, index) => {
+          {dockApps.map((app, index) => {
             const Icon = app.icon
             return (
               <Link 
