@@ -18,7 +18,8 @@ import {
 
 const productNav = [
   { name: 'Home', href: '/home', Icon: DashboardIcon },
-  { name: 'Rooms', href: '/rooms', Icon: RoomsIcon },
+  { name: 'Clients', href: '/clients', Icon: RoomsIcon },
+  { name: 'Developers', href: '/developers', Icon: AgentsIllustrationIcon },
   { name: 'Enterprise', href: '/enterprise', Icon: ControlPlaneIllustrationIcon },
 ]
 
