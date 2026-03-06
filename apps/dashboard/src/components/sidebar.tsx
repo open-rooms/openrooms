@@ -92,7 +92,7 @@ const devModeNav: NavItem[] = [
   { name: 'Runtime', href: '/runtime', Icon: MetricsIllustrationIcon },
 ]
 
-function NavSection({ label, items, pathname }: { label: string; items: NavItem[]; pathname: string }) {
+function NavSection({ label, items, pathname, accentColor }: { label: string; items: NavItem[]; pathname: string; accentColor?: string }) {
   return (
     <div>
       <p className="px-4 mb-1 text-[10px] font-bold tracking-widest text-gray-400 uppercase">{label}</p>
@@ -105,10 +105,18 @@ function NavSection({ label, items, pathname }: { label: string; items: NavItem[
               key={item.name}
               href={item.href}
               className={cn(
-                'flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-colors duration-150 ease-in-out',
-                isActive ? 'bg-[#FBF7F2] text-gray-900' : 'text-gray-600 hover:bg-[#FBF7F2] hover:text-gray-900'
+                'flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-all duration-150 ease-in-out relative',
+                isActive
+                  ? 'bg-[#FBF7F2] text-gray-900 font-semibold'
+                  : 'text-gray-600 hover:bg-[#FBF7F2] hover:text-gray-900'
               )}
             >
+              {isActive && accentColor && (
+                <span
+                  className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-5 rounded-full"
+                  style={{ backgroundColor: accentColor }}
+                />
+              )}
               <Icon className="w-5 h-5 flex-shrink-0" />
               <span>{item.name}</span>
             </Link>
@@ -143,10 +151,10 @@ export function Sidebar() {
         {/* Global */}
         <NavSection label="Navigation" items={globalNav} pathname={pathname} />
 
-        {/* Path-specific */}
-        {isClients && <NavSection label="Client Tools" items={clientsNav} pathname={pathname} />}
-        {isDevelopers && <NavSection label="Developer Mode" items={developersNav} pathname={pathname} />}
-        {isEnterprise && <NavSection label="Enterprise" items={enterpriseNav} pathname={pathname} />}
+        {/* Path-specific with accent colors */}
+        {isClients && <NavSection label="Client Tools" items={clientsNav} pathname={pathname} accentColor="#FDA4AF" />}
+        {isDevelopers && <NavSection label="Developer Mode" items={developersNav} pathname={pathname} accentColor="#F54E00" />}
+        {isEnterprise && <NavSection label="Enterprise" items={enterpriseNav} pathname={pathname} accentColor="#111111" />}
 
         {/* Default: show all paths when not in a specific one */}
         {!isClients && !isDevelopers && !isEnterprise && (

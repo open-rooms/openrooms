@@ -73,6 +73,13 @@ const features = [
   },
 ]
 
+const highlights = [
+  { value: 'REST API', label: 'Fully programmable' },
+  { value: 'BullMQ', label: 'Distributed runtime' },
+  { value: 'Any LLM', label: 'OpenAI · Anthropic · Custom' },
+  { value: 'TypeScript', label: 'Typed SDK included' },
+]
+
 const dockItems = [
   { id: 'control-plane', name: 'Control Plane', icon: DashboardIcon, href: '/control-plane' },
   { id: 'agents', name: 'Agents', icon: AgentIcon, href: '/agents' },
@@ -87,47 +94,103 @@ const dockItems = [
 
 export default function DevelopersPage() {
   return (
-    <div className="min-h-screen bg-[#E8DCC8] pb-28">
+    <div className="min-h-screen bg-[#E8DCC8] pb-32">
+
+      {/* Coloured accent bar */}
+      <div className="h-1 w-full bg-[#F54E00] animate-accent-expand" />
+
       {/* Hero */}
       <div className="bg-[#F5F1E8] border-b-2 border-black">
-        <div className="max-w-[95%] 2xl:max-w-[1600px] mx-auto px-6 md:px-8 py-12 md:py-16">
-          <div className="max-w-2xl">
-            <span className="text-[10px] font-bold tracking-widest text-gray-500 uppercase px-3 py-1 bg-[#E8DCC8] rounded-full animate-hero-enter" style={{ animationDelay: '0s' }}>For Developers</span>
-            <h1 className="text-3xl md:text-5xl font-bold text-[#111111] mt-4 mb-4 leading-tight animate-hero-enter" style={{ animationDelay: '0.08s' }}>
-              Build Agent<br />Infrastructure
-            </h1>
-            <p className="text-base text-gray-600 leading-relaxed mb-6 max-w-xl animate-hero-enter" style={{ animationDelay: '0.16s' }}>
-              OpenRooms is a full control plane. Design agents, compose workflows, register tools, and observe execution — all through a programmable runtime.
-            </p>
-            <div className="flex flex-wrap gap-3">
-              <Link href="/control-plane" className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#5EEAD4] hover:bg-[#4dd4be] text-[#111111] text-sm font-bold rounded-xl transition-colors">
-                <span>Open Control Plane</span>
-                <ChevronRightIcon className="w-4 h-4" />
-              </Link>
-              <Link href="/agents/create" className="inline-flex items-center gap-2 px-5 py-2.5 bg-white border-2 border-black hover:bg-gray-50 text-[#111111] text-sm font-bold rounded-xl transition-colors">
-                Create an Agent
-              </Link>
+        <div className="max-w-[95%] 2xl:max-w-[1400px] mx-auto px-4 sm:px-6 md:px-10 py-10 md:py-16">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-8">
+
+            {/* Left: copy */}
+            <div className="max-w-xl">
+              <span
+                className="inline-block text-[10px] font-black tracking-widest uppercase px-3 py-1 rounded-full mb-4 animate-hero-enter"
+                style={{ background: '#F54E00', color: '#fff', animationDelay: '0s' }}
+              >
+                For Developers
+              </span>
+              <h1
+                className="text-3xl sm:text-4xl md:text-5xl font-black text-[#111111] mb-4 leading-tight animate-hero-enter"
+                style={{ animationDelay: '0.08s' }}
+              >
+                Build Agent<br />Infrastructure
+              </h1>
+              <p
+                className="text-base text-gray-600 leading-relaxed mb-8 animate-hero-enter"
+                style={{ animationDelay: '0.16s' }}
+              >
+                OpenRooms is a full control plane. Design agents, compose workflows, register tools, and observe execution — all through a programmable runtime.
+              </p>
+              <div className="flex flex-wrap gap-3 animate-hero-enter" style={{ animationDelay: '0.22s' }}>
+                <Link
+                  href="/control-plane"
+                  className="inline-flex items-center gap-2 px-5 py-3 bg-[#F54E00] hover:bg-[#E24600] text-white text-sm font-black rounded-xl transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
+                >
+                  <span>Open Control Plane</span>
+                  <ChevronRightIcon className="w-4 h-4" />
+                </Link>
+                <Link
+                  href="/agents/create"
+                  className="inline-flex items-center gap-2 px-5 py-3 bg-white border-2 border-black hover:bg-gray-50 text-[#111111] text-sm font-black rounded-xl transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
+                >
+                  Create an Agent
+                </Link>
+              </div>
+            </div>
+
+            {/* Right: stats grid (desktop only) */}
+            <div className="hidden md:grid grid-cols-2 gap-3 flex-shrink-0 w-64 animate-hero-enter" style={{ animationDelay: '0.3s' }}>
+              {highlights.map((h) => (
+                <div key={h.label} className="bg-white border border-[#D4C4A8] rounded-xl p-4 text-center">
+                  <div className="text-base font-black text-[#111]">{h.value}</div>
+                  <div className="text-[10px] text-gray-500 mt-0.5 leading-snug">{h.label}</div>
+                </div>
+              ))}
             </div>
           </div>
         </div>
       </div>
 
+      {/* Mobile stats strip */}
+      <div className="md:hidden bg-black border-b border-gray-800">
+        <div className="grid grid-cols-2 divide-x divide-gray-800">
+          {highlights.map((h) => (
+            <div key={h.label} className="px-4 py-3 text-center">
+              <div className="text-sm font-black text-white">{h.value}</div>
+              <div className="text-[10px] text-gray-400 leading-snug">{h.label}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+
       {/* Feature Grid */}
-      <div className="max-w-[95%] 2xl:max-w-[1600px] mx-auto px-6 md:px-8 py-12 md:py-16">
-        <div className="mb-8">
-          <h2 className="text-2xl font-bold text-[#111111] mb-1">Developer tools</h2>
-          <p className="text-sm text-gray-500">Hover any card to learn more. Click to open.</p>
+      <div className="max-w-[95%] 2xl:max-w-[1400px] mx-auto px-4 sm:px-6 md:px-10 py-10 md:py-14">
+        <div className="mb-8 animate-section-enter" style={{ animationDelay: '0.1s' }}>
+          <div className="flex items-center gap-3 mb-1">
+            <div className="w-1 h-6 rounded-full bg-[#F54E00]" />
+            <h2 className="text-xl sm:text-2xl font-black text-[#111111]">Developer tools</h2>
+          </div>
+          <p className="text-sm text-gray-500 pl-4">Everything you need to build production agent systems.</p>
         </div>
         <FeatureGrid features={features} />
       </div>
 
       {/* API quick-start */}
-      <div className="border-t border-[#D4C4A8] py-12">
-        <div className="max-w-[95%] 2xl:max-w-[1600px] mx-auto px-6 md:px-8">
-          <div className="bg-black rounded-2xl p-6 md:p-8">
-            <p className="text-xs font-bold tracking-widest text-gray-400 uppercase mb-3">Quick Start</p>
-            <h3 className="text-xl font-bold text-white mb-4">Trigger an agent run via API</h3>
-            <pre className="text-sm text-[#86EFAC] font-mono overflow-x-auto leading-relaxed">
+      <div className="max-w-[95%] 2xl:max-w-[1400px] mx-auto px-4 sm:px-6 md:px-10 pb-4">
+        <div className="bg-[#111111] rounded-2xl border-2 border-black overflow-hidden">
+          <div className="flex items-center gap-2 px-5 py-3 bg-black border-b border-gray-800">
+            <div className="w-2.5 h-2.5 rounded-full bg-[#EF4444]" />
+            <div className="w-2.5 h-2.5 rounded-full bg-[#F59E0B]" />
+            <div className="w-2.5 h-2.5 rounded-full bg-[#22C55E]" />
+            <span className="ml-2 text-[11px] text-gray-500 font-mono">openrooms — quick start</span>
+          </div>
+          <div className="p-5 sm:p-8">
+            <p className="text-[10px] font-black tracking-widest text-[#F54E00] uppercase mb-3">API Quick Start</p>
+            <h3 className="text-lg sm:text-xl font-black text-white mb-4">Trigger an agent run</h3>
+            <pre className="text-xs sm:text-sm text-[#86EFAC] font-mono overflow-x-auto leading-relaxed bg-black/40 rounded-xl p-4 sm:p-5">
 {`POST /api/agents/:id/run
 Content-Type: application/json
 
@@ -142,12 +205,18 @@ Content-Type: application/json
   "status": "queued"
 }`}
             </pre>
-            <div className="mt-6 flex gap-3">
-              <Link href="/agents" className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#F54E00] hover:bg-[#E24600] text-white text-sm font-bold rounded-xl transition-colors">
+            <div className="mt-6 flex flex-wrap gap-3">
+              <Link
+                href="/agents"
+                className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#F54E00] hover:bg-[#E24600] text-white text-sm font-black rounded-xl transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
+              >
                 <span>Browse Agents</span>
                 <ChevronRightIcon className="w-4 h-4" />
               </Link>
-              <Link href="/settings" className="inline-flex items-center gap-2 px-5 py-2.5 border-2 border-gray-600 hover:border-white text-gray-400 hover:text-white text-sm font-bold rounded-xl transition-colors">
+              <Link
+                href="/settings"
+                className="inline-flex items-center gap-2 px-5 py-2.5 border-2 border-gray-600 hover:border-white text-gray-400 hover:text-white text-sm font-black rounded-xl transition-colors duration-200"
+              >
                 Configure Providers
               </Link>
             </div>
@@ -156,7 +225,7 @@ Content-Type: application/json
       </div>
 
       {/* Path Dock */}
-      <PathDock items={dockItems} accentColor="#5EEAD4" />
+      <PathDock items={dockItems} accentColor="#F54E00" />
     </div>
   )
 }

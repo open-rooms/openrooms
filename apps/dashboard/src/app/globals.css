@@ -83,39 +83,74 @@
     50%       { transform: translateY(-4px); }
   }
 
-  /* ── Path-page card entrance — spring pop with stagger ── */
+  /* ── Path-page card entrance — clean fade + rise, no overshoot ── */
   .animate-card-pop {
-    animation: cardPop 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+    animation: cardFadeUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
   }
 
-  /* Hero text entrance on path pages — slides in from left */
+  /* Hero text entrance on path pages — gentle fade up */
   .animate-hero-enter {
-    animation: heroEnter 0.55s cubic-bezier(0.16, 1, 0.3, 1) both;
+    animation: heroFadeUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
   }
 
-  @keyframes cardPop {
-    0% {
-      opacity: 0;
-      transform: scale(0.88) translateY(18px);
-    }
-    65% {
-      opacity: 1;
-      transform: scale(1.03) translateY(-2px);
-    }
-    100% {
-      opacity: 1;
-      transform: scale(1) translateY(0);
-    }
+  /* Section title entrance */
+  .animate-section-enter {
+    animation: heroFadeUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
   }
 
-  @keyframes heroEnter {
+  /* Accent bar expand */
+  .animate-accent-expand {
+    animation: accentExpand 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+
+  /* Dock entrance from bottom */
+  .animate-dock-rise {
+    animation: dockRise 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+
+  @keyframes cardFadeUp {
     from {
       opacity: 0;
-      transform: translateX(-20px);
+      transform: translateY(16px);
     }
     to {
       opacity: 1;
-      transform: translateX(0);
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes heroFadeUp {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes accentExpand {
+    from {
+      opacity: 0;
+      transform: scaleX(0);
+      transform-origin: left;
+    }
+    to {
+      opacity: 1;
+      transform: scaleX(1);
+      transform-origin: left;
+    }
+  }
+
+  @keyframes dockRise {
+    from {
+      opacity: 0;
+      transform: translateY(24px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
     }
   }
 
