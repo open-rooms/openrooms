@@ -82,15 +82,15 @@ const highlights = [
 ]
 
 const dockItems = [
-  { id: 'rooms', name: 'Rooms', icon: RoomsIcon, href: '/rooms' },
-  { id: 'agents', name: 'Agents', icon: AgentIcon, href: '/agents' },
-  { id: 'workflows', name: 'Workflows', icon: WorkflowIcon, href: '/workflows' },
-  { id: 'automation', name: 'Automations', icon: AutomationIcon, href: '/automation' },
-  { id: 'live', name: 'Live Activity', icon: RuntimeIcon, href: '/live-runs' },
-  { id: 'knowledge', name: 'Knowledge', icon: MemoryIcon, href: '/rooms' },
-  { id: 'reports', name: 'Reports', icon: ReportsIcon, href: '/live-runs' },
-  { id: 'integrations', name: 'Integrations', icon: IntegrationsIcon, href: '/tools' },
-  { id: 'tools', name: 'Tools', icon: ToolIcon, href: '/tools' },
+  { id: 'rooms', name: 'Rooms', icon: RoomsIcon, href: '/clients/rooms' },
+  { id: 'agents', name: 'Agents', icon: AgentIcon, href: '/clients/agents' },
+  { id: 'workflows', name: 'Workflows', icon: WorkflowIcon, href: '/clients/workflows' },
+  { id: 'automation', name: 'Automations', icon: AutomationIcon, href: '/clients/automations' },
+  { id: 'live', name: 'Live Activity', icon: RuntimeIcon, href: '/clients/activity' },
+  { id: 'knowledge', name: 'Knowledge', icon: MemoryIcon, href: '/clients/knowledge' },
+  { id: 'reports', name: 'Reports', icon: ReportsIcon, href: '/clients/reports' },
+  { id: 'integrations', name: 'Integrations', icon: IntegrationsIcon, href: '/clients/integrations' },
+  { id: 'tools', name: 'Tools', icon: ToolIcon, href: '/clients/tools' },
 ]
 
 export default function ClientsPage() {

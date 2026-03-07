@@ -33,6 +33,7 @@ import {
   IntegrationsIcon,
   ReportsIcon,
   APIIcon,
+  SDKIcon,
 } from './icons/system'
 
 type NavItem = { name: string; href: string; Icon: React.ComponentType<{ className?: string }> }
@@ -68,7 +69,7 @@ const developersNav: NavItem[] = [
   { name: 'Live Runs', href: '/developers/runs', Icon: LiveRunsIcon },
   { name: 'Logs', href: '/developers/logs', Icon: LogsIcon },
   { name: 'API', href: '/developers/api', Icon: APIIcon },
-  { name: 'SDK', href: '/developers/sdk', Icon: APIIcon },
+  { name: 'SDK', href: '/developers/sdk', Icon: SDKIcon },
 ]
 
 // Shown when on /enterprise

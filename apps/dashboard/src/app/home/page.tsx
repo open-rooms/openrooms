@@ -197,12 +197,12 @@ export default function HomePage() {
               workflows, and autonomous systems across models, APIs, and blockchains.
             </p>
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4 animate-slide-up" style={{ animationDelay: '0.3s' }}>
-              <Link href="/clients" className="px-6 py-3 bg-[#F54E00] hover:bg-[#E24600] text-white text-sm sm:text-base font-bold rounded-lg transition-colors duration-150 inline-flex items-center justify-center gap-2">
+              <a href="#paths" className="px-6 py-3 bg-[#F54E00] hover:bg-[#E24600] text-white text-sm sm:text-base font-bold rounded-lg transition-colors duration-150 inline-flex items-center justify-center gap-2">
                 <span>Start for Free</span>
                 <ChevronRightIcon className="w-5 h-5" />
-              </Link>
-              <Link href="/developers" className="px-6 py-3 bg-white border-2 border-black hover:bg-[#F54E00] hover:border-[#F54E00] text-[#111111] hover:text-white text-sm sm:text-base font-bold rounded-lg transition-colors duration-150 text-center">
-                Explore Platform
+              </a>
+              <Link href="/ecosystem" className="px-6 py-3 bg-white border-2 border-black hover:bg-[#F54E00] hover:border-[#F54E00] text-[#111111] hover:text-white text-sm sm:text-base font-bold rounded-lg transition-colors duration-150 text-center">
+                Explore Infrastructure
               </Link>
             </div>
           </div>
@@ -210,7 +210,7 @@ export default function HomePage() {
       </div>
 
       {/* ── Product Path Cards + Module Chips (same section) ── */}
-      <div className="bg-[#E8DCC8] py-12 sm:py-16 border-b-2 border-black">
+      <div id="paths" className="bg-[#E8DCC8] py-12 sm:py-16 border-b-2 border-black">
         <div className="max-w-[95%] 2xl:max-w-[1600px] mx-auto px-4 sm:px-6 md:px-8">
           <div className="mb-8 animate-slide-up" style={{ animationDelay: '0.35s' }}>
             <p className="text-xs font-bold tracking-widest text-gray-500 uppercase mb-2">Choose your path</p>

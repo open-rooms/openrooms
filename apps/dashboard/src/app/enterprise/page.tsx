@@ -82,15 +82,15 @@ const stats = [
 ]
 
 const dockItems = [
-  { id: 'rooms', name: 'Rooms', icon: RoomsIcon, href: '/rooms' },
-  { id: 'clusters', name: 'Swarms', icon: AgentClustersIcon, href: '/agents' },
-  { id: 'dist', name: 'Distributed Exec', icon: DistributedExecutionIcon, href: '/runtime' },
-  { id: 'obs', name: 'Observability', icon: ObservabilityIcon, href: '/live-runs' },
-  { id: 'auto', name: 'Automation', icon: AutomationIcon, href: '/automation' },
-  { id: 'int', name: 'Integrations', icon: IntegrationsIcon, href: '/tools' },
-  { id: 'sec', name: 'Security', icon: SecurityIcon, href: '/settings' },
-  { id: 'comp', name: 'Compliance', icon: ComplianceIcon, href: '/live-runs' },
-  { id: 'arch', name: 'Architecture', icon: EnterpriseArchitectureIcon, href: '/control-plane' },
+  { id: 'rooms', name: 'Rooms', icon: RoomsIcon, href: '/enterprise/rooms' },
+  { id: 'clusters', name: 'Swarms', icon: AgentClustersIcon, href: '/enterprise/swarms' },
+  { id: 'dist', name: 'Distributed Exec', icon: DistributedExecutionIcon, href: '/enterprise/execution' },
+  { id: 'obs', name: 'Observability', icon: ObservabilityIcon, href: '/enterprise/observability' },
+  { id: 'auto', name: 'Automation', icon: AutomationIcon, href: '/enterprise/automation' },
+  { id: 'int', name: 'Integrations', icon: IntegrationsIcon, href: '/enterprise/integrations' },
+  { id: 'sec', name: 'Security', icon: SecurityIcon, href: '/enterprise/security' },
+  { id: 'comp', name: 'Compliance', icon: ComplianceIcon, href: '/enterprise/compliance' },
+  { id: 'arch', name: 'Architecture', icon: EnterpriseArchitectureIcon, href: '/enterprise/architecture' },
 ]
 
 export default function EnterprisePage() {

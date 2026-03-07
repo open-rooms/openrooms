@@ -82,15 +82,15 @@ const highlights = [
 ]
 
 const dockItems = [
-  { id: 'control-plane', name: 'Control Plane', icon: DashboardIcon, href: '/control-plane' },
-  { id: 'agents', name: 'Agents', icon: AgentIcon, href: '/agents' },
-  { id: 'workflows', name: 'Workflows', icon: WorkflowIcon, href: '/workflows' },
-  { id: 'tools', name: 'Tools', icon: ToolIcon, href: '/tools' },
-  { id: 'runtime', name: 'Runtime', icon: RuntimeIcon, href: '/runtime' },
-  { id: 'runs', name: 'Live Runs', icon: LiveRunsIcon, href: '/live-runs' },
-  { id: 'logs', name: 'Logs', icon: LogsIcon, href: '/live-runs' },
-  { id: 'api', name: 'API', icon: APIIcon, href: '/settings' },
-  { id: 'sdk', name: 'SDK', icon: SDKIcon, href: '/docs' },
+  { id: 'control-plane', name: 'Control Plane', icon: DashboardIcon, href: '/developers/control-plane' },
+  { id: 'agents', name: 'Agents', icon: AgentIcon, href: '/developers/agents' },
+  { id: 'workflows', name: 'Workflows', icon: WorkflowIcon, href: '/developers/workflows' },
+  { id: 'tools', name: 'Tools', icon: ToolIcon, href: '/developers/tools' },
+  { id: 'runtime', name: 'Runtime', icon: RuntimeIcon, href: '/developers/runtime' },
+  { id: 'runs', name: 'Live Runs', icon: LiveRunsIcon, href: '/developers/runs' },
+  { id: 'logs', name: 'Logs', icon: LogsIcon, href: '/developers/logs' },
+  { id: 'api', name: 'API', icon: APIIcon, href: '/developers/api' },
+  { id: 'sdk', name: 'SDK', icon: SDKIcon, href: '/developers/sdk' },
 ]
 
 export default function DevelopersPage() {
