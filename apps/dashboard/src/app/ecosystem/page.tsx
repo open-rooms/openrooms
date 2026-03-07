@@ -152,31 +152,20 @@ export default function EcosystemPage() {
                 </Link>
               </div>
 
-              {/* 9-icon grid */}
+              {/* 9-icon grid — display only, no navigation */}
               <motion.div
                 variants={containerVariants}
                 initial="hidden"
                 whileInView="show"
                 viewport={{ once: true, margin: '-60px' }}
-                className="grid grid-cols-3 sm:grid-cols-3 lg:grid-cols-9 gap-3 sm:gap-4"
+                className="grid grid-cols-3 sm:grid-cols-3 lg:grid-cols-9 gap-4 sm:gap-5"
               >
                 {path.features.map((feature) => {
                   const Icon = feature.icon
                   return (
-                    <motion.div key={feature.title} variants={itemVariants}>
-                      <Link href={feature.href}>
-                        <motion.div
-                          whileHover={{ scale: 1.06, y: -3 }}
-                          whileTap={{ scale: 0.97 }}
-                          transition={{ duration: 0.18, ease: 'easeOut' }}
-                          className="bg-[#F5F1E8] border border-[#D4C4A8] hover:border-[#F54E00] rounded-2xl p-4 flex flex-col items-center text-center cursor-pointer transition-colors duration-200 hover:shadow-md"
-                          style={{ borderColor: undefined }}
-                        >
-                          <Icon className="w-12 h-12 mb-2" />
-                          <span className="text-xs font-black text-[#111111] leading-tight">{feature.title}</span>
-                          <span className="text-[10px] text-gray-400 mt-1 leading-snug hidden lg:block">{feature.desc}</span>
-                        </motion.div>
-                      </Link>
+                    <motion.div key={feature.title} variants={itemVariants} className="flex flex-col items-center gap-2">
+                      <Icon className="w-14 h-14 sm:w-16 sm:h-16" />
+                      <span className="text-xs font-black text-[#111111] text-center leading-tight">{feature.title}</span>
                     </motion.div>
                   )
                 })}
