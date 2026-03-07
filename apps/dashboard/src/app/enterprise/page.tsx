@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { ChevronRightIcon } from '@/components/icons'
 import { FeatureGrid } from '@/components/FeatureCard'
 import { PathDock } from '@/components/PathDock'
+import { PageTransition } from '@/components/PageTransition'
 import {
   RoomsIcon,
   AgentClustersIcon,
@@ -21,55 +22,55 @@ const features = [
     icon: RoomsIcon,
     title: 'Rooms',
     description: 'Isolated execution environments that contain agents, memory, and workflows at runtime.',
-    href: '/rooms',
+    href: '/enterprise/rooms',
   },
   {
     icon: AgentClustersIcon,
     title: 'Swarms',
     description: 'Deploy coordinated swarms of specialised agents that work in parallel across shared tasks.',
-    href: '/agents',
+    href: '/enterprise/swarms',
   },
   {
     icon: DistributedExecutionIcon,
     title: 'Distributed Execution',
     description: 'BullMQ worker pools that scale horizontally — no bottlenecks, no single point of failure.',
-    href: '/runtime',
+    href: '/enterprise/execution',
   },
   {
     icon: ObservabilityIcon,
     title: 'Observability',
     description: 'Full telemetry across every agent action, tool call, reasoning trace, and workflow step.',
-    href: '/live-runs',
+    href: '/enterprise/observability',
   },
   {
     icon: AutomationIcon,
     title: 'Automation',
     description: 'Schedule and trigger intelligent workflows across teams, time zones, and data pipelines.',
-    href: '/automation',
+    href: '/enterprise/automation',
   },
   {
     icon: IntegrationsIcon,
     title: 'Integrations',
     description: 'Connect your infrastructure to any external API, database, or service via the tool registry.',
-    href: '/tools',
+    href: '/enterprise/integrations',
   },
   {
     icon: SecurityIcon,
     title: 'Security',
     description: 'API key management, execution policies, and room-level access isolation built in.',
-    href: '/settings',
+    href: '/enterprise/security',
   },
   {
     icon: ComplianceIcon,
     title: 'Compliance',
     description: 'Structured audit logs, execution records, and immutable run history for every operation.',
-    href: '/live-runs',
+    href: '/enterprise/compliance',
   },
   {
     icon: EnterpriseArchitectureIcon,
     title: 'Architecture',
     description: 'Modular infrastructure: swap LLM providers, extend tool registries, and customise runtime.',
-    href: '/control-plane',
+    href: '/enterprise/architecture',
   },
 ]
 
@@ -94,6 +95,7 @@ const dockItems = [
 
 export default function EnterprisePage() {
   return (
+    <PageTransition>
     <div className="min-h-screen bg-gray-50 pb-32">
 
       {/* Coloured accent bar */}
@@ -214,5 +216,6 @@ export default function EnterprisePage() {
       {/* Path Dock */}
       <PathDock items={dockItems} accentColor="#111111" />
     </div>
+    </PageTransition>
   )
 }

@@ -193,17 +193,16 @@ export default function HomePage() {
               Orchestrate Intelligent Systems at Runtime
             </h1>
             <p className="text-sm sm:text-base md:text-lg text-gray-700 mb-6 sm:mb-8 max-w-2xl leading-relaxed animate-slide-up" style={{ animationDelay: '0.2s' }}>
-              OpenRooms is a control plane for autonomous systems.{' '}
-              It orchestrates AI agents, workflows, APIs, and external tools into coordinated execution environments called Rooms.{' '}
-              Teams can deploy intelligent agents, automate complex tasks, and observe system behavior in real time.
+              OpenRooms is the control plane for deploying and orchestrating AI agents,
+              workflows, and autonomous systems across models, APIs, and blockchains.
             </p>
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4 animate-slide-up" style={{ animationDelay: '0.3s' }}>
-              <Link href="/control-plane" className="px-6 py-3 bg-[#F54E00] hover:bg-[#E24600] text-white text-sm sm:text-base font-bold rounded-lg transition-colors duration-150 inline-flex items-center justify-center gap-2">
-                <span>Launch Control Plane</span>
+              <Link href="/clients" className="px-6 py-3 bg-[#F54E00] hover:bg-[#E24600] text-white text-sm sm:text-base font-bold rounded-lg transition-colors duration-150 inline-flex items-center justify-center gap-2">
+                <span>Start for Free</span>
                 <ChevronRightIcon className="w-5 h-5" />
               </Link>
-              <Link href="/live-runs" className="px-6 py-3 bg-white border-2 border-black hover:bg-[#F54E00] hover:border-[#F54E00] text-[#111111] hover:text-white text-sm sm:text-base font-bold rounded-lg transition-colors duration-150 text-center">
-                View Live System
+              <Link href="/developers" className="px-6 py-3 bg-white border-2 border-black hover:bg-[#F54E00] hover:border-[#F54E00] text-[#111111] hover:text-white text-sm sm:text-base font-bold rounded-lg transition-colors duration-150 text-center">
+                Explore Platform
               </Link>
             </div>
           </div>

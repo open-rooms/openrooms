@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { ChevronRightIcon } from '@/components/icons'
 import { FeatureGrid } from '@/components/FeatureCard'
 import { PathDock } from '@/components/PathDock'
+import { PageTransition } from '@/components/PageTransition'
 import {
   RoomsIcon,
   AgentIcon,
@@ -21,55 +22,55 @@ const features = [
     icon: RoomsIcon,
     title: 'Rooms',
     description: 'Coordinated environments where agents work together on your tasks.',
-    href: '/rooms',
+    href: '/clients/rooms',
   },
   {
     icon: AgentIcon,
     title: 'Agents',
     description: 'Intelligent AI agents that perceive, reason, and act autonomously.',
-    href: '/agents',
+    href: '/clients/agents',
   },
   {
     icon: WorkflowIcon,
     title: 'Workflows',
     description: 'Multi-step automation pipelines that chain agents and tools together.',
-    href: '/workflows',
+    href: '/clients/workflows',
   },
   {
     icon: AutomationIcon,
     title: 'Automations',
     description: 'Scheduled and event-driven tasks that run without manual intervention.',
-    href: '/automation',
+    href: '/clients/automations',
   },
   {
     icon: RuntimeIcon,
     title: 'Live Activity',
     description: 'Real-time feed showing exactly what your agents are doing right now.',
-    href: '/live-runs',
+    href: '/clients/activity',
   },
   {
     icon: MemoryIcon,
     title: 'Knowledge',
     description: 'Persistent memory and context that agents build up over time.',
-    href: '/rooms',
+    href: '/clients/knowledge',
   },
   {
     icon: ReportsIcon,
     title: 'Reports',
     description: 'Summarised outputs and analytics from completed agent runs.',
-    href: '/live-runs',
+    href: '/clients/reports',
   },
   {
     icon: IntegrationsIcon,
     title: 'Integrations',
     description: 'Connect agents to external APIs, data sources, and platforms.',
-    href: '/tools',
+    href: '/clients/integrations',
   },
   {
     icon: ToolIcon,
     title: 'Tools',
     description: 'Pre-built capabilities agents can invoke: search, fetch, compute, and more.',
-    href: '/tools',
+    href: '/clients/tools',
   },
 ]
 
@@ -94,6 +95,7 @@ const dockItems = [
 
 export default function ClientsPage() {
   return (
+    <PageTransition>
     <div className="min-h-screen bg-[#E8DCC8] pb-32">
 
       {/* Coloured accent bar */}
@@ -202,5 +204,6 @@ export default function ClientsPage() {
       {/* Path Dock */}
       <PathDock items={dockItems} accentColor="#FDA4AF" />
     </div>
+    </PageTransition>
   )
 }

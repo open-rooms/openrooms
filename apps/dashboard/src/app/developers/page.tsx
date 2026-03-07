@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { ChevronRightIcon } from '@/components/icons'
 import { FeatureGrid } from '@/components/FeatureCard'
 import { PathDock } from '@/components/PathDock'
+import { PageTransition } from '@/components/PageTransition'
 import {
   DashboardIcon,
   AgentIcon,
@@ -21,55 +22,55 @@ const features = [
     icon: DashboardIcon,
     title: 'Control Plane',
     description: 'Central admin interface for managing agents, workflows, tools and execution state.',
-    href: '/control-plane',
+    href: '/developers/control-plane',
   },
   {
     icon: AgentIcon,
     title: 'Agents',
     description: 'Design autonomous agents with custom goals, tools, LLM providers, and policy configs.',
-    href: '/agents',
+    href: '/developers/agents',
   },
   {
     icon: WorkflowIcon,
     title: 'Workflows',
     description: 'Build multi-agent pipelines with branching logic, parallel nodes, and chained steps.',
-    href: '/workflows',
+    href: '/developers/workflows',
   },
   {
     icon: ToolIcon,
     title: 'Tools',
     description: 'Register HTTP tools and custom executors that agents invoke during their reasoning loop.',
-    href: '/tools',
+    href: '/developers/tools',
   },
   {
     icon: RuntimeIcon,
     title: 'Runtime',
     description: 'BullMQ-powered execution engine with Redis queues, worker processes, and job management.',
-    href: '/runtime',
+    href: '/developers/runtime',
   },
   {
     icon: LiveRunsIcon,
     title: 'Runs',
     description: 'Full execution history with status tracking, duration, and per-run metadata.',
-    href: '/live-runs',
+    href: '/developers/runs',
   },
   {
     icon: LogsIcon,
     title: 'Logs',
     description: 'Structured execution logs with event types, reasoning traces, and tool call records.',
-    href: '/live-runs',
+    href: '/developers/logs',
   },
   {
     icon: APIIcon,
     title: 'API',
     description: 'REST API for triggering agent runs, querying logs, managing tools, and configuring providers.',
-    href: '/settings',
+    href: '/developers/api',
   },
   {
     icon: SDKIcon,
     title: 'SDK',
     description: 'Programmatic access to OpenRooms infrastructure via typed workspace packages.',
-    href: '/docs',
+    href: '/developers/sdk',
   },
 ]
 
@@ -94,6 +95,7 @@ const dockItems = [
 
 export default function DevelopersPage() {
   return (
+    <PageTransition>
     <div className="min-h-screen bg-[#E8DCC8] pb-32">
 
       {/* Coloured accent bar */}
@@ -227,5 +229,6 @@ Content-Type: application/json
       {/* Path Dock */}
       <PathDock items={dockItems} accentColor="#F54E00" />
     </div>
+    </PageTransition>
   )
 }

@@ -25,6 +25,7 @@ import {
   RuntimeIcon,
   ToolIcon,
   AgentClustersIcon,
+  DistributedExecutionIcon,
   ObservabilityIcon,
   SecurityIcon,
   ComplianceIcon,
@@ -45,40 +46,43 @@ const globalNav: NavItem[] = [
 // Shown when on /clients
 const clientsNav: NavItem[] = [
   { name: 'Clients', href: '/clients', Icon: RoomsIcon },
-  { name: 'Rooms', href: '/rooms', Icon: RoomsIcon },
-  { name: 'Agents', href: '/agents', Icon: AgentsIllustrationIcon },
-  { name: 'Automations', href: '/automation', Icon: AutomationIcon },
-  { name: 'Live Activity', href: '/live-runs', Icon: LiveActivityIcon },
-  { name: 'Knowledge', href: '/knowledge', Icon: MemoryIcon },
-  { name: 'Reports', href: '/reports', Icon: ReportsIcon },
-  { name: 'Integrations', href: '/integrations', Icon: IntegrationsIcon },
-  { name: 'Tools', href: '/tools', Icon: ToolIcon },
+  { name: 'Rooms', href: '/clients/rooms', Icon: RoomsIcon },
+  { name: 'Agents', href: '/clients/agents', Icon: AgentsIllustrationIcon },
+  { name: 'Workflows', href: '/clients/workflows', Icon: WorkflowIcon },
+  { name: 'Automations', href: '/clients/automations', Icon: AutomationIcon },
+  { name: 'Live Activity', href: '/clients/activity', Icon: LiveActivityIcon },
+  { name: 'Knowledge', href: '/clients/knowledge', Icon: MemoryIcon },
+  { name: 'Reports', href: '/clients/reports', Icon: ReportsIcon },
+  { name: 'Integrations', href: '/clients/integrations', Icon: IntegrationsIcon },
+  { name: 'Tools', href: '/clients/tools', Icon: ToolIcon },
 ]
 
 // Shown when on /developers
 const developersNav: NavItem[] = [
   { name: 'Developers', href: '/developers', Icon: AgentsIllustrationIcon },
-  { name: 'Control Plane', href: '/control-plane', Icon: ControlPlaneIllustrationIcon },
-  { name: 'Agents', href: '/agents', Icon: AgentsIllustrationIcon },
-  { name: 'Workflows', href: '/workflows', Icon: WorkflowIcon },
-  { name: 'Tools', href: '/tools', Icon: ToolIcon },
-  { name: 'Runtime', href: '/runtime', Icon: RuntimeIcon },
-  { name: 'Live Runs', href: '/live-runs', Icon: LiveRunsIcon },
-  { name: 'Logs', href: '/logs', Icon: LogsIcon },
-  { name: 'API', href: '/api-keys', Icon: APIIcon },
+  { name: 'Control Plane', href: '/developers/control-plane', Icon: ControlPlaneIllustrationIcon },
+  { name: 'Agents', href: '/developers/agents', Icon: AgentsIllustrationIcon },
+  { name: 'Workflows', href: '/developers/workflows', Icon: WorkflowIcon },
+  { name: 'Tools', href: '/developers/tools', Icon: ToolIcon },
+  { name: 'Runtime', href: '/developers/runtime', Icon: RuntimeIcon },
+  { name: 'Live Runs', href: '/developers/runs', Icon: LiveRunsIcon },
+  { name: 'Logs', href: '/developers/logs', Icon: LogsIcon },
+  { name: 'API', href: '/developers/api', Icon: APIIcon },
+  { name: 'SDK', href: '/developers/sdk', Icon: APIIcon },
 ]
 
 // Shown when on /enterprise
 const enterpriseNav: NavItem[] = [
   { name: 'Enterprise', href: '/enterprise', Icon: ControlPlaneIllustrationIcon },
-  { name: 'Rooms', href: '/rooms', Icon: RoomsIcon },
-  { name: 'Swarms', href: '/agent-clusters', Icon: AgentClustersIcon },
-  { name: 'Observability', href: '/observability', Icon: ObservabilityIcon },
-  { name: 'Automation', href: '/automation', Icon: AutomationIcon },
-  { name: 'Integrations', href: '/integrations', Icon: IntegrationsIcon },
-  { name: 'Security', href: '/security', Icon: SecurityIcon },
-  { name: 'Compliance', href: '/compliance', Icon: ComplianceIcon },
-  { name: 'Architecture', href: '/architecture', Icon: EnterpriseArchitectureIcon },
+  { name: 'Rooms', href: '/enterprise/rooms', Icon: RoomsIcon },
+  { name: 'Swarms', href: '/enterprise/swarms', Icon: AgentClustersIcon },
+  { name: 'Distributed Execution', href: '/enterprise/execution', Icon: DistributedExecutionIcon },
+  { name: 'Observability', href: '/enterprise/observability', Icon: ObservabilityIcon },
+  { name: 'Automation', href: '/enterprise/automation', Icon: AutomationIcon },
+  { name: 'Integrations', href: '/enterprise/integrations', Icon: IntegrationsIcon },
+  { name: 'Security', href: '/enterprise/security', Icon: SecurityIcon },
+  { name: 'Compliance', href: '/enterprise/compliance', Icon: ComplianceIcon },
+  { name: 'Architecture', href: '/enterprise/architecture', Icon: EnterpriseArchitectureIcon },
 ]
 
 // Default developer mode (when not in a specific path)
@@ -130,9 +134,9 @@ function NavSection({ label, items, pathname, accentColor }: { label: string; it
 export function Sidebar() {
   const pathname = usePathname()
 
-  const isClients = pathname?.startsWith('/clients') || pathname?.startsWith('/rooms') || pathname?.startsWith('/reports') || pathname?.startsWith('/knowledge')
-  const isDevelopers = pathname?.startsWith('/developers') || pathname?.startsWith('/control-plane') || pathname?.startsWith('/agents') || pathname?.startsWith('/workflows') || pathname?.startsWith('/api-keys') || pathname?.startsWith('/logs')
-  const isEnterprise = pathname?.startsWith('/enterprise') || pathname?.startsWith('/agent-clusters') || pathname?.startsWith('/observability') || pathname?.startsWith('/security') || pathname?.startsWith('/compliance') || pathname?.startsWith('/architecture')
+  const isClients = pathname?.startsWith('/clients')
+  const isDevelopers = pathname?.startsWith('/developers')
+  const isEnterprise = pathname?.startsWith('/enterprise')
 
   return (
     <aside className="fixed left-0 top-0 bottom-0 w-64 bg-white border-r border-[#DED8D2] flex flex-col">
