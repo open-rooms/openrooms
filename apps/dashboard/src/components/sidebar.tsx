@@ -41,6 +41,9 @@ type NavItem = { name: string; href: string; Icon: React.ComponentType<{ classNa
 // Always shown at the top
 const globalNav: NavItem[] = [
   { name: 'Home', href: '/home', Icon: DashboardIcon },
+  { name: 'System Map', href: '/system', Icon: EnterpriseArchitectureIcon },
+  { name: 'Ecosystem', href: '/ecosystem', Icon: DistributedExecutionIcon },
+  { name: 'Docs', href: '/docs', Icon: ControlPlaneIllustrationIcon },
   { name: 'Settings', href: '/settings', Icon: SettingsIllustrationIcon },
 ]
 

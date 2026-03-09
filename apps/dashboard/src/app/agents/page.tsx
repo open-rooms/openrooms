@@ -175,7 +175,7 @@ export default function AgentsPage() {
               <Link
                 key={agent.id}
                 href={`/agents/${agent.id}`}
-                className="bg-white border-2 border-black rounded-lg p-6 hover:shadow-xl transition-all hover:scale-[1.02] group"
+                className={`bg-white border-2 border-black rounded-lg p-6 hover:shadow-xl transition-all hover:scale-[1.02] group ${agent.status === 'ACTIVE' ? 'animate-agent-pulse' : ''}`}
                 style={{ animationDelay: `${0.3 + index * 0.05}s` }}
               >
                 <div className="flex items-start justify-between gap-4">

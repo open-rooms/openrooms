@@ -97,6 +97,21 @@ export const runAgent = (agentId: string, data?: { roomId?: string; maxIteration
     { method: 'POST', body: JSON.stringify(data ?? {}) }
   )
 
+export const deployAgent = (data: CreateAgentInput & { runImmediately?: boolean }) =>
+  request<{ agent: Agent; runId?: string }>(
+    '/api/agents/deploy',
+    { method: 'POST', body: JSON.stringify(data) }
+  )
+
+export const createTool = (data: { name: string; description: string; category: 'API' | 'Webhook' | 'Script' | 'SDK'; url?: string; method?: string; parameters?: unknown[] }) =>
+  request<Tool>('/api/tools', { method: 'POST', body: JSON.stringify(data) })
+
+export const deleteTool = (id: string) =>
+  request<void>(`/api/tools/${id}`, { method: 'DELETE' })
+
+export const getRuntimeStatus = () =>
+  request<{ status: string; redis: string; queues: Record<string, { waiting: number; active: number; completed: number; failed: number }>; timestamp: string }>('/api/runtime/status')
+
 export const runWorkflow = (workflowId: string, data?: { roomId?: string; roomName?: string; context?: Record<string, unknown> }) =>
   request<{ runId: string; workflowId: string; roomId: string; status: string; message: string }>(
     `/api/workflows/${workflowId}/run`,
@@ -298,6 +313,8 @@ export const api = {
   getWorkflowNodes,
   getTools,
   getTool,
+  createTool,
+  deleteTool,
   getAgents,
   getAgent,
   createAgent,
@@ -315,4 +332,6 @@ export const api = {
   getLogsByRun,
   runAgent,
   runWorkflow,
+  deployAgent,
+  getRuntimeStatus,
 }

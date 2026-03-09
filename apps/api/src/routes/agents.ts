@@ -60,6 +60,57 @@ export function agentRoutes(fastify: FastifyInstance, container: Container) {
   });
 
   /**
+   * POST /api/agents/deploy - Create agent and optionally run immediately
+   */
+  fastify.post('/agents/deploy', async (request, reply) => {
+    const body = request.body as {
+      name: string;
+      description?: string;
+      goal: string;
+      roomId?: string;
+      allowedTools: string[];
+      policyConfig?: AgentPolicy;
+      runImmediately?: boolean;
+      maxIterations?: number;
+    };
+
+    try {
+      const normalizedRoomId = body.roomId && body.roomId.trim() ? body.roomId.trim() : undefined;
+      const agent = await container.agentRepository.create({
+        name: body.name,
+        description: body.description,
+        goal: body.goal,
+        roomId: normalizedRoomId,
+        allowedTools: body.allowedTools ?? [],
+        policyConfig: body.policyConfig ?? {},
+      });
+
+      if (body.runImmediately) {
+        const result = await container.agentRunner.runAgent(agent.id, {
+          roomId: normalizedRoomId,
+          maxIterations: body.maxIterations ?? 5,
+        });
+        return reply.code(202).send({
+          agent,
+          run: result,
+          message: 'Agent deployed and run queued',
+        });
+      }
+
+      return reply.code(201).send({
+        agent,
+        message: 'Agent deployed',
+      });
+    } catch (error) {
+      fastify.log.error(error);
+      return reply.code(500).send({
+        error: 'Failed to deploy agent',
+        message: (error as Error).message,
+      });
+    }
+  });
+
+  /**
    * GET /api/agents/:id - Get agent by ID
    */
   fastify.get<{ Params: { id: string } }>('/agents/:id', async (request, reply) => {

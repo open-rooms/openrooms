@@ -19,7 +19,7 @@ const themeMap: Record<string, string> = {
 
 export function LayoutClient({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
-  const isHomePage = pathname === '/home' || pathname === '/' || pathname === '/ecosystem'
+  const isHomePage = pathname === '/home' || pathname === '/' || pathname === '/ecosystem' || pathname === '/system'
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false)
 
   // Close mobile sidebar on route change

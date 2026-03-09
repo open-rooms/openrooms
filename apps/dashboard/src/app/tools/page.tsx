@@ -1,16 +1,25 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { getTools, type Tool } from '@/lib/api';
-import { CheckCircleIcon, AlertCircleIcon, ToolRegistryIcon } from '@/components/icons';
+import { getTools, createTool, deleteTool, type Tool } from '@/lib/api';
+import { CheckCircleIcon, AlertCircleIcon, ToolRegistryIcon, PlusIcon } from '@/components/icons';
 import { ToolsIcon as ToolsProductIcon } from '@/components/icons/product/ToolsIcon';
+
+const BUILTIN_IDS = new Set([
+  '00000000-0000-0000-0000-000000000001',
+  '00000000-0000-0000-0000-000000000002',
+  '00000000-0000-0000-0000-000000000003',
+]);
 
 export default function ToolsPage() {
   const [tools, setTools] = useState<Tool[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [filter, setFilter] = useState<'all' | string>('all');
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
+  const [showAdd, setShowAdd] = useState(false);
+  const [adding, setAdding] = useState(false);
+  const [addError, setAddError] = useState<string | null>(null);
+  const [addForm, setAddForm] = useState({ name: '', description: '', category: 'API' as 'API'|'Webhook'|'Script'|'SDK', url: '', method: 'POST' });
 
   useEffect(() => {
     fetchTools();
@@ -30,6 +39,39 @@ export default function ToolsPage() {
     }
   }
 
+  async function handleAddTool(e: React.FormEvent) {
+    e.preventDefault();
+    if (!addForm.name.trim()) return setAddError('Name is required');
+    setAdding(true);
+    setAddError(null);
+    try {
+      await createTool({
+        name: addForm.name.trim(),
+        description: addForm.description.trim() || addForm.name,
+        category: addForm.category,
+        url: addForm.url.trim() || undefined,
+        method: addForm.method,
+      });
+      setShowAdd(false);
+      setAddForm({ name: '', description: '', category: 'API', url: '', method: 'POST' });
+      await fetchTools();
+    } catch (err: any) {
+      setAddError(err.message || 'Failed to add tool');
+    } finally {
+      setAdding(false);
+    }
+  }
+
+  async function handleDelete(toolId: string, toolName: string) {
+    if (!confirm(`Delete tool "${toolName}"? Agents using it will need to be updated.`)) return;
+    try {
+      await deleteTool(toolId);
+      await fetchTools();
+    } catch (err: any) {
+      alert(err.message || 'Failed to delete tool');
+    }
+  }
+
   const categories = ['all', ...Array.from(new Set(tools.map(t => t.category)))];
 
   const filteredTools = tools
@@ -37,11 +79,12 @@ export default function ToolsPage() {
 
   const getCategoryColor = (category: string) => {
     switch (category) {
+      case 'EXTERNAL_API': return 'bg-blue-100 text-blue-800 border-blue-200';
+      case 'COMPUTATION': return 'bg-purple-100 text-purple-800 border-purple-200';
+      case 'DATA_ACCESS': return 'bg-teal-100 text-teal-800 border-teal-200';
+      case 'CUSTOM': return 'bg-orange-100 text-orange-800 border-orange-200';
       case 'search': return 'bg-blue-100 text-blue-800 border-blue-200';
       case 'compute': return 'bg-purple-100 text-purple-800 border-purple-200';
-      case 'database': return 'bg-teal-100 text-teal-800 border-teal-200';
-      case 'integration': return 'bg-orange-100 text-orange-800 border-orange-200';
-      case 'file': return 'bg-green-100 text-green-800 border-green-200';
       default: return 'bg-gray-100 text-gray-800 border-gray-200';
     }
   };
@@ -51,15 +94,106 @@ export default function ToolsPage() {
       <div className="max-w-7xl mx-auto">
 
         {/* Header */}
-        <div className="mb-8 flex items-center gap-6">
-          <ToolsProductIcon className="w-20 h-20 flex-shrink-0" />
-          <div>
-            <h1 className="text-3xl sm:text-4xl font-bold text-[#111111]">Tool Registry</h1>
-            <p className="text-gray-600 mt-1 max-w-2xl">
-              Available tools agents can invoke. Each tool is validated against agent policy before execution.
-            </p>
+        <div className="mb-8 flex flex-wrap items-start justify-between gap-4">
+          <div className="flex items-center gap-6">
+            <ToolsProductIcon className="w-20 h-20 flex-shrink-0" />
+            <div>
+              <h1 className="text-3xl sm:text-4xl font-bold text-[#111111]">Tool Registry</h1>
+              <p className="text-gray-600 mt-1 max-w-2xl">
+                Available tools agents can invoke. Each tool is validated against agent policy before execution.
+              </p>
+            </div>
           </div>
+          <button
+            onClick={() => setShowAdd(true)}
+            className="inline-flex items-center gap-2 px-5 py-3 bg-[#F54E00] hover:bg-[#E24600] text-white font-bold rounded-lg transition-all"
+          >
+            <PlusIcon className="w-5 h-5" />
+            Add Tool
+          </button>
         </div>
+
+        {/* Add Tool Modal */}
+        {showAdd && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <div className="absolute inset-0 bg-black/50" onClick={() => setShowAdd(false)} />
+            <div className="relative bg-white border-2 border-black rounded-2xl w-full max-w-lg shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
+              <div className="flex items-center justify-between p-6 border-b-2 border-black">
+                <h2 className="text-xl font-bold text-[#111111]">Register Tool</h2>
+                <button onClick={() => setShowAdd(false)} className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-100 font-bold text-lg">×</button>
+              </div>
+              <form onSubmit={handleAddTool} className="p-6 space-y-4">
+                {addError && (
+                  <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">{addError}</div>
+                )}
+                <div>
+                  <label className="block text-sm font-bold text-[#111111] mb-1">Name *</label>
+                  <input
+                    value={addForm.name}
+                    onChange={e => setAddForm(f => ({ ...f, name: e.target.value }))}
+                    placeholder="e.g. my_webhook"
+                    className="w-full px-3 py-2 border-2 border-black rounded-lg text-sm"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-bold text-[#111111] mb-1">Description</label>
+                  <input
+                    value={addForm.description}
+                    onChange={e => setAddForm(f => ({ ...f, description: e.target.value }))}
+                    placeholder="What this tool does"
+                    className="w-full px-3 py-2 border-2 border-black rounded-lg text-sm"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-bold text-[#111111] mb-1">Category</label>
+                  <select
+                    value={addForm.category}
+                    onChange={e => setAddForm(f => ({ ...f, category: e.target.value as any }))}
+                    className="w-full px-3 py-2 border-2 border-black rounded-lg text-sm bg-white"
+                  >
+                    <option value="API">API</option>
+                    <option value="Webhook">Webhook</option>
+                    <option value="Script">Script</option>
+                    <option value="SDK">SDK</option>
+                  </select>
+                </div>
+                {(addForm.category === 'API' || addForm.category === 'Webhook') && (
+                  <>
+                    <div>
+                      <label className="block text-sm font-bold text-[#111111] mb-1">URL</label>
+                      <input
+                        value={addForm.url}
+                        onChange={e => setAddForm(f => ({ ...f, url: e.target.value }))}
+                        placeholder="https://api.example.com/webhook"
+                        className="w-full px-3 py-2 border-2 border-black rounded-lg text-sm"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-bold text-[#111111] mb-1">Method</label>
+                      <select
+                        value={addForm.method}
+                        onChange={e => setAddForm(f => ({ ...f, method: e.target.value }))}
+                        className="w-full px-3 py-2 border-2 border-black rounded-lg text-sm bg-white"
+                      >
+                        <option value="GET">GET</option>
+                        <option value="POST">POST</option>
+                        <option value="PUT">PUT</option>
+                        <option value="PATCH">PATCH</option>
+                        <option value="DELETE">DELETE</option>
+                      </select>
+                    </div>
+                  </>
+                )}
+                <div className="flex gap-3 pt-2">
+                  <button type="button" onClick={() => setShowAdd(false)} className="flex-1 py-2.5 border-2 border-black rounded-lg text-sm font-bold">Cancel</button>
+                  <button type="submit" disabled={adding} className="flex-1 py-2.5 bg-[#F54E00] hover:bg-[#E24600] disabled:opacity-50 text-white rounded-lg text-sm font-bold">
+                    {adding ? 'Adding...' : 'Add Tool'}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
 
         {/* Error banner */}
         {error && (
@@ -114,9 +248,19 @@ export default function ToolsPage() {
         {!loading && !error && filteredTools.length === 0 && (
           <div className="bg-white border-2 border-black rounded-lg p-12 text-center">
             <ToolsProductIcon className="w-20 h-20 mx-auto mb-4 opacity-40" />
-            <h3 className="text-xl font-bold text-[#111111] mb-2">No tools registered</h3>
-            <p className="text-gray-600 mb-2">The tool registry is empty. Tools are registered by the runtime when the API starts.</p>
-            <p className="text-sm text-gray-500">Start the API server to seed built-in tools.</p>
+            <h3 className="text-xl font-bold text-[#111111] mb-2">No tools in this filter</h3>
+            <p className="text-gray-600 mb-6">
+              {categoryFilter === 'all' ? 'Add a custom tool or start the API to load built-in tools.' : 'Try a different category.'}
+            </p>
+            {categoryFilter === 'all' && (
+              <button
+                onClick={() => setShowAdd(true)}
+                className="inline-flex items-center gap-2 px-5 py-3 bg-[#F54E00] hover:bg-[#E24600] text-white font-bold rounded-lg transition-all"
+              >
+                <PlusIcon className="w-5 h-5" />
+                Add Tool
+              </button>
+            )}
           </div>
         )}
 
@@ -158,9 +302,17 @@ export default function ToolsPage() {
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-1 flex-shrink-0">
+                  <div className="flex items-center gap-3 flex-shrink-0">
                     <CheckCircleIcon className="w-4 h-4 text-emerald-500" />
                     <span className="text-xs font-semibold text-emerald-600">Available</span>
+                    {!BUILTIN_IDS.has(tool.id) && (
+                      <button
+                        onClick={() => handleDelete(tool.id, tool.name)}
+                        className="px-2 py-1 text-xs font-bold text-red-600 hover:bg-red-50 rounded border border-red-200 transition-colors"
+                      >
+                        Delete
+                      </button>
+                    )}
                   </div>
                 </div>
               </div>

@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { Header } from '@/components/header'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { CpuIcon, DatabaseIcon, ZapIcon, WorkersIcon, JobQueueIcon, RunsIllustrationIcon, MetricsIllustrationIcon, StorageIllustrationIcon, AgentsIllustrationIcon, ControlPlaneIllustrationIcon, CheckCircleIcon, AlertCircleIcon } from '@/components/icons'
-import { getHealth, getRooms, getAgents } from '@/lib/api'
+import { getHealth, getRooms, getAgents, getRuntimeStatus } from '@/lib/api'
 
 export default function RuntimePage() {
   const [metrics, setMetrics] = useState({

@@ -216,11 +216,14 @@ export default function DocsPage() {
         <div className="max-w-[95%] 2xl:max-w-[1400px] mx-auto px-4 sm:px-6 md:px-10 pb-4">
           <div className="bg-black rounded-2xl p-8 text-center">
             <h3 className="text-xl font-black text-white mb-2">Ready to explore the platform?</h3>
-            <p className="text-sm text-gray-400 mb-6">Visit the ecosystem page to see all 27 capabilities.</p>
+            <p className="text-sm text-gray-400 mb-6">See the system map for a visual overview of how all components connect.</p>
             <div className="flex flex-wrap justify-center gap-3">
-              <Link href="/ecosystem" className="inline-flex items-center gap-2 px-6 py-3 bg-[#F54E00] hover:bg-[#E24600] text-white text-sm font-black rounded-xl transition-all hover:scale-[1.02]">
-                <span>Platform Ecosystem</span>
+              <Link href="/system" className="inline-flex items-center gap-2 px-6 py-3 bg-[#F54E00] hover:bg-[#E24600] text-white text-sm font-black rounded-xl transition-all hover:scale-[1.02]">
+                <span>View System Map</span>
                 <ChevronRightIcon className="w-4 h-4" />
+              </Link>
+              <Link href="/ecosystem" className="inline-flex items-center gap-2 px-6 py-3 border border-gray-600 hover:border-white text-gray-400 hover:text-white text-sm font-black rounded-xl transition-colors">
+                All 27 Capabilities
               </Link>
               <Link href="/developers/control-plane" className="inline-flex items-center gap-2 px-6 py-3 border border-gray-600 hover:border-white text-gray-400 hover:text-white text-sm font-black rounded-xl transition-colors">
                 Open Control Plane

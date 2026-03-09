@@ -16,6 +16,7 @@ import { healthRoutes } from './routes/health';
 import { agentRoutes } from './routes/agents';
 import { apiKeyRoutes } from './routes/api-keys';
 import { runsRoutes } from './routes/runs';
+import { runtimeRoutes } from './routes/runtime';
 import { settingsRoutes } from './routes/settings';
 import { createAPIKeyMiddleware } from './middleware/api-key-auth';
 import { createAgentWorker } from './workers/agent-worker';
@@ -79,6 +80,7 @@ async function main() {
   }, { prefix: '/api' });
 
   await fastify.register((instance) => runsRoutes(instance, container), { prefix: '/api' });
+  await fastify.register((instance) => runtimeRoutes(instance, container), { prefix: '/api' });
   await fastify.register((instance) => settingsRoutes(instance, container), { prefix: '/api' });
 
   // Root endpoint
