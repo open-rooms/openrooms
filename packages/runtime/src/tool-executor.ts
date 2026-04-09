@@ -5,7 +5,7 @@
  * Supports HTTP API, computation, and generic tool types.
  */
 
-import type { Kysely } from 'kysely';
+
 import type { Database } from '@openrooms/database';
 
 export interface ToolExecutionResult {
@@ -18,7 +18,7 @@ export interface ToolExecutionResult {
 }
 
 export class ToolExecutor {
-  constructor(private readonly db: Kysely<Database>) {}
+  constructor(private readonly db: any) {}
 
   async executeTool(
     toolId: string,

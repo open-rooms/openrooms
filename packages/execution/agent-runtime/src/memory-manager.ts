@@ -55,10 +55,10 @@ export class HybridMemoryManager implements MemoryManagerImpl {
     const recentEntries = await this.getRecentMemoryEntries(roomId, 10);
 
     return {
-      conversationHistory: prunedHistory,
+      conversationHistory: prunedHistory as any,
       context: memory.context,
-      entries: recentEntries,
-    };
+      entries: recentEntries as any,
+    } as JSONObject;
   }
 
   /**
@@ -260,10 +260,10 @@ export class InMemoryMemoryManager implements MemoryManagerImpl {
     const recentHistory = memory.conversationHistory.slice(-10);
 
     return {
-      conversationHistory: recentHistory,
+      conversationHistory: recentHistory as any,
       context: memory.context,
-      entries: memory.entries,
-    };
+      entries: memory.entries as any,
+    } as JSONObject;
   }
 
   async appendMessage(roomId: UUID, message: ConversationMessage): Promise<void> {

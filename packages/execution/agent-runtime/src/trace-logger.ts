@@ -142,9 +142,9 @@ export class PostgreSQLTraceLogger implements TraceLoggerImpl {
     for (const key in stateAfter) {
       if (JSON.stringify(stateBefore[key]) !== JSON.stringify(stateAfter[key])) {
         diff[key] = {
-          before: stateBefore[key],
-          after: stateAfter[key],
-        };
+          before: stateBefore[key] ?? null,
+          after: stateAfter[key] ?? null,
+        } as any;
       }
     }
 
@@ -152,9 +152,9 @@ export class PostgreSQLTraceLogger implements TraceLoggerImpl {
     for (const key in stateBefore) {
       if (!(key in stateAfter)) {
         diff[key] = {
-          before: stateBefore[key],
-          after: undefined,
-        };
+          before: stateBefore[key] ?? null,
+          after: null,
+        } as any;
       }
     }
 

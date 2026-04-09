@@ -6,7 +6,7 @@
  */
 
 import { Queue } from 'bullmq';
-import type { Kysely } from 'kysely';
+
 import type { Database } from '@openrooms/database';
 import type Redis from 'ioredis';
 import { RunManager } from './run-manager';
@@ -41,7 +41,7 @@ export class AgentRunner {
   private readonly queue: Queue;
 
   constructor(
-    private readonly db: Kysely<Database>,
+    private readonly db: any,
     redis: Redis,
     connection: { host: string; port: number }
   ) {

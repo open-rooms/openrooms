@@ -179,8 +179,8 @@ export class AgentRuntimeLoop {
       availableTools: context.availableTools.map(t => ({
         name: t.name,
         description: t.description,
-        parameters: t.parameters,
-      })),
+        parameters: t.parameters as any,
+      })) as any,
       iteration: context.currentIteration,
     };
   }
@@ -195,14 +195,14 @@ export class AgentRuntimeLoop {
     const systemPrompt = this.buildSystemPrompt(context.agent, perception);
 
     const request: LLMRequest = {
-      model: context.agent.policyConfig.model || 'gpt-4',
+      model: (context.agent.policyConfig as any).model || 'gpt-4',
       messages: [
         { role: 'system', content: systemPrompt, timestamp: new Date().toISOString() },
         { role: 'user', content: JSON.stringify(perception), timestamp: new Date().toISOString() },
       ],
-      temperature: context.agent.policyConfig.temperature || 0.7,
+      temperature: (context.agent.policyConfig as any).temperature || 0.7,
       maxTokens: context.agent.policyConfig.maxTokensPerRequest || 2000,
-      tools: perception.availableTools as ToolDefinition[],
+      tools: perception.availableTools as unknown as ToolDefinition[],
       toolChoice: 'auto',
     };
 
@@ -237,7 +237,7 @@ export class AgentRuntimeLoop {
         roomId: context.roomId,
         eventType: ExecutionEventType.AGENT_TOOL_DENIED,
         message: `Tool ${decision.selectedTool} denied by policy`,
-        metadata: { reason: policyCheck.reason },
+        metadata: { reason: policyCheck.reason ?? '' },
       });
 
       return { success: false, error: new Error(policyCheck.reason) };
@@ -248,7 +248,7 @@ export class AgentRuntimeLoop {
       roomId: context.roomId,
       eventType: ExecutionEventType.AGENT_TOOL_SELECTED,
       message: `Tool selected: ${decision.selectedTool}`,
-      metadata: { rationale: decision.reasoning },
+        metadata: { rationale: decision.reasoning ?? '' },
     });
 
     return {
@@ -284,8 +284,8 @@ export class AgentRuntimeLoop {
       return {
         callId: crypto.randomUUID(),
         success: result.success,
-        result: result.data,
-        error: result.success ? undefined : result.error,
+        result: (result as any).data,
+        error: result.success ? undefined : (result.error as any),
         duration: Date.now() - startTime,
         timestamp: new Date().toISOString(),
       };

@@ -9,10 +9,11 @@ export async function healthRoutes(
   fastify: FastifyInstance,
   container: Container
 ): Promise<void> {
-  fastify.get('/health', async (request, reply) => {
+  fastify.get('/health', async (_request, reply) => {
     try {
-      // Check Redis
-      const redisHealth = await container.stateManager.healthCheck();
+      // Check Redis via ping
+      const redisPong = await container.redis.ping().catch(() => null);
+      const redisHealth = redisPong === 'PONG';
 
       // Check Database
       let dbHealth = false;

@@ -121,7 +121,7 @@ export async function roomRoutes(
               id: crypto.randomUUID(),
               workflowId: workflow.id,
               nodeId: startNodeId,
-              type: 'START',
+              type: 'START' as any,
               name: 'Start',
               description: 'Auto-recovered start node',
               config: JSON.stringify({
@@ -134,7 +134,7 @@ export async function roomRoutes(
               id: crypto.randomUUID(),
               workflowId: workflow.id,
               nodeId: endNodeId,
-              type: 'END',
+              type: 'END' as any,
               name: 'End',
               description: 'Auto-recovered end node',
               config: JSON.stringify({ transitions: [] }) as any,

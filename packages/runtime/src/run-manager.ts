@@ -6,7 +6,7 @@
  */
 
 import crypto from 'crypto';
-import type { Kysely } from 'kysely';
+
 import type { Database } from '@openrooms/database';
 
 export type RunStatus = 'pending' | 'running' | 'completed' | 'failed';
@@ -28,7 +28,7 @@ export interface Run {
 }
 
 export class RunManager {
-  constructor(private readonly db: Kysely<Database>) {}
+  constructor(private readonly db: any) {}
 
   async createRun(params: {
     type: RunType;

@@ -31,7 +31,7 @@ export async function toolRoutes(
   container: Container
 ): Promise<void> {
   // List Tools — merge built-in (registry) + custom (DB)
-  fastify.get('/tools', async (request, reply) => {
+  fastify.get('/tools', async (_request, reply) => {
     try {
       const builtIn = container.toolRegistry.listTools();
       const builtInMap = new Map(builtIn.map(t => [t.name, t]));

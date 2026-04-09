@@ -1,10 +1,5 @@
 import { config } from 'dotenv';
-import { fileURLToPath } from 'url';
-import { dirname, resolve } from 'path';
-
-// Get __dirname equivalent in ESM
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
+import { resolve } from 'path';
 
 // Load .env from api directory — override: true so .env wins over any stale shell vars
 const envPath = resolve(__dirname, '../.env');

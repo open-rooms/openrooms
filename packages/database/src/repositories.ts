@@ -322,10 +322,8 @@ export class KyselyAgentRepository implements AgentRepository {
         roomId: data.roomId,
         name: data.name,
         description: data.description || null,
-        config: JSON.stringify(data.config || {}),
-        metadata: JSON.stringify(data.metadata || {}),
         updatedAt: new Date(),
-      })
+      } as any)
       .returningAll()
       .executeTakeFirstOrThrow();
 

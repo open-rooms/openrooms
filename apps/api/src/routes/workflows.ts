@@ -45,7 +45,7 @@ export async function workflowRoutes(
             id: crypto.randomUUID(),
             workflowId: workflow.id,
             nodeId: startNodeId,
-            type: 'START',
+            type: 'START' as any,
             name: 'Start',
             description: 'Entry point',
             config: JSON.stringify({
@@ -60,7 +60,7 @@ export async function workflowRoutes(
             id: crypto.randomUUID(),
             workflowId: workflow.id,
             nodeId: endNodeId,
-            type: 'END',
+            type: 'END' as any,
             name: 'End',
             description: 'Exit point',
             config: JSON.stringify({ transitions: [] }) as any,
@@ -102,7 +102,7 @@ export async function workflowRoutes(
   });
 
   // List Workflows
-  fastify.get('/workflows', async (request, reply) => {
+  fastify.get('/workflows', async (_request, reply) => {
     try {
       const workflows = await container.workflowRepository.findAll();
       return reply.send({ workflows, count: workflows.length });

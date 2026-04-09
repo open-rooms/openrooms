@@ -4,14 +4,12 @@
 
 import Redis from 'ioredis';
 import { getDb } from '@openrooms/database';
-import type { Kysely } from 'kysely';
 import type { Database } from '@openrooms/database';
 import {
   WorkflowEngine,
   StateManager,
   RoomRepository,
   WorkflowRepository,
-  AgentRepository,
   ExecutionLogRepository,
   MemoryRepository,
   LoggingService,
@@ -41,7 +39,7 @@ export interface Container {
   // Repositories
   roomRepository: RoomRepository;
   workflowRepository: WorkflowRepository;
-  agentRepository: AgentRepository;
+  agentRepository: PostgreSQLAgentRepository;
   executionLogRepository: ExecutionLogRepository;
   memoryRepository: MemoryRepository;
 
@@ -59,7 +57,7 @@ export interface Container {
   workflowRunner: WorkflowRunner;
   
   // Infrastructure
-  db: Kysely<Database>;
+  db: ReturnType<typeof getDb>;
   redis: Redis;
   jobQueue: BullMQJobQueue;
   workerManager: WorkerManager;

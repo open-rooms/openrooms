@@ -114,7 +114,7 @@ export class ProductionToolExecutor implements ToolExecutorImpl {
         }
 
         // Enum validation
-        if (param.enum && !param.enum.includes(value)) {
+        if (param.enum && !param.enum.includes(value as any)) {
           return `Parameter "${param.name}" must be one of: ${param.enum.join(', ')}`;
         }
       }

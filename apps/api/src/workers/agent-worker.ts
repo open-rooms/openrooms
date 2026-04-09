@@ -8,7 +8,8 @@
 import { Job } from 'bullmq';
 import { AgentRuntimeLoop } from '@openrooms/agent-runtime';
 import { OpenAIProvider, AnthropicProvider } from '@openrooms/execution';
-import type { LLMProvider, LLMRequest, LLMResponse } from '@openrooms/core';
+import type { LLMProvider, LLMRequest, LLMResponse, AgentConfig } from '@openrooms/core';
+import { AgentProvider } from '@openrooms/core';
 
 // ─── Simulation LLM ──────────────────────────────────────────────────────────
 // Used when no API key is configured. Runs the full agent loop with
@@ -16,6 +17,11 @@ import type { LLMProvider, LLMRequest, LLMResponse } from '@openrooms/core';
 
 class SimulationLLMProvider implements LLMProvider {
   readonly name = 'simulation';
+  readonly type = AgentProvider.CUSTOM;
+
+  validateConfig(_config: AgentConfig): boolean {
+    return true;
+  }
 
   async chat(request: LLMRequest): Promise<LLMResponse> {
     // Small delay to feel realistic
@@ -25,8 +31,6 @@ class SimulationLLMProvider implements LLMProvider {
     const goalLine = request.messages.find(m => m.role === 'system')?.content?.split('\n').find(l => l.startsWith('Goal:')) || 'Goal: complete task';
     const goal = goalLine.replace('Goal:', '').trim();
 
-    // After first tool use, terminate
-    const iteration = parseInt(request.messages[1]?.content?.toString() || '{}', 10);
     const hasAlreadyActed = request.messages.filter(m => m.role === 'tool').length > 0;
 
     let response: Record<string, unknown>;
@@ -54,6 +58,7 @@ class SimulationLLMProvider implements LLMProvider {
     }
 
     return {
+      id: crypto.randomUUID(),
       message: {
         role: 'assistant',
         content: JSON.stringify(response),
@@ -61,17 +66,8 @@ class SimulationLLMProvider implements LLMProvider {
       },
       usage: { promptTokens: 80, completionTokens: 60, totalTokens: 140 },
       model: 'openrooms-simulation-v1',
-      provider: 'simulation',
+      finishReason: 'stop',
     };
-  }
-
-  async complete(_prompt: string): Promise<string> {
-    await new Promise(r => setTimeout(r, 300));
-    return 'Simulation complete.';
-  }
-
-  async embed(_text: string): Promise<number[]> {
-    return Array.from({ length: 8 }, () => Math.random());
   }
 }
 import {
@@ -88,6 +84,7 @@ import { getDb } from '@openrooms/database';
 import Redis from 'ioredis';
 import crypto from 'crypto';
 import type { Agent, AgentPolicy, ToolDefinition } from '@openrooms/core';
+import { ToolCategory } from '@openrooms/core';
 
 interface AgentExecutionJobData {
   agentId: string;
@@ -159,7 +156,7 @@ export class AgentExecutionWorker {
         agent,
         roomId,
         memory,
-        roomState,
+        roomState: roomState as Record<string, import('@openrooms/core').JSONValue>,
         availableTools,
         maxIterations,
         currentIteration: 0,
@@ -232,12 +229,16 @@ export class AgentExecutionWorker {
         id: 'calculator',
         name: 'calculator',
         description: 'Evaluates a safe arithmetic expression and returns the numeric result',
-        category: 'COMPUTATION',
+        category: ToolCategory.COMPUTATION,
         parameters: [
-          { name: 'expression', type: 'string', required: true, description: 'A safe arithmetic expression e.g. "2 + 2 * 5"' }
+          { name: 'expression', type: 'string' as const, required: true, description: 'A safe arithmetic expression e.g. "2 + 2 * 5"' }
         ],
+        returnType: {},
         timeout: 2000,
         version: '1.0.0',
+        metadata: {},
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
       },
       async (input) => {
         try {
@@ -257,14 +258,18 @@ export class AgentExecutionWorker {
         id: 'http_request',
         name: 'http_request',
         description: 'Makes an HTTP request to an external URL and returns the response body',
-        category: 'EXTERNAL_API',
+        category: ToolCategory.EXTERNAL_API,
         parameters: [
-          { name: 'url', type: 'string', required: true, description: 'Full URL to request' },
-          { name: 'method', type: 'string', required: false, description: 'HTTP method: GET, POST, PUT, DELETE. Defaults to GET' },
-          { name: 'body', type: 'object', required: false, description: 'JSON body for POST/PUT requests' },
+          { name: 'url', type: 'string' as const, required: true, description: 'Full URL to request' },
+          { name: 'method', type: 'string' as const, required: false, description: 'HTTP method: GET, POST, PUT, DELETE. Defaults to GET' },
+          { name: 'body', type: 'object' as const, required: false, description: 'JSON body for POST/PUT requests' },
         ],
+        returnType: {},
         timeout: 15000,
         version: '1.0.0',
+        metadata: {},
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
       },
       async (input) => {
         try {
@@ -289,12 +294,16 @@ export class AgentExecutionWorker {
         id: 'memory_query',
         name: 'memory_query',
         description: 'Searches the conversation history in the current room memory for a keyword or phrase',
-        category: 'SYSTEM',
+        category: ToolCategory.SYSTEM,
         parameters: [
-          { name: 'query', type: 'string', required: true, description: 'Keyword or phrase to search for in memory' }
+          { name: 'query', type: 'string' as const, required: true, description: 'Keyword or phrase to search for in memory' }
         ],
+        returnType: {},
         timeout: 3000,
         version: '1.0.0',
+        metadata: {},
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
       },
       async (input) => ({
         success: true,
@@ -363,27 +372,27 @@ export class AgentExecutionWorker {
       {
         id: 'calculator', name: 'calculator',
         description: 'Evaluates a safe arithmetic expression and returns the numeric result',
-        category: 'COMPUTATION' as any,
-        parameters: [{ name: 'expression', type: 'string', required: true, description: 'Arithmetic expression e.g. "2 + 2 * 5"' }],
-        timeout: 2000, version: '1.0.0', metadata: {}, createdAt: '', updatedAt: '',
+        category: ToolCategory.COMPUTATION,
+        parameters: [{ name: 'expression', type: 'string' as const, required: true, description: 'Arithmetic expression e.g. "2 + 2 * 5"' }],
+        returnType: {}, timeout: 2000, version: '1.0.0', metadata: {}, createdAt: '', updatedAt: '',
       },
       {
         id: 'http_request', name: 'http_request',
         description: 'Makes an HTTP request and returns the response',
-        category: 'EXTERNAL_API' as any,
+        category: ToolCategory.EXTERNAL_API,
         parameters: [
-          { name: 'url', type: 'string', required: true, description: 'URL to request' },
-          { name: 'method', type: 'string', required: false, description: 'GET, POST, PUT, DELETE' },
-          { name: 'body', type: 'object', required: false, description: 'JSON body' },
+          { name: 'url', type: 'string' as const, required: true, description: 'URL to request' },
+          { name: 'method', type: 'string' as const, required: false, description: 'GET, POST, PUT, DELETE' },
+          { name: 'body', type: 'object' as const, required: false, description: 'JSON body' },
         ],
-        timeout: 15000, version: '1.0.0', metadata: {}, createdAt: '', updatedAt: '',
+        returnType: {}, timeout: 15000, version: '1.0.0', metadata: {}, createdAt: '', updatedAt: '',
       },
       {
         id: 'memory_query', name: 'memory_query',
         description: 'Searches room conversation history for a keyword',
-        category: 'SYSTEM' as any,
-        parameters: [{ name: 'query', type: 'string', required: true, description: 'Search term' }],
-        timeout: 3000, version: '1.0.0', metadata: {}, createdAt: '', updatedAt: '',
+        category: ToolCategory.SYSTEM,
+        parameters: [{ name: 'query', type: 'string' as const, required: true, description: 'Search term' }],
+        returnType: {}, timeout: 3000, version: '1.0.0', metadata: {}, createdAt: '', updatedAt: '',
       },
     ];
 

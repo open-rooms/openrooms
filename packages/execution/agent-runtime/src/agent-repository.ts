@@ -15,6 +15,7 @@ import type {
   UUID,
   JSONObject,
 } from '@openrooms/core';
+import { AgentStatus as AgentStatusEnum, AgentLoopState as AgentLoopStateEnum } from '@openrooms/core';
 
 export interface AgentRepository {
   create(params: CreateAgentParams): Promise<Agent>;
@@ -58,8 +59,8 @@ export class PostgreSQLAgentRepository implements AgentRepository {
       roomId: params.roomId,
       allowedTools: params.allowedTools,
       policyConfig: params.policyConfig,
-      status: 'ACTIVE',
-      loopState: 'IDLE',
+      status: AgentStatusEnum.ACTIVE,
+      loopState: AgentLoopStateEnum.IDLE,
       memoryState: {},
       parentAgentId: params.parentAgentId,
       snapshotData: undefined,
@@ -257,8 +258,8 @@ export class InMemoryAgentRepository implements AgentRepository {
       roomId: params.roomId,
       allowedTools: params.allowedTools,
       policyConfig: params.policyConfig,
-      status: 'ACTIVE',
-      loopState: 'IDLE',
+      status: AgentStatusEnum.ACTIVE,
+      loopState: AgentLoopStateEnum.IDLE,
       memoryState: {},
       parentAgentId: params.parentAgentId,
       snapshotData: undefined,

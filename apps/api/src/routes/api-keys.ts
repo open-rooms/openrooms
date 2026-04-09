@@ -80,7 +80,7 @@ export function apiKeyRoutes(fastify: FastifyInstance, container: Container) {
   /**
    * GET /api/api-keys - List API keys (without keys)
    */
-  fastify.get('/api-keys', async (request, reply) => {
+  fastify.get('/api-keys', async (_request, reply) => {
     try {
       const keys = await container.db
         .selectFrom('api_keys')
@@ -156,20 +156,20 @@ export function apiKeyRoutes(fastify: FastifyInstance, container: Container) {
           'timestamp',
         ])
         .where('apiKeyId', '=', request.params.id)
-        .where('timestamp', '>=', since)
+        .where('timestamp', '>=', since as any)
         .orderBy('timestamp', 'desc')
         .limit(1000)
         .execute();
 
       const stats = {
         totalRequests: usage.length,
-        successRate: usage.filter(u => u.statusCode && u.statusCode < 400).length / usage.length,
-        avgResponseTime: usage.reduce((sum, u) => sum + (u.responseTime || 0), 0) / usage.length,
+        successRate: usage.filter((u: any) => u.statusCode && u.statusCode < 400).length / usage.length,
+        avgResponseTime: usage.reduce((sum: number, u: any) => sum + (u.responseTime || 0), 0) / usage.length,
         byEndpoint: {} as Record<string, number>,
         byStatus: {} as Record<number, number>,
       };
 
-      usage.forEach(u => {
+      usage.forEach((u: any) => {
         stats.byEndpoint[u.endpoint] = (stats.byEndpoint[u.endpoint] || 0) + 1;
         if (u.statusCode) {
           stats.byStatus[u.statusCode] = (stats.byStatus[u.statusCode] || 0) + 1;

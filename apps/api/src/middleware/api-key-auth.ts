@@ -228,10 +228,10 @@ export function createAPIKeyMiddleware(redis: any) {
     reply.header('X-RateLimit-Remaining', remaining);
     reply.header('X-RateLimit-Reset', Math.floor(Date.now() / 1000) + keyConfig.rateLimitWindow);
 
-    // Log successful request on response
-    reply.addHook('onResponse', async (request, reply) => {
+    // Log successful request after response
+    request.raw.on('finish', async () => {
       const responseTime = Date.now() - startTime;
-      await logAPIKeyUsage(validation.keyId!, request, reply.statusCode, responseTime);
+      await logAPIKeyUsage(validation.keyId!, request, reply.statusCode, responseTime).catch(() => {});
     });
   };
 }

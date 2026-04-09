@@ -36,7 +36,7 @@ export async function runtimeRoutes(
 
   // ─── GET /api/runtime/status ─────────────────────────────────────────────
 
-  fastify.get('/runtime/status', async (request, reply) => {
+  fastify.get('/runtime/status', async (_request, reply) => {
     try {
       const roomQ = new Queue('room-execution', { connection });
       const agentQ = new Queue('agent_runs', { connection });

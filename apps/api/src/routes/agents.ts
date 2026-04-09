@@ -213,7 +213,6 @@ export function agentRoutes(fastify: FastifyInstance, container: Container) {
           eventType: 'STATE_UPDATED',
           level: 'INFO',
           message: `Agent "${agent.name}" updated`,
-          metadata: normalizedBody,
         });
       }
 
@@ -407,14 +406,14 @@ export function agentRoutes(fastify: FastifyInstance, container: Container) {
         .selectFrom('agent_execution_traces')
         .selectAll()
         .where('agentId', '=', request.params.id)
-        .$if(!!query.roomId, (qb) => qb.where('roomId', '=', query.roomId!))
+        .$if(!!query.roomId, (qb: any) => qb.where('roomId', '=', query.roomId!))
         .orderBy('timestamp', 'desc')
         .limit(limit)
         .execute();
 
       return {
         agentId: request.params.id,
-        traces: traces.map(t => ({
+        traces: traces.map((t: any) => ({
           id: t.id,
           loopIteration: t.loopIteration,
           loopState: t.loopState,
@@ -456,13 +455,13 @@ export function agentRoutes(fastify: FastifyInstance, container: Container) {
 
         return {
           ...trace,
-          toolInput: trace.toolInput ? JSON.parse(trace.toolInput as string) : null,
-          toolOutput: trace.toolOutput ? JSON.parse(trace.toolOutput as string) : null,
-          toolError: trace.toolError ? JSON.parse(trace.toolError as string) : null,
-          stateBefore: trace.stateBefore ? JSON.parse(trace.stateBefore as string) : null,
-          stateAfter: trace.stateAfter ? JSON.parse(trace.stateAfter as string) : null,
-          stateDiff: trace.stateDiff ? JSON.parse(trace.stateDiff as string) : null,
-          metadata: trace.metadata ? JSON.parse(trace.metadata as string) : {},
+          toolInput: trace.toolInput ? JSON.parse(trace.toolInput as unknown as string) : null,
+          toolOutput: trace.toolOutput ? JSON.parse(trace.toolOutput as unknown as string) : null,
+          toolError: trace.toolError ? JSON.parse(trace.toolError as unknown as string) : null,
+          stateBefore: trace.stateBefore ? JSON.parse(trace.stateBefore as unknown as string) : null,
+          stateAfter: trace.stateAfter ? JSON.parse(trace.stateAfter as unknown as string) : null,
+          stateDiff: trace.stateDiff ? JSON.parse(trace.stateDiff as unknown as string) : null,
+          metadata: trace.metadata ? JSON.parse(trace.metadata as unknown as string) : {},
         };
       } catch (error) {
         fastify.log.error(error);

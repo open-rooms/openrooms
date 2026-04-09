@@ -105,7 +105,7 @@ async function main() {
   });
 
   // Error handler
-  fastify.setErrorHandler((error, request, reply) => {
+  fastify.setErrorHandler((error, _request, reply) => {
     fastify.log.error(error);
     
     reply.code(error.statusCode ?? 500).send({
