@@ -8,15 +8,27 @@ import { CheckCircleIcon, AlertCircleIcon, ClockIcon, PlayIcon } from '@/compone
 import { RunsIcon as RunsProductIcon } from '@/components/icons/product/RunsIcon'
 import { getRooms, getRoomLogs, getAgents, getRuns, getLogsByRun, type ExecutionLog, type Room, type Run } from '@/lib/api'
 
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'
+
+interface SSEEvent {
+  event: string
+  runId: string
+  data: Record<string, unknown>
+  timestamp: string
+}
+
 export default function LiveRunsPage() {
   const [runs, setRuns] = useState<Run[]>([])
   const [roomEvents, setRoomEvents] = useState<(ExecutionLog & { roomName?: string })[]>([])
+  const [sseEvents, setSseEvents] = useState<SSEEvent[]>([])
+  const [sseConnected, setSseConnected] = useState(false)
   const [selectedRun, setSelectedRun] = useState<string | null>(null)
   const [runLogs, setRunLogs] = useState<ExecutionLog[]>([])
   const [stats, setStats] = useState({ totalRooms: 0, activeRooms: 0, agents: 0, totalRuns: 0 })
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const pollingRef = useRef<NodeJS.Timeout | null>(null)
+  const sseRef = useRef<EventSource | null>(null)
 
   async function fetchAll() {
     try {
@@ -73,6 +85,44 @@ export default function LiveRunsPage() {
       setRunLogs([])
     }
   }
+
+  // ── SSE connection for real-time events ──────────────────────────────────
+  useEffect(() => {
+    const connect = () => {
+      if (sseRef.current) sseRef.current.close()
+
+      const source = new EventSource(`${API_BASE}/api/runtime/events`)
+      sseRef.current = source
+
+      source.onopen = () => setSseConnected(true)
+
+      source.onmessage = (e) => {
+        try {
+          const payload: SSEEvent = JSON.parse(e.data)
+          setSseEvents(prev => [payload, ...prev].slice(0, 100))
+          // Refresh run list when an execution ends
+          if (payload.event?.includes('completed') || payload.event?.includes('failed')) {
+            fetchAll()
+          }
+        } catch { /* malformed event */ }
+      }
+
+      source.onerror = () => {
+        setSseConnected(false)
+        source.close()
+        // Reconnect after 5s
+        setTimeout(connect, 5000)
+      }
+    }
+
+    connect()
+
+    return () => {
+      sseRef.current?.close()
+      sseRef.current = null
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   useEffect(() => {
     fetchAll()
@@ -134,9 +184,11 @@ export default function LiveRunsPage() {
         subtitle="Real-time orchestration — agent loops, workflow executions, tool calls"
         actions={
           <div className="flex items-center gap-3">
-            <div className="flex items-center gap-2 px-3 py-2 bg-emerald-100 rounded-lg">
-              <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" />
-              <span className="text-sm font-semibold text-emerald-700">Live · 3s</span>
+            <div className={`flex items-center gap-2 px-3 py-2 rounded-lg ${sseConnected ? 'bg-emerald-100' : 'bg-yellow-100'}`}>
+              <div className={`w-2 h-2 rounded-full ${sseConnected ? 'bg-emerald-500 animate-pulse' : 'bg-yellow-500'}`} />
+              <span className={`text-sm font-semibold ${sseConnected ? 'text-emerald-700' : 'text-yellow-700'}`}>
+                {sseConnected ? 'SSE · Live' : 'Polling · 3s'}
+              </span>
             </div>
             <Link href="/rooms" className="px-4 py-2 bg-[#F54E00] hover:bg-[#E24600] text-white text-sm font-bold rounded-lg transition-colors">
               + New Run
@@ -175,6 +227,41 @@ export default function LiveRunsPage() {
               </Card>
             ))}
           </div>
+
+          {/* SSE Event Stream */}
+          {sseEvents.length > 0 && (
+            <Card className="border-2 border-emerald-200 bg-emerald-50">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm flex items-center gap-2">
+                  <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" />
+                  Runtime Event Stream
+                  <span className="text-xs font-normal text-gray-500 ml-1">({sseEvents.length} events)</span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-1.5 max-h-36 overflow-y-auto">
+                  {sseEvents.slice(0, 20).map((ev, i) => (
+                    <div key={i} className="flex items-center gap-2 text-xs bg-white rounded px-2 py-1.5 border border-emerald-100">
+                      <span className={`shrink-0 px-1.5 py-0.5 rounded font-bold text-[10px] ${
+                        ev.event?.includes('agent') ? 'bg-purple-100 text-purple-700'
+                        : ev.event?.includes('tool') ? 'bg-orange-100 text-orange-700'
+                        : ev.event?.includes('workflow') ? 'bg-indigo-100 text-indigo-700'
+                        : 'bg-gray-100 text-gray-600'
+                      }`}>
+                        {ev.event?.split('.').pop()?.toUpperCase()}
+                      </span>
+                      <span className="text-gray-700 truncate flex-1">
+                        {(ev.data?.agentName as string) || (ev.data?.agentId as string)?.slice(0, 8) || ev.runId?.slice(0, 8)}
+                      </span>
+                      <span className="text-gray-400 shrink-0">
+                        {new Date(ev.timestamp).toLocaleTimeString()}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          )}
 
           {/* Main layout: run list + log inspector */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
