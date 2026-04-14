@@ -3,9 +3,10 @@
 import { useState, useEffect } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { AlertCircleIcon, CheckCircleIcon } from '@/components/icons'
-import { APIIcon } from '@/components/icons/system'
+import { APIIcon, AutomationIcon, ObservabilityIcon, IntegrationsIcon } from '@/components/icons/system'
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'
+// Use relative path so Next.js rewrites proxy to the backend
+const API_BASE = ''
 
 type ConnectorType = 'REST_API' | 'BLOCKCHAIN' | 'WEBHOOK'
 
@@ -240,35 +241,44 @@ export default function ConnectorsPage() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {[
               {
-                icon: '🌐',
+                Icon: APIIcon,
+                iconBg: '#93C5FD',
                 title: 'REST API',
                 desc: 'Register any HTTP endpoint with auth. Agents call it by name — they handle the parameters.',
                 examples: ['Stripe · send invoice', 'CoinGecko · get price', 'Your backend · query data'],
-                color: 'border-blue-200 bg-blue-50',
+                color: 'border-[#93C5FD]',
+                bg: 'bg-white',
               },
               {
-                icon: '⛓️',
+                Icon: IntegrationsIcon,
+                iconBg: '#C4B5FD',
                 title: 'Blockchain',
                 desc: 'Read state or query events from any EVM contract. Agents reason over on-chain data.',
                 examples: ['ERC-20 balanceOf', 'Uniswap getReserves', 'Custom contract state'],
-                color: 'border-purple-200 bg-purple-50',
+                color: 'border-[#C4B5FD]',
+                bg: 'bg-white',
               },
               {
-                icon: '🔔',
+                Icon: AutomationIcon,
+                iconBg: '#FCA5A5',
                 title: 'Webhook Triggers',
                 desc: 'Every room has an inbound webhook URL. Post from any external system to start execution.',
                 examples: ['Smart contract event', 'Stripe payment hook', 'GitHub push event'],
-                color: 'border-orange-200 bg-orange-50',
+                color: 'border-[#FCA5A5]',
+                bg: 'bg-white',
               },
             ].map(c => (
-              <div key={c.title} className={`border-2 rounded-xl p-4 ${c.color}`}>
-                <div className="text-2xl mb-2">{c.icon}</div>
-                <h3 className="font-bold text-[#111111] mb-1">{c.title}</h3>
-                <p className="text-xs text-gray-600 mb-3">{c.desc}</p>
-                <ul className="space-y-1">
+              <div key={c.title} className={`border-2 rounded-2xl p-5 ${c.color} ${c.bg} hover:shadow-md transition-all duration-200 group`}>
+                <div className="w-12 h-12 rounded-xl flex items-center justify-center mb-3 transition-transform duration-200 group-hover:scale-110"
+                  style={{ background: c.iconBg + '30', border: `1.5px solid ${c.iconBg}` }}>
+                  <c.Icon className="w-9 h-9" />
+                </div>
+                <h3 className="font-extrabold text-[#111111] mb-1.5">{c.title}</h3>
+                <p className="text-xs text-gray-600 mb-3 leading-relaxed">{c.desc}</p>
+                <ul className="space-y-1.5">
                   {c.examples.map(ex => (
-                    <li key={ex} className="text-xs text-gray-500 flex items-center gap-1.5">
-                      <span className="w-1 h-1 rounded-full bg-gray-400 flex-shrink-0" />
+                    <li key={ex} className="text-xs text-gray-500 flex items-center gap-2">
+                      <span className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background: c.iconBg }} />
                       {ex}
                     </li>
                   ))}
@@ -281,8 +291,8 @@ export default function ConnectorsPage() {
           {activeForm === 'REST_API' && (
             <Card className="border-2 border-blue-300 bg-blue-50">
               <CardHeader>
-                <CardTitle className="text-base flex items-center gap-2">
-                  🌐 Register REST API Connector
+                        <CardTitle className="text-base flex items-center gap-2">
+                  <APIIcon className="w-6 h-6" /> Register REST API Connector
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -381,8 +391,8 @@ export default function ConnectorsPage() {
           {activeForm === 'BLOCKCHAIN' && (
             <Card className="border-2 border-purple-300 bg-purple-50">
               <CardHeader>
-                <CardTitle className="text-base flex items-center gap-2">
-                  ⛓️ Register Blockchain Connector
+                  <CardTitle className="text-base flex items-center gap-2">
+                  <IntegrationsIcon className="w-6 h-6" /> Register Blockchain Connector
                 </CardTitle>
                 <p className="text-xs text-gray-500 mt-1">Read on-chain state or query contract events. Agents call this by name to get live blockchain data.</p>
               </CardHeader>
@@ -469,26 +479,29 @@ export default function ConnectorsPage() {
                 <div className="w-6 h-6 border-2 border-[#D4C4A8] border-t-[#EA580C] rounded-full animate-spin mx-auto" />
               </div>
             ) : connectors.length === 0 ? (
-              <Card className="border-2 border-dashed border-[#D4C4A8] bg-white">
-                <CardContent className="py-12 text-center">
-                  <div className="text-4xl mb-3">🔌</div>
+              <div className="border-2 border-dashed border-[#D4C4A8] rounded-2xl bg-white">
+                  <div className="text-center py-12">
+                  <APIIcon className="w-14 h-14 mx-auto mb-3 opacity-30" />
                   <h3 className="font-bold text-[#111111] mb-2">No connectors yet</h3>
                   <p className="text-sm text-gray-500 max-w-sm mx-auto">
                     Register a REST API or blockchain contract above. Once registered, agents can call them by name in their reasoning loop.
                   </p>
-                </CardContent>
-              </Card>
+                </div>
+              </div>
             ) : (
               <div className="space-y-3">
                 {connectors.map(c => (
-                  <Card key={c.id} className="border border-[#D4C4A8] bg-white hover:bg-white transition-all">
-                    <CardContent className="p-4">
+                  <div key={c.id} className="border border-[#D4C4A8] bg-white rounded-2xl hover:border-[#EA580C] hover:shadow-md transition-all duration-200 group">
+                    <div className="p-4">
                       <div className="flex items-center justify-between gap-4">
                         <div className="flex items-center gap-3 flex-1 min-w-0">
-                          <div className={`w-10 h-10 rounded-lg flex items-center justify-center text-lg flex-shrink-0 ${
+                          <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 transition-transform duration-200 group-hover:scale-110 ${
                             c.type === 'BLOCKCHAIN' ? 'bg-purple-100' : 'bg-blue-100'
                           }`}>
-                            {c.type === 'BLOCKCHAIN' ? '⛓️' : '🌐'}
+                            {c.type === 'BLOCKCHAIN'
+                              ? <IntegrationsIcon className="w-7 h-7" />
+                              : <APIIcon className="w-7 h-7" />
+                            }
                           </div>
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-2 mb-0.5 flex-wrap">
@@ -512,8 +525,8 @@ export default function ConnectorsPage() {
                           </button>
                         </div>
                       </div>
-                    </CardContent>
-                  </Card>
+                    </div>
+                  </div>
                 ))}
               </div>
             )}

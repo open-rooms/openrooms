@@ -263,7 +263,7 @@ function ConnectorsPanel({ roomId }: { roomId: string }) {
 }
 
 // ─── Panel: Metrics ────────────────────────────────────────────────────────────
-function MetricsPanel({ runs }: { runs: Run[] }) {
+function MetricsPanel({ runs, agentCount }: { runs: Run[]; agentCount: number }) {
   const total = runs.length
   const completed = runs.filter(r => r.status === 'completed').length
   const failed = runs.filter(r => r.status === 'failed').length
@@ -279,7 +279,7 @@ function MetricsPanel({ runs }: { runs: Run[] }) {
           { label: 'Completed', value: completed, color: 'text-emerald-600' },
           { label: 'Failed', value: failed, color: 'text-red-500' },
           { label: 'Active Now', value: running, color: 'text-blue-600' },
-          { label: 'Agents', value: '—', color: 'text-gray-400' },
+          { label: 'Agents', value: agentCount, color: agentCount > 0 ? 'text-[#EA580C]' : 'text-gray-400' },
         ].map(m => (
           <div key={m.label} className="p-3 bg-white border border-[#D4C4A8] rounded-xl">
             <p className="text-[10px] text-gray-500 mb-1">{m.label}</p>
@@ -442,10 +442,17 @@ export default function RoomSystemPage() {
 
   const handleStop = async () => {
     setRunningAction('stop')
-    setSystemStatus('IDLE')
-    pushActivity('System stopped by user', 'log')
-    setLastNotice('System stopped')
-    setTimeout(() => { setLastNotice(null); setRunningAction(null) }, 2000)
+    try {
+      await api.pauseRoom(roomId)
+      setSystemStatus('IDLE')
+      pushActivity('System paused — all workflows halted', 'log')
+      setLastNotice('System paused')
+      setTimeout(() => setLastNotice(null), 3000)
+      setTimeout(load, 500)
+    } catch (e: any) {
+      setLastNotice(`Pause error: ${e.message}`)
+      setTimeout(() => setLastNotice(null), 4000)
+    } finally { setRunningAction(null) }
   }
 
   const handleRunAgent = async (agentId: string) => {
@@ -618,7 +625,7 @@ export default function RoomSystemPage() {
                   {activePanel === 'connectors' && <ConnectorsPanel roomId={roomId} />}
                   {activePanel === 'events' && <EventsPanel roomId={roomId} onEvent={msg => pushActivity(msg, 'event')} />}
                   {activePanel === 'logs' && <LogsPanel logs={logs} />}
-                  {activePanel === 'metrics' && <MetricsPanel runs={runs} />}
+                  {activePanel === 'metrics' && <MetricsPanel runs={runs} agentCount={agents.length} />}
                   {activePanel === 'storage' && <StoragePanel room={room} />}
                 </div>
               </div>

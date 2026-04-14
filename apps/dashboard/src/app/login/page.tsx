@@ -477,6 +477,24 @@ export default function LoginPage() {
                 Launch my workspace →
               </button>
 
+              {/* Mini code snippet */}
+              <div className="mt-3 rounded-xl overflow-hidden border border-[#E0D6CC]">
+                <div className="flex items-center justify-between px-3 py-1.5 bg-[#0D0F1A]">
+                  <span className="text-[9px] font-mono text-white/25 tracking-widest">your first room</span>
+                  <div className="flex gap-1">
+                    <span className="w-2 h-2 rounded-full bg-red-400/60" /><span className="w-2 h-2 rounded-full bg-yellow-400/60" /><span className="w-2 h-2 rounded-full bg-green-400/60" />
+                  </div>
+                </div>
+                <pre className="bg-[#0D0F1A] px-4 py-3 font-mono text-[10px] leading-relaxed overflow-x-auto">{[
+                  ['text-white/30', '// Deploy an autonomous system in 3 lines'],
+                  ['text-[#6EE7B7]', 'const room = await openrooms.create("my-workspace")'],
+                  ['text-[#FCA882]', 'await room.deploy({ goal: "Handle support tickets" })'],
+                  ['text-white/30', '// ← queued in 143ms, running now'],
+                ].map(([cls, txt], i) => (
+                  <div key={i} className={cls as string}>{txt as string}</div>
+                ))}</pre>
+              </div>
+
               {/* Included section with platform icons */}
               <div className="pt-3 space-y-3">
                 <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Included on day one</p>
