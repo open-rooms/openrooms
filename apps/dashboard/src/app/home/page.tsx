@@ -1,499 +1,869 @@
 'use client'
 
 import Link from 'next/link'
-import { ChevronRightIcon } from '@/components/icons'
 import { useEffect, useState } from 'react'
-import { getRooms, getAgents, getWorkflows, getRoomLogs } from '@/lib/api'
+import { useRouter } from 'next/navigation'
+import { OpenRoomsLogo } from '@/components/openrooms-logo'
+import { getRooms, getAgents, getWorkflows, createRoom, createAgent, createWorkflow } from '@/lib/api'
+import type { Room } from '@/lib/api'
 import {
-  DashboardIcon,
   RoomsIcon,
+  AgentIcon,
   WorkflowIcon,
   AutomationIcon,
   LiveRunsIcon,
-  ToolIcon,
-  AgentIcon,
-  RuntimeIcon,
-  SettingsIcon,
-  ArchitectureIcon,
-  LiveActivityIcon,
   LogsIcon,
   MemoryIcon,
+  SettingsIcon,
+  DashboardIcon,
   DeveloperIcon,
   BuildIcon,
-  GovernIcon,
-  ClientsIcon,
+  ObservabilityIcon,
+  ReportsIcon,
+  APIIcon,
+  AgentClustersIcon,
+  ComplianceIcon,
+  IntegrationsIcon,
+  SecurityIcon,
+  ToolIcon,
+  SDKIcon,
+  MessageIcon,
 } from '@/components/icons/system'
+import { ChevronRightIcon, PlayIcon } from '@/components/icons'
+import { formatRelativeTime } from '@/lib/utils'
 
-const dockApps = [
-  { id: 'rooms', name: 'Rooms', icon: RoomsIcon, href: '/rooms' },
-  { id: 'agents', name: 'Agents', icon: AgentIcon, href: '/agents' },
-  { id: 'workflows', name: 'Workflows', icon: WorkflowIcon, href: '/workflows' },
-  { id: 'automation', name: 'Automation', icon: AutomationIcon, href: '/automation' },
-  { id: 'live-runs', name: 'Live Runs', icon: LiveRunsIcon, href: '/live-runs' },
-  { id: 'tools', name: 'Tools', icon: ToolIcon, href: '/tools' },
-  { id: 'runtime', name: 'Runtime', icon: RuntimeIcon, href: '/runtime' },
-  { id: 'settings', name: 'Settings', icon: SettingsIcon, href: '/settings' },
-  { id: 'control-plane', name: 'Control Plane', icon: DashboardIcon, href: '/control-plane' },
-]
+// ─── CTA colour — matches dock SettingsIcon orange, dark-shade depth ──────────
+const CTA = '#EA580C'
+const CTA_HOVER = '#C2410C'
 
-const categoryGroups = [
+// ─── Quick-start templates ────────────────────────────────────────────────────
+const TEMPLATES = [
   {
-    tag: 'BUILD',
-    icon: BuildIcon,
-    items: ['Agents', 'Workflows', 'Tools'],
+    id: 'incident-responder',
+    Icon: SecurityIcon,
+    title: 'Incident Responder',
+    tag: 'Ops Automation',
+    tagColor: 'bg-red-100 text-red-700',
+    accentColor: '#FCA5A5',
+    description: 'Monitors health endpoints every 60s. When a service degrades, agents triage root cause, open a ticket, and page on-call.',
+    what: [
+      'Polls /health endpoints on a schedule',
+      'Agent classifies severity + likely cause',
+      'Creates ticket via API, triggers alert',
+    ],
+    trigger: 'Schedule · every 60s or via webhook from alertmanager',
+    workflow: { name: 'Incident Response Flow', agentGoal: 'Check the health status of all registered services, classify any degraded service by severity and likely root cause, create an incident ticket via the API connector, and output a structured incident report with recommended next steps.' },
   },
   {
-    tag: 'DEPLOY & RUN',
-    icon: RuntimeIcon,
-    items: ['Rooms', 'Runtime', 'Automation'],
+    id: 'support-triage',
+    Icon: AgentClustersIcon,
+    title: 'Support Triage',
+    tag: 'Customer Ops',
+    tagColor: 'bg-blue-100 text-blue-700',
+    accentColor: '#93C5FD',
+    description: 'Receives support requests via webhook. Agents classify intent, check knowledge base, draft a reply or escalate to a human queue.',
+    what: [
+      'Classifies request: bug / how-to / billing / churn',
+      'Queries memory for known solutions',
+      'Drafts reply or routes to correct queue via API',
+    ],
+    trigger: 'Webhook · from Intercom, Zendesk, Slack, or any form',
+    workflow: { name: 'Support Triage Flow', agentGoal: 'Receive an incoming support request from the webhook payload, classify its intent and urgency, search the knowledge base for matching resolutions, then either draft a complete response or escalate to the appropriate human queue with a detailed context summary.' },
   },
   {
-    tag: 'OBSERVE & GOVERN',
-    icon: GovernIcon,
-    items: ['Live Runs', 'Dashboard', 'Control Plane'],
+    id: 'content-intelligence',
+    Icon: ReportsIcon,
+    title: 'Content Intelligence',
+    tag: 'Media & Research',
+    tagColor: 'bg-emerald-100 text-emerald-700',
+    accentColor: '#6EE7B7',
+    description: 'Crawls a list of URLs on a schedule, extracts key signals, and delivers a structured daily brief to any endpoint you configure.',
+    what: [
+      'Fetches pages from a URL watchlist',
+      'Agent extracts key facts, quotes, and sentiment',
+      'POSTs a structured brief to Slack, email, or API',
+    ],
+    trigger: 'Schedule · daily, hourly, or on-demand',
+    workflow: { name: 'Content Intelligence Flow', agentGoal: 'Fetch content from the configured URL list, extract key facts, named entities, sentiment, and competitive signals, then synthesise a structured intelligence brief and deliver it via the configured output connector.' },
   },
-]
-
-const featureHighlights = [
-  { icon: RuntimeIcon, title: 'Zero-Drift Execution', desc: 'Agents run on rails. Every token, tool call, and decision is logged — reproducible in production, auditable forever.' },
-  { icon: LiveActivityIcon, title: 'Trigger Anything', desc: 'Webhooks, schedules, API calls, agent signals. If something can emit an event, OpenRooms will act on it — without code.' },
-  { icon: WorkflowIcon, title: 'Parallel Agent Networks', desc: 'Deploy clusters of specialist agents that divide work, share context, and converge on results — no human handholding.' },
-  { icon: LogsIcon, title: 'Execution X-Ray', desc: 'Not just logs. Structured telemetry on every step — filter, replay, and debug any execution in milliseconds.' },
-  { icon: MemoryIcon, title: 'Memory That Compounds', desc: "Agents don't start blank. Vectorised memory lets them accumulate context across every room and every run." },
-  { icon: ToolIcon, title: 'Infinite Surface Area', desc: 'Any REST API, database, or platform becomes an agent-native tool in one config block. No SDK. No boilerplate.' },
+  {
+    id: 'data-reconciliation',
+    Icon: ComplianceIcon,
+    title: 'Data Reconciliation',
+    tag: 'Data Integrity',
+    tagColor: 'bg-amber-100 text-amber-700',
+    accentColor: '#FCD34D',
+    description: 'Pulls the same dataset from two sources (DB + API, or two APIs), compares them, and flags records that are out of sync.',
+    what: [
+      'Fetches data from source A and source B',
+      'Agent diffs records field-by-field',
+      'Outputs a reconciliation report with discrepancies',
+    ],
+    trigger: 'Schedule · run before daily reporting or on-demand',
+    workflow: { name: 'Data Reconciliation Flow', agentGoal: 'Fetch datasets from both configured sources, perform a detailed field-by-field comparison, identify all records that are missing, duplicated, or contain conflicting values, and produce a structured reconciliation report with counts and representative examples.' },
+  },
+  {
+    id: 'api-pipeline',
+    Icon: APIIcon,
+    title: 'Multi-API Pipeline',
+    tag: 'Integration',
+    tagColor: 'bg-indigo-100 text-indigo-700',
+    accentColor: '#A5B4FC',
+    description: 'Chains calls across multiple REST APIs — an agent fetches, enriches, and merges data from disparate sources into one output.',
+    what: [
+      'Sequential HTTP calls to N configured APIs',
+      'Agent resolves conflicts and fills gaps',
+      'Returns a single enriched unified record',
+    ],
+    trigger: 'Webhook · triggered by any upstream system',
+    workflow: { name: 'API Pipeline Flow', agentGoal: 'Make sequential HTTP requests to all configured API connectors, cross-reference and enrich the results, resolve any field conflicts using business logic rules, and synthesise a unified structured JSON record highlighting key findings and data gaps.' },
+  },
+  {
+    id: 'compliance-audit',
+    Icon: ObservabilityIcon,
+    title: 'Compliance Audit',
+    tag: 'Governance',
+    tagColor: 'bg-violet-100 text-violet-700',
+    accentColor: '#C4B5FD',
+    description: 'Scans outputs, logs, or content against a defined policy ruleset. Flags violations, scores conformance, and generates audit trail.',
+    what: [
+      'Ingests content or log payload via webhook',
+      'Agent evaluates against policy rules in memory',
+      'Scores conformance and flags specific violations',
+    ],
+    trigger: 'Webhook · from any system that produces auditable output',
+    workflow: { name: 'Compliance Audit Flow', agentGoal: 'Receive the content or log payload from the webhook, evaluate it against the stored compliance policy rules, score overall conformance from 0-100, identify and quote specific rule violations, and generate a structured audit report with recommended remediation steps.' },
+  },
 ]
 
 const poweredByItems = [
-  'Deterministic Runtime',
-  'Event-Driven Automation',
-  'Multi-Model LLM Execution',
-  'Vector Memory',
-  'BullMQ Job Queue',
-  'PostgreSQL',
-  'Redis',
-  'Fastify API',
-  'Next.js Dashboard',
-  'OpenAI Compatible',
-  'Webhook Triggers',
-  'Real-time Observability',
-  'Blockchain Integrations',
-  'Horizontal Scaling',
-  'API-First Design',
-  'pnpm Monorepo',
+  'Deterministic Runtime', 'Event-Driven Automation', 'Multi-Model LLM Execution',
+  'Vector Memory', 'BullMQ Job Queue', 'PostgreSQL', 'Redis', 'Fastify API',
+  'Next.js Dashboard', 'OpenAI Compatible', 'Webhook Triggers',
+  'Real-time Observability', 'Blockchain Integrations', 'Horizontal Scaling',
+  'API-First Design', 'pnpm Monorepo',
 ]
 
-export default function HomePage() {
-  const [currentTime, setCurrentTime] = useState('')
-  const [liveStats, setLiveStats] = useState({
-    roomsActive: '…',
-    agentsRunning: '…',
-    workflowsDeployed: '…',
-    systemStatus: 'Operational',
-    events24h: '…',
-  })
-  const [liveActivity, setLiveActivity] = useState<{ time: string; message: string }[]>([])
+const HOW_IT_WORKS = [
+  { step: '01', Icon: RoomsIcon,      title: 'Create a Room',      desc: 'Rooms are isolated namespaces. Give one a name — it becomes your autonomous system boundary.' },
+  { step: '02', Icon: AgentIcon,      title: 'Deploy Agents',       desc: 'Agents run inside the Room, share its memory, and loop until their goal is reached or budget is spent.' },
+  { step: '03', Icon: IntegrationsIcon, title: 'Wire in Your APIs',  desc: 'Register any REST API or blockchain contract as a tool. Agents call it by name, handle errors, retry automatically.' },
+  { step: '04', Icon: LiveRunsIcon,   title: 'Fire & Observe',      desc: 'Trigger via webhook, schedule, or the dashboard. Every reasoning step, tool call, and decision streams live.' },
+]
 
+const WHO_FOR = [
+  {
+    Icon: DeveloperIcon,
+    title: 'Developers',
+    description: 'Register any REST API or blockchain contract as an agent-callable tool in one step. Write a goal in plain English. Get a webhook URL back. No SDK required.',
+    cta: 'Open Control Plane',
+    href: '/control-plane',
+  },
+  {
+    Icon: BuildIcon,
+    title: 'Builders & PMs',
+    description: 'Go from idea to a live autonomous system in under 5 minutes using a template. Customise agent goals, swap tools, and watch execution in real time — no code needed.',
+    cta: 'Browse Templates',
+    href: '#templates',
+  },
+  {
+    Icon: SDKIcon,
+    title: 'Platform Teams',
+    description: 'Enforce cost caps, rate limits, and execution policies at the infrastructure layer. Full audit trail, replay-able runs, horizontal scaling — built in, not bolted on.',
+    cta: 'View Runtime',
+    href: '/runtime',
+  },
+]
+
+const CAPABILITIES = [
+  { Icon: ComplianceIcon,    title: 'Zero-Drift Execution',    desc: 'Every token, tool call, and decision is logged. Full replay on any run, forever.' },
+  { Icon: AutomationIcon,    title: 'Trigger From Anything',   desc: 'Webhooks, cron schedules, blockchain events, or a single API call — any signal fires a Room.' },
+  { Icon: AgentClustersIcon, title: 'Parallel Agent Networks', desc: 'Multiple agents in one Room share memory and divide work. They cooperate, not compete.' },
+  { Icon: ObservabilityIcon, title: 'Execution X-Ray',         desc: 'Stream every reasoning iteration live. Filter, search, and replay any historical run.' },
+  { Icon: MemoryIcon,        title: 'Persistent Shared Memory', desc: 'Agents read and write to a shared store. What one learns, all know. Context survives across runs.' },
+  { Icon: SDKIcon,           title: 'Any Model, Any Provider', desc: 'OpenAI, Anthropic, or your own endpoint. Swap models per-agent without changing a line of goal code.' },
+]
+
+// Dock — only 8 icons, each routes to a real distinct working page
+const dockApps = [
+  { id: 'rooms',      name: 'Rooms',        Icon: RoomsIcon,      href: '/rooms',         desc: 'Your live systems' },
+  { id: 'agents',     name: 'Agents',       Icon: AgentIcon,      href: '/agents',        desc: 'Deploy AI agents' },
+  { id: 'workflows',  name: 'Workflows',    Icon: WorkflowIcon,   href: '/workflows',     desc: 'Orchestration graphs' },
+  { id: 'connectors', name: 'Connectors',   Icon: APIIcon,        href: '/connectors',    desc: 'APIs & webhooks' },
+  { id: 'live-runs',  name: 'Live Runs',    Icon: LiveRunsIcon,   href: '/live-runs',     desc: 'Execution stream' },
+  { id: 'tools',      name: 'Tools',        Icon: ToolIcon,       href: '/tools',         desc: 'Agent tool registry' },
+  { id: 'runtime',    name: 'Runtime',      Icon: ObservabilityIcon, href: '/runtime',    desc: 'Engine & health' },
+  { id: 'settings',   name: 'Settings',     Icon: SettingsIcon,   href: '/settings',      desc: 'Configuration' },
+]
+
+// ─── Per-status live log lines ────────────────────────────────────────────────
+const RUNNING_LINES = [
+  ['text-emerald-400', '● agents dispatched'],
+  ['text-blue-400',    '→ tool: http_request'],
+  ['text-yellow-400',  '← 200 OK · data received'],
+  ['text-purple-400',  '→ tool: memory_query'],
+  ['text-blue-400',    '← match found in memory'],
+  ['text-red-400',     '⚠ decision threshold met'],
+  ['text-emerald-300', '→ tool: http_request(POST /alert)'],
+  ['text-emerald-300', '← alert queued · id: ALT-91'],
+  ['text-gray-500',    '· reasoning iter 4/5…'],
+  ['text-emerald-400', '✓ run completed'],
+]
+const IDLE_LINES = [
+  ['text-gray-600', '○ idle — awaiting trigger'],
+  ['text-gray-700', '  no active run'],
+  ['text-gray-700', '  last run: completed'],
+  ['text-gray-600', '  POST /webhook to fire'],
+]
+const COMPLETED_LINES = [
+  ['text-emerald-400', '✓ execution complete'],
+  ['text-blue-400',    '  2 agents · 6 tool calls'],
+  ['text-gray-500',    '  tokens: 1,240 · $0.003'],
+  ['text-gray-600',    '  output: logged'],
+]
+
+function useCyclingLog(lines: string[][], intervalMs = 900) {
+  const [idx, setIdx] = useState(0)
   useEffect(() => {
-    const updateTime = () => {
-      const now = new Date()
-      setCurrentTime(now.toLocaleTimeString())
-    }
-    updateTime()
-    const interval = setInterval(updateTime, 1000)
-    return () => clearInterval(interval)
-  }, [])
+    const t = setInterval(() => setIdx(i => (i + 1) % Math.max(1, lines.length - 3)), intervalMs)
+    return () => clearInterval(t)
+  }, [lines, intervalMs])
+  return lines.slice(idx, idx + 4)
+}
 
-  useEffect(() => {
-    async function fetchStats() {
-      try {
-        const [roomsData, agentsData, workflowsData] = await Promise.all([
-          getRooms().catch(() => ({ rooms: [] })),
-          getAgents().catch(() => ({ agents: [], count: 0 })),
-          getWorkflows().catch(() => ({ workflows: [] })),
-        ])
+// Room status badge colours (all light palette)
+function statusBadge(status: string) {
+  if (status === 'RUNNING')   return 'bg-emerald-100 text-emerald-700 border-emerald-200'
+  if (status === 'COMPLETED') return 'bg-blue-100 text-blue-700 border-blue-200'
+  if (status === 'FAILED')    return 'bg-red-100 text-red-700 border-red-200'
+  return 'bg-gray-100 text-gray-600 border-gray-200'
+}
 
-        const rooms = roomsData.rooms || []
-        const activeRooms = rooms.filter((r) => r.status === 'RUNNING')
-        const workflows = workflowsData.workflows || []
-        const agentCount = agentsData.count ?? (agentsData.agents?.length ?? 0)
-
-        let recentLogs: { time: string; message: string }[] = []
-        const targetRooms = rooms.filter(r => ['RUNNING', 'COMPLETED'].includes(r.status)).slice(0, 3)
-        for (const room of targetRooms) {
-          try {
-            const logsData = await getRoomLogs(room.id)
-            const entries = (logsData.logs || []).slice(0, 3).map(log => ({
-              time: new Date(log.timestamp).toLocaleTimeString(),
-              message: log.message,
-            }))
-            recentLogs = [...recentLogs, ...entries]
-          } catch { /* skip */ }
-        }
-
-        setLiveStats({
-          roomsActive: String(activeRooms.length),
-          agentsRunning: String(agentCount),
-          workflowsDeployed: String(workflows.filter(w => w.status === 'ACTIVE').length),
-          systemStatus: 'Operational',
-          events24h: recentLogs.length > 0 ? `${recentLogs.length}+` : '0',
-        })
-
-        if (recentLogs.length > 0) {
-          setLiveActivity(recentLogs.slice(0, 5))
-        }
-      } catch {
-        // keep defaults on error
-      }
-    }
-    fetchStats()
-    const interval = setInterval(fetchStats, 15000)
-    return () => clearInterval(interval)
-  }, [])
-
-  // Build live status marquee items from live stats
-  const statusMarqueeItems = [
-    { label: '● System', value: liveStats.systemStatus, color: 'text-green-400' },
-    { label: 'Rooms Active', value: liveStats.roomsActive },
-    { label: 'Agents Running', value: liveStats.agentsRunning },
-    { label: 'Workflows', value: liveStats.workflowsDeployed },
-    { label: 'Events', value: liveStats.events24h },
-    { label: 'Clock', value: currentTime },
-  ]
+// ─── Live terminal card ────────────────────────────────────────────────────────
+function RoomTerminalCard({ room, cardIndex }: { room: Room; cardIndex: number }) {
+  const lines = room.status === 'RUNNING' ? RUNNING_LINES : room.status === 'COMPLETED' ? COMPLETED_LINES : IDLE_LINES
+  const visibleLines = useCyclingLog(lines, room.status === 'RUNNING' ? 850 : 2200)
+  // Every 3rd card shows a MessageIcon notification on the screen
+  const showMessage = cardIndex % 3 === 2
 
   return (
-    <div className="min-h-screen bg-[#E8DCC8] pb-24 animate-fade-in">
-      {/* Top Navigation Bar */}
-      <nav className="bg-[#F5F1E8] border-b-2 border-black sticky top-0 z-40 backdrop-blur-sm">
-        <div className="max-w-[95%] 2xl:max-w-[1600px] mx-auto px-4 sm:px-6 md:px-8 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-3 sm:gap-4">
-            <AgentIcon className="w-7 h-7 sm:w-8 sm:h-8" />
-            <span className="text-lg sm:text-xl font-bold text-[#111111]">OpenRooms</span>
-            <span className="hidden sm:inline-block px-3 py-1 bg-black text-white text-xs font-bold rounded-full">PLATFORM</span>
-          </div>
-          <div className="flex items-center gap-3 sm:gap-6">
-            <Link href="/home" className="text-xs sm:text-sm font-semibold text-[#111111] hover:text-[#F54E00] transition-colors duration-150">Home</Link>
-            <Link href="/docs" className="hidden sm:inline-block text-sm font-semibold text-gray-700 hover:text-[#F54E00] transition-colors duration-150">Docs</Link>
-            <Link href="/live-runs" className="hidden md:inline-block text-sm font-semibold text-gray-700 hover:text-[#F54E00] transition-colors duration-150">Status</Link>
-            <Link href="https://github.com" className="hidden md:inline-block text-sm font-semibold text-gray-700 hover:text-[#F54E00] transition-colors duration-150">GitHub</Link>
-            <button className="px-3 sm:px-4 py-2 bg-[#F54E00] hover:bg-[#E24600] text-white text-xs sm:text-sm font-bold rounded-lg transition-colors duration-150">
-              Sign In
-            </button>
+    <div className="bg-[#0a0a0a] relative overflow-hidden">
+      {/* Title bar */}
+      <div className="flex items-center gap-1.5 px-3 py-2 bg-[#141414] border-b border-[#1e1e1e]">
+        <span className="w-2 h-2 rounded-full bg-[#FF5F56]" />
+        <span className="w-2 h-2 rounded-full bg-[#FFBD2E]" />
+        <span className="w-2 h-2 rounded-full bg-[#27C93F]" />
+        <span className="ml-2 text-[8px] text-gray-600 font-mono truncate flex-1 lowercase">
+          {room.name.replace(/\s+/g, '-').toLowerCase()}
+        </span>
+        {room.status === 'RUNNING' && (
+          <span className="flex items-center gap-1 text-[8px] font-bold text-emerald-400 flex-shrink-0">
+            <span className="w-1 h-1 rounded-full bg-emerald-400 animate-pulse" />LIVE
+          </span>
+        )}
+      </div>
+
+      {/* Content row */}
+      <div className="px-3 pt-2.5 pb-2 flex items-start gap-2.5">
+        {/* Bot face */}
+        <div className="flex-shrink-0 relative">
+          <svg viewBox="0 0 44 44" className="w-11 h-11" fill="none">
+            <rect x="6" y="10" width="32" height="24" rx="8"
+              fill={room.status === 'RUNNING' ? '#5EEAD4' : room.status === 'COMPLETED' ? '#86EFAC' : '#A78BFA'}
+              stroke="#fff" strokeWidth="1.8"/>
+            <rect x="11" y="17" width="7" height="8" rx="2" fill="#fff"
+              className={room.status === 'RUNNING' ? 'animate-pulse' : ''}/>
+            <rect x="26" y="17" width="7" height="8" rx="2" fill="#fff"
+              className={room.status === 'RUNNING' ? 'animate-pulse' : ''}/>
+            <circle cx="14.5" cy="21" r="2" fill="#111"/>
+            <circle cx="29.5" cy="21" r="2" fill="#111"/>
+            {room.status === 'RUNNING'
+              ? <path d="M14 30 Q22 35 30 30" stroke="#fff" strokeWidth="1.8" strokeLinecap="round" fill="none"/>
+              : room.status === 'COMPLETED'
+                ? <path d="M14 30 Q22 34 30 30" stroke="#fff" strokeWidth="1.8" strokeLinecap="round" fill="none"/>
+                : <line x1="14" y1="30" x2="30" y2="30" stroke="#fff" strokeWidth="1.5" strokeLinecap="round"/>
+            }
+            <line x1="22" y1="10" x2="22" y2="6" stroke="#fff" strokeWidth="1.6" strokeLinecap="round"/>
+            <circle cx="22" cy="5" r="2.5"
+              fill={room.status === 'RUNNING' ? '#5EEAD4' : '#A78BFA'}
+              stroke="#fff" strokeWidth="1.4"
+              className={room.status === 'RUNNING' ? 'animate-pulse' : ''}/>
+          </svg>
+          {/* Message icon badge on every 3rd card */}
+          {showMessage && (
+            <div className="absolute -top-1 -right-1">
+              <MessageIcon className="w-5 h-5" />
+            </div>
+          )}
+        </div>
+
+        {/* Log lines — cycling */}
+        <div className="flex-1 font-mono space-y-0.5 min-w-0 pt-0.5">
+          {visibleLines.map(([color, text], li) => (
+            <div key={li} className={`text-[8.5px] truncate ${color} transition-opacity duration-300`}>
+              {text}
+            </div>
+          ))}
+          {room.status === 'RUNNING' && (
+            <div className="flex items-center gap-1 text-[8px] text-gray-600 mt-0.5">
+              <span className="w-1 h-1 rounded-full bg-gray-600 animate-pulse" />
+              <span className="animate-pulse">processing…</span>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* CRT scanlines */}
+      <div className="absolute inset-0 pointer-events-none"
+        style={{ backgroundImage: 'repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(255,255,255,0.01) 3px,rgba(255,255,255,0.01) 4px)' }}/>
+
+      {/* Nameplate — compact */}
+      <div className="bg-[#F2EDE6] border-t border-[#E8E0D0] px-3 py-1.5 flex items-center justify-between">
+        <h3 className="font-bold text-[#111] text-xs truncate group-hover:text-[#EA580C] transition-colors">{room.name}</h3>
+        <div className="flex items-center gap-1.5 flex-shrink-0 ml-2">
+          <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded border ${statusBadge(room.status)}`}>{room.status}</span>
+          <span className="text-[9px] text-gray-400 font-mono">{formatRelativeTime(room.updatedAt)}</span>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+export default function HomePage() {
+  const router = useRouter()
+  const [stats, setStats]               = useState({ rooms: 0, agents: 0, workflows: 0 })
+  const [rooms, setRooms]               = useState<Room[]>([])
+  const [roomsLoading, setRoomsLoading] = useState(false)
+  const [showRooms, setShowRooms]       = useState(false)
+  const [showAllRooms, setShowAllRooms] = useState(false)
+  const [launching, setLaunching]       = useState<string | null>(null)
+  const [launched, setLaunched]         = useState<string | null>(null)
+
+  const ROOMS_PAGE_SIZE = 6
+  const visibleRooms = showAllRooms ? rooms : rooms.slice(0, ROOMS_PAGE_SIZE)
+
+  async function loadAll() {
+    try {
+      const [r, a, w] = await Promise.all([
+        getRooms().catch(() => ({ rooms: [] })),
+        getAgents().catch(() => ({ agents: [], count: 0 })),
+        getWorkflows().catch(() => ({ workflows: [] })),
+      ])
+      const roomList = r.rooms || []
+      setRooms(roomList)
+      setStats({
+        rooms: roomList.length,
+        agents: a.count ?? (a.agents || []).length,
+        workflows: (w.workflows || []).length,
+      })
+    } catch { /* silent */ }
+  }
+
+  useEffect(() => { loadAll() }, [])
+
+  async function useTemplate(t: typeof TEMPLATES[0]) {
+    setLaunching(t.id)
+    try {
+      const wf = await createWorkflow({
+        name: t.workflow.name,
+        description: t.description,
+        nodes: [
+          { nodeId: 'start', type: 'START', name: 'Start', config: {} },
+          { nodeId: 'end',   type: 'END',   name: 'End',   config: {} },
+        ],
+      })
+      const room = await createRoom({ name: t.title, description: t.description, workflowId: wf.id })
+      await createAgent({
+        name: `${t.title} Agent`,
+        goal: t.workflow.agentGoal,
+        roomId: room.id,
+        allowedTools: ['calculator', 'http_request', 'memory_query'],
+        policyConfig: { provider: 'simulation', model: 'gpt-4o', maxLoopIterations: 5 },
+      })
+      setLaunched(t.id)
+      setTimeout(() => router.push(`/rooms/${room.id}`), 1200)
+    } catch (e: any) {
+      alert(`Failed to launch template: ${e.message}`)
+    } finally {
+      setLaunching(null)
+    }
+  }
+
+  async function handleStartFree() {
+    setShowRooms(true)
+    setRoomsLoading(true)
+    try {
+      const r = await getRooms()
+      setRooms(r.rooms || [])
+    } catch { /* keep empty */ }
+    finally { setRoomsLoading(false) }
+    setTimeout(() => {
+      document.getElementById('rooms-grid')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }, 80)
+  }
+
+  return (
+    <div className="min-h-screen bg-[#F9F5EF] pb-28 font-sans">
+
+      {/* ── Top nav ──────────────────────────────────────────────────────────── */}
+      <nav className="bg-[#F9F5EF] border-b border-[#E8E0D0] sticky top-0 z-40">
+        <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
+          <OpenRoomsLogo size={36} textSize="text-lg" />
+          <div className="flex items-center gap-5">
+            <Link href="/rooms"      className="text-sm font-medium text-gray-500 hover:text-[#111] transition-colors hidden sm:block">Rooms</Link>
+            <Link href="/agents"     className="text-sm font-medium text-gray-500 hover:text-[#111] transition-colors hidden md:block">Agents</Link>
+            <Link href="/workflows"  className="text-sm font-medium text-gray-500 hover:text-[#111] transition-colors hidden md:block">Workflows</Link>
+            <Link href="/live-runs"  className="text-sm font-medium text-gray-500 hover:text-[#111] transition-colors hidden lg:block">Live Runs</Link>
+            <Link href="/rooms"
+              className="px-4 py-2 text-white text-sm font-bold rounded-xl transition-all"
+              style={{ backgroundColor: CTA }}
+              onMouseEnter={e => (e.currentTarget.style.backgroundColor = CTA_HOVER)}
+              onMouseLeave={e => (e.currentTarget.style.backgroundColor = CTA)}
+            >
+              Start for free
+            </Link>
           </div>
         </div>
       </nav>
 
-      {/* Platform Hero */}
-      <div className="bg-[#F5F1E8] border-b-2 border-black overflow-hidden">
-        <div className="max-w-[95%] 2xl:max-w-[1600px] mx-auto px-4 sm:px-6 md:px-8 py-12 sm:py-16 md:py-20">
-          <div className="max-w-4xl animate-slide-up">
-            <div className="mb-4">
-              <span className="text-[10px] sm:text-xs font-bold tracking-widest text-gray-600 inline-block animate-fade-in px-3 py-1 bg-gray-200 rounded-full">AUTONOMOUS AI CONTROL PLANE</span>
-            </div>
-            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-[#111111] mb-4 sm:mb-6 leading-tight animate-slide-up hover:text-[#F54E00] transition-colors duration-500" style={{ animationDelay: '0.1s' }}>
-              Orchestrate Intelligent Systems at Runtime
+      {/* ── Hero ─────────────────────────────────────────────────────────────── */}
+      <div className="bg-[#F9F5EF] border-b border-[#E8E0D0]">
+        <div className="max-w-6xl mx-auto px-6 py-16 md:py-24">
+          <div className="max-w-2xl">
+            <span className="inline-block mb-5 text-xs font-bold tracking-widest text-[#888] uppercase bg-[#EDE8DF] px-3 py-1 rounded-full">
+              Autonomous AI Control Plane
+            </span>
+            <h1 className="text-4xl md:text-5xl font-extrabold text-[#111111] mb-5 leading-tight tracking-tight">
+              Run intelligent systems<br />that act for you.
             </h1>
-            <p className="text-sm sm:text-base md:text-lg text-gray-700 mb-6 sm:mb-8 max-w-2xl leading-relaxed animate-slide-up" style={{ animationDelay: '0.2s' }}>
-              OpenRooms is the control plane for deploying and orchestrating AI agents,
-              workflows, and autonomous systems across models, APIs, and blockchains.
+            <p className="text-base md:text-lg text-gray-500 mb-8 leading-relaxed">
+              OpenRooms is a control plane for AI agents, workflows, and real-time automation —
+              across models, APIs, and blockchain.
             </p>
-            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4 animate-slide-up" style={{ animationDelay: '0.3s' }}>
-              <a href="#paths" className="px-6 py-3 bg-[#F54E00] hover:bg-[#E24600] text-white text-sm sm:text-base font-bold rounded-lg transition-colors duration-150 inline-flex items-center justify-center gap-2">
-                <span>Start for Free</span>
-                <ChevronRightIcon className="w-5 h-5" />
+            <div className="flex flex-col sm:flex-row gap-3">
+              <button
+                onClick={handleStartFree}
+                className="px-6 py-3 text-white font-bold rounded-lg text-sm transition-all inline-flex items-center gap-2"
+                style={{ backgroundColor: CTA }}
+                onMouseEnter={e => (e.currentTarget.style.backgroundColor = CTA_HOVER)}
+                onMouseLeave={e => (e.currentTarget.style.backgroundColor = CTA)}
+              >
+                Start for free
+                <ChevronRightIcon className="w-4 h-4" />
+              </button>
+              <a href="#templates"
+                className="px-6 py-3 border border-[#D4C9B8] hover:border-[#111111] text-[#111111] font-semibold rounded-lg text-sm transition-colors text-center bg-white">
+                See templates
               </a>
-              <Link href="/ecosystem" className="px-6 py-3 bg-white border-2 border-black hover:bg-[#F54E00] hover:border-[#F54E00] text-[#111111] hover:text-white text-sm sm:text-base font-bold rounded-lg transition-colors duration-150 text-center">
-                Explore Infrastructure
+            </div>
+
+            {/* Live stats chips */}
+            <div className="flex items-center gap-3 mt-8 flex-wrap">
+              {[
+                { label: `${stats.rooms} Rooms`, dot: 'bg-emerald-400' },
+                { label: `${stats.agents} Agents`, dot: 'bg-blue-400' },
+                { label: `${stats.workflows} Workflows`, dot: 'bg-purple-400' },
+              ].map(s => (
+                <span key={s.label} className="inline-flex items-center gap-1.5 text-xs font-semibold text-gray-500 bg-white border border-[#E8E0D0] px-3 py-1.5 rounded-full">
+                  <span className={`w-1.5 h-1.5 rounded-full ${s.dot}`} />
+                  {s.label}
+                </span>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* ── Rooms Grid (shown when Start for Free is clicked) ─────────────────── */}
+      {showRooms && (
+        <div id="rooms-grid" className="bg-[#F9F5EF] border-b border-[#E8E0D0] py-12 animate-[fadeSlideDown_0.3s_ease]"
+          style={{ animationFillMode: 'both' }}>
+          <div className="max-w-6xl mx-auto px-6">
+            <div className="flex items-center justify-between mb-8">
+              <div>
+                <h2 className="text-xl font-extrabold text-[#111111]">Your Rooms</h2>
+                <p className="text-sm text-gray-500 mt-0.5">
+                  {rooms.length > 0 ? `${rooms.length} room${rooms.length !== 1 ? 's' : ''} — click any to open it` : 'Select a room to open it, or create a new one.'}
+                </p>
+              </div>
+              <div className="flex items-center gap-2">
+                <Link href="/rooms"
+                  className="px-4 py-2.5 text-sm font-semibold rounded-lg border border-[#D4C9B8] hover:border-[#111] text-[#111] bg-white transition-colors">
+                  View all
+                </Link>
+                <Link href="/rooms"
+                  className="px-4 py-2.5 text-white text-sm font-bold rounded-lg transition-colors inline-flex items-center gap-2"
+                  style={{ backgroundColor: CTA }}
+                  onMouseEnter={e => (e.currentTarget.style.backgroundColor = CTA_HOVER)}
+                  onMouseLeave={e => (e.currentTarget.style.backgroundColor = CTA)}
+                >
+                  + New Room
+                </Link>
+              </div>
+            </div>
+
+            {roomsLoading ? (
+              <div className="flex items-center justify-center py-16 gap-3">
+                <div className="w-6 h-6 border-2 border-[#F5A623] border-t-transparent rounded-full animate-spin" />
+                <span className="text-sm text-gray-500">Loading your rooms…</span>
+              </div>
+            ) : rooms.length === 0 ? (
+              <div className="text-center py-16 bg-white border border-[#E8E0D0] rounded-2xl">
+                <RoomsIcon className="w-16 h-16 mx-auto mb-4 opacity-40" />
+                <p className="text-gray-600 font-semibold mb-1">No rooms found</p>
+                <p className="text-sm text-gray-400 mb-6">
+                  {stats.rooms > 0
+                    ? 'Could not reach the API — make sure the server is running on port 3001.'
+                    : 'Create your first room from a template below, or go to your Rooms dashboard.'}
+                </p>
+                <div className="flex items-center justify-center gap-3 flex-wrap">
+                  <Link href="/rooms"
+                    className="inline-flex items-center gap-2 px-5 py-2.5 text-white text-sm font-bold rounded-lg transition-colors"
+                    style={{ backgroundColor: CTA }}
+                    onMouseEnter={e => (e.currentTarget.style.backgroundColor = CTA_HOVER)}
+                    onMouseLeave={e => (e.currentTarget.style.backgroundColor = CTA)}
+                  >
+                    Open Rooms Dashboard
+                    <ChevronRightIcon className="w-4 h-4" />
+                  </Link>
+                  <a href="#templates"
+                    className="inline-flex items-center gap-2 px-5 py-2.5 border border-[#D4C9B8] hover:border-[#111] text-[#111] text-sm font-semibold rounded-lg transition-colors bg-white">
+                    Use a template
+                  </a>
+                </div>
+              </div>
+            ) : (
+              <>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+                  {visibleRooms.map((room, i) => (
+                    <Link key={room.id} href={`/rooms/${room.id}`}
+                      className="group flex flex-col"
+                      style={{ animation: `fadeSlideDown 0.35s ease both`, animationDelay: `${i * 60}ms` }}>
+                      <div className={`relative rounded-2xl border-2 overflow-hidden transition-all duration-200 hover:-translate-y-1 ${
+                        room.status === 'RUNNING'
+                          ? 'border-emerald-400 shadow-[0_0_20px_rgba(52,211,153,0.2)]'
+                          : 'border-[#D4C9B8] group-hover:border-[#F5A623] group-hover:shadow-lg'
+                      }`}>
+                        <RoomTerminalCard room={room} cardIndex={i} />
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+                {rooms.length > ROOMS_PAGE_SIZE && (
+                  <div className="mt-5 flex items-center justify-center gap-4">
+                    <button
+                      onClick={() => setShowAllRooms(v => !v)}
+                      className="px-5 py-2.5 border border-[#D4C9B8] hover:border-[#111] text-sm font-semibold rounded-xl transition-colors bg-white text-[#111]"
+                    >
+                      {showAllRooms ? `Show less` : `View all ${rooms.length} rooms`}
+                    </button>
+                    <Link href="/rooms"
+                      className="px-5 py-2.5 text-white text-sm font-bold rounded-xl transition-colors"
+                      style={{ backgroundColor: CTA }}
+                      onMouseEnter={e => (e.currentTarget.style.backgroundColor = CTA_HOVER)}
+                      onMouseLeave={e => (e.currentTarget.style.backgroundColor = CTA)}
+                    >
+                      Manage in Rooms →
+                    </Link>
+                  </div>
+                )}
+              </>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* ── Rooms are living systems ─────────────────────────────────────────── */}
+      <div className="bg-white border-b border-[#E8E0D0] py-14">
+        <div className="max-w-6xl mx-auto px-6">
+          <div className="flex flex-col lg:flex-row gap-12 items-start">
+
+            {/* Left — what they really are */}
+            <div className="lg:w-1/2">
+              <span className="text-xs font-bold tracking-widest text-[#F5A623] uppercase mb-3 inline-block">How Rooms Work</span>
+              <h2 className="text-2xl md:text-3xl font-extrabold text-[#111111] mb-4 leading-tight">
+                Rooms are living systems.<br />Not pages. Not configs.
+              </h2>
+              <p className="text-gray-500 text-sm leading-relaxed mb-5">
+                Drop agents into a Room. Connect any REST API or blockchain contract as a callable tool.
+                Fire it from anywhere — a webhook, a cron job, a smart contract event, a button.
+                Every agent shares memory, every decision is logged, every run is replayable.
+              </p>
+              <p className="text-gray-400 text-sm leading-relaxed mb-7">
+                No glue code. No infrastructure wiring. No observability gap.
+                You define the goal. Rooms execute, reason, and report back — with a full trace of every step.
+              </p>
+              <div className="space-y-3">
+                {[
+                  { Icon: AgentIcon,      label: 'Multi-agent execution',  desc: 'Deploy N agents into one room — they cooperate, share memory, and divide the work' },
+                  { Icon: SecurityIcon,   label: 'Policy enforcement',      desc: 'Rate limits, cost caps, and execution policies enforced at runtime — not in your code' },
+                  { Icon: LiveRunsIcon,   label: 'Full execution trace',    desc: 'Every token, every tool call, every decision — logged and queryable' },
+                  { Icon: AutomationIcon, label: 'Trigger from anything',   desc: 'Webhook, schedule, blockchain event, API call — any signal can fire a Room' },
+                ].map(item => (
+                  <div key={item.label} className="flex items-start gap-3">
+                    <div className="p-2 bg-[#F9F5EF] border border-[#E8E0D0] rounded-xl flex-shrink-0">
+                      <item.Icon className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-bold text-[#111111]">{item.label}</p>
+                      <p className="text-xs text-gray-400 leading-snug">{item.desc}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Right — live execution terminal showing something powerful */}
+            <div className="lg:w-1/2">
+              <div className="bg-[#111111] rounded-2xl overflow-hidden border border-[#2a2a2a] shadow-xl">
+                {/* Terminal title bar */}
+                <div className="flex items-center gap-2 px-4 py-3 bg-[#1a1a1a] border-b border-[#2a2a2a]">
+                  <span className="w-3 h-3 rounded-full bg-red-500" />
+                  <span className="w-3 h-3 rounded-full bg-yellow-400" />
+                  <span className="w-3 h-3 rounded-full bg-emerald-400" />
+                  <span className="ml-3 text-xs text-gray-500 font-mono">openrooms — threat-detection-room — RUNNING</span>
+                  <span className="ml-auto flex items-center gap-1.5 text-[10px] font-bold text-emerald-400">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />LIVE
+                  </span>
+                </div>
+
+                {/* Execution log */}
+                <div className="p-4 font-mono text-[11px] space-y-1.5">
+                  <div className="text-gray-500"># Room triggered via blockchain event — tx: 0x4f2a…d91c</div>
+                  <div className="text-emerald-400">● <span className="text-gray-300">Agent[0] SecurityScanner</span> <span className="text-gray-500">→ DISPATCHED</span></div>
+                  <div className="text-emerald-400">● <span className="text-gray-300">Agent[1] ChainReader</span> <span className="text-gray-500">→ DISPATCHED</span></div>
+                  <div className="text-blue-400">&nbsp;&nbsp;→ tool: blockchain_read("0xC02a…6Cc2", "balanceOf")</div>
+                  <div className="text-blue-400">&nbsp;&nbsp;← result: 847.33 ETH (abnormal — 3σ above baseline)</div>
+                  <div className="text-yellow-400">&nbsp;&nbsp;→ tool: http_request(POST /alerts/escalate)</div>
+                  <div className="text-yellow-400">&nbsp;&nbsp;← 200 OK · alert_id: ALT-9182</div>
+                  <div className="text-purple-400">● <span className="text-gray-300">Agent[0] SecurityScanner</span> <span className="text-gray-500">REASONING iteration 4/5</span></div>
+                  <div className="text-gray-500">&nbsp;&nbsp;cross-referencing shared memory: last_seen_balance, tx_pattern…</div>
+                  <div className="text-red-400 font-bold">⚠ DECISION: potential wash-trading detected — confidence 0.91</div>
+                  <div className="text-emerald-300">&nbsp;&nbsp;→ tool: http_request(POST /risk/flag-address)</div>
+                  <div className="text-emerald-300">&nbsp;&nbsp;← address flagged · run_id: RUN-a04b8…</div>
+                  <div className="text-gray-600 mt-2 border-t border-[#2a2a2a] pt-2">
+                    execution_time: 1.84s · tokens_used: 1,240 · cost: $0.0031
+                  </div>
+                </div>
+
+                {/* Footer */}
+                <div className="px-4 py-2.5 bg-[#1a1a1a] border-t border-[#2a2a2a] flex items-center gap-3 text-[10px]">
+                  <span className="text-gray-500">POST /api/rooms/:id/webhook</span>
+                  <span className="text-gray-700">·</span>
+                  <span className="text-gray-500">2 agents · 4 tools · 0 manual steps</span>
+                  <Link href="/live-runs" className="ml-auto text-[#F5A623] font-bold hover:underline">Watch live →</Link>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* ── System Blueprints (formerly templates) ────────────────────────────── */}
+      <div id="templates" className="bg-[#F9F5EF] border-b border-[#E8E0D0] py-14">
+        <div className="max-w-6xl mx-auto px-6">
+          <div className="mb-8">
+            <span className="text-xs font-bold tracking-widest text-gray-400 uppercase mb-2 inline-block">System Blueprints</span>
+            <h2 className="text-2xl md:text-3xl font-extrabold text-[#111111]">Deploy a live Room in one click</h2>
+            <p className="text-gray-400 text-sm mt-1">Each blueprint provisions a Room + Workflow + Agent runtime. Ready to customise.</p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+            {TEMPLATES.map(t => {
+              const isLaunching = launching === t.id
+              const isDone      = launched === t.id
+              const TIcon       = t.Icon
+              return (
+                <div key={t.id} className="bg-[#F9F5EF] border border-[#E8E0D0] rounded-2xl p-6 flex flex-col hover:border-[#F5A623] hover:shadow-md transition-all duration-200">
+                  <div className="flex items-start justify-between mb-3">
+                    <TIcon className="w-10 h-10" />
+                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${t.tagColor}`}>{t.tag}</span>
+                  </div>
+                  <h3 className="text-sm font-extrabold text-[#111111] mb-2">{t.title}</h3>
+                  <p className="text-xs text-gray-500 leading-relaxed mb-4 flex-1">{t.description}</p>
+                  <ul className="space-y-1.5 mb-4">
+                    {t.what.map(w => (
+                      <li key={w} className="flex items-start gap-2 text-xs text-gray-500">
+                        <span className="font-bold mt-0.5" style={{ color: CTA }}>→</span>
+                        {w}
+                      </li>
+                    ))}
+                  </ul>
+                  <div className="text-[10px] text-gray-400 mb-4 pb-4 border-b border-[#E8E0D0]">
+                    {t.trigger}
+                  </div>
+                  <button
+                    onClick={() => useTemplate(t)}
+                    disabled={isLaunching || isDone}
+                    className="w-full py-2.5 text-sm font-bold rounded-xl transition-all flex items-center justify-center gap-2 text-white disabled:opacity-60"
+                    style={{ backgroundColor: isDone ? '#10B981' : CTA }}
+                    onMouseEnter={e => { if (!isDone) e.currentTarget.style.backgroundColor = CTA_HOVER }}
+                    onMouseLeave={e => { if (!isDone) e.currentTarget.style.backgroundColor = CTA }}
+                  >
+                    {isDone ? (
+                      <>✓ Launching room…</>
+                    ) : isLaunching ? (
+                      <><div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" /> Creating…</>
+                    ) : (
+                      <><PlayIcon className="w-3.5 h-3.5" /> Deploy Blueprint</>
+                    )}
+                  </button>
+                </div>
+              )
+            })}
+          </div>
+
+          <div className="mt-6 flex flex-col sm:flex-row items-center gap-4 p-5 bg-[#F9F5EF] border border-[#E8E0D0] rounded-2xl">
+            <div className="flex-1">
+              <p className="font-bold text-[#111111] text-sm">Start from scratch</p>
+              <p className="text-xs text-gray-400 mt-0.5">Create an empty Room, add your own agents and connectors.</p>
+            </div>
+            <div className="flex gap-3 flex-shrink-0">
+              <Link href="/rooms"
+                className="px-5 py-2.5 text-white text-sm font-bold rounded-xl transition-colors"
+                style={{ backgroundColor: CTA }}
+                onMouseEnter={e => (e.currentTarget.style.backgroundColor = CTA_HOVER)}
+                onMouseLeave={e => (e.currentTarget.style.backgroundColor = CTA)}
+              >
+                New Room
+              </Link>
+              <Link href="/connectors" className="px-5 py-2.5 border border-[#E8E0D0] hover:border-[#111111] text-sm font-bold rounded-xl transition-colors bg-white">
+                Add Connector
               </Link>
             </div>
           </div>
         </div>
       </div>
 
-      {/* ── Product Path Cards + Module Chips (same section) ── */}
-      <div id="paths" className="bg-[#E8DCC8] py-12 sm:py-16 border-b-2 border-black">
-        <div className="max-w-[95%] 2xl:max-w-[1600px] mx-auto px-4 sm:px-6 md:px-8">
-          <div className="mb-8 animate-slide-up" style={{ animationDelay: '0.35s' }}>
-            <p className="text-xs font-bold tracking-widest text-gray-500 uppercase mb-2">Choose your path</p>
-            <h2 className="text-2xl sm:text-3xl font-bold text-[#111111]">Who is OpenRooms for?</h2>
+      {/* ── How it works ─────────────────────────────────────────────────────── */}
+      <div className="bg-[#F9F5EF] border-b border-[#E8E0D0] py-14">
+        <div className="max-w-6xl mx-auto px-6">
+          <div className="mb-10">
+            <span className="text-xs font-bold tracking-widest text-gray-400 uppercase mb-2 inline-block">Getting started</span>
+            <h2 className="text-2xl md:text-3xl font-extrabold text-[#111111]">From zero to autonomous system in four steps</h2>
           </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+            {HOW_IT_WORKS.map(({ step, Icon, title, desc }) => (
+              <div key={step} className="bg-white border border-[#E8E0D0] rounded-2xl p-6 hover:border-[#F5A623] hover:shadow-md transition-all group">
+                <div className="flex items-start justify-between mb-4">
+                  <span className="text-3xl font-black text-gray-100 group-hover:text-[#F5A623]/20 transition-colors">{step}</span>
+                  <Icon className="w-10 h-10" />
+                </div>
+                <h3 className="font-extrabold text-[#111111] mb-2 text-sm">{title}</h3>
+                <p className="text-xs text-gray-400 leading-relaxed">{desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
 
-          {/* 3 path cards */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-5 sm:gap-6 mb-6">
+      {/* ── Capabilities grid ────────────────────────────────────────────────── */}
+      <div className="bg-white border-b border-[#E8E0D0] py-14">
+        <div className="max-w-6xl mx-auto px-6">
+          <div className="mb-10">
+            <span className="text-xs font-bold tracking-widest text-gray-400 uppercase mb-2 inline-block">Built for production</span>
+            <h2 className="text-2xl md:text-3xl font-extrabold text-[#111111]">Infrastructure that doesn&apos;t flinch.</h2>
+            <p className="text-gray-400 text-sm mt-1 max-w-lg">
+              While you sleep, agents run. Every decision logged, every execution auditable, every failure recoverable.
+            </p>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+            {CAPABILITIES.map(({ Icon, title, desc }) => (
+              <div key={title} className="bg-[#F9F5EF] border border-[#E8E0D0] rounded-2xl p-6 flex items-start gap-4 hover:border-[#F5A623] hover:shadow-md transition-all group">
+                <div className="p-2.5 bg-white border border-[#E8E0D0] rounded-xl flex-shrink-0 group-hover:border-[#F5A623] transition-colors">
+                  <Icon className="w-8 h-8" />
+                </div>
+                <div>
+                  <h3 className="font-extrabold text-[#111111] text-sm mb-1">{title}</h3>
+                  <p className="text-xs text-gray-400 leading-relaxed">{desc}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+          <div className="mt-8 grid grid-cols-2 sm:grid-cols-4 gap-4">
             {[
-              {
-                icon: ClientsIcon,
-                title: 'Clients',
-                description: 'Deploy intelligent agents that research, monitor, and automate tasks for you.',
-                href: '/clients',
-                cta: 'Explore Rooms',
-                bg: 'bg-[#FDA4AF]',
-                hoverBg: 'hover:bg-[#fb7185]',
-                textColor: 'text-[#111111]',
-                iconBg: '',
-              },
-              {
-                icon: DeveloperIcon,
-                title: 'Developers',
-                description: 'Build, deploy, and orchestrate autonomous agents using APIs, workflows, and tools.',
-                href: '/developers',
-                cta: 'Open Control Plane',
-                bg: 'bg-[#F54E00]',
-                hoverBg: 'hover:bg-[#E24600]',
-                textColor: 'text-white',
-                iconBg: '',
-              },
-              {
-                icon: ArchitectureIcon,
-                title: 'Enterprise',
-                description: 'Operate large-scale intelligent systems across teams, infrastructure, and data pipelines.',
-                href: '/enterprise',
-                cta: 'Enterprise Architecture',
-                bg: 'bg-[#FB923C]',
-                hoverBg: 'hover:bg-[#e87d2a]',
-                textColor: 'text-white',
-                iconBg: '',
-              },
-            ].map((card, i) => {
-              const Icon = card.icon
-              return (
-                <div
-                  key={card.title}
-                  className="group bg-[#F5F1E8] border-2 border-[#D4C4A8] rounded-2xl p-6 sm:p-8 flex flex-col hover:border-[#F54E00] hover:shadow-[4px_4px_0px_0px_rgba(245,78,0,0.4)] hover:-translate-y-1 transition-all duration-300 animate-slide-up"
-                  style={{ animationDelay: `${0.4 + i * 0.1}s` }}
-                >
-                  <div className="mb-5 transition-transform duration-300 group-hover:scale-105">
-                    <div className={`inline-flex items-center justify-center rounded-2xl p-2 ${card.iconBg}`}>
-                      <Icon className="w-20 h-20 sm:w-24 sm:h-24" />
-                    </div>
-                  </div>
-                  <div className="flex-1">
-                    <h3 className="text-xl font-bold text-[#111111] mb-2">{card.title}</h3>
-                    <p className="text-sm text-gray-600 leading-relaxed mb-6">{card.description}</p>
-                  </div>
-                  <Link
-                    href={card.href}
-                    className={`inline-flex items-center justify-center gap-2 w-full py-3 ${card.bg} ${card.hoverBg} ${card.textColor} text-sm font-bold rounded-xl transition-colors duration-200`}
-                  >
-                    <span>{card.cta}</span>
-                    <ChevronRightIcon className="w-4 h-4" />
-                  </Link>
-                </div>
-              )
-            })}
-          </div>
-
-          {/* BUILD / DEPLOY & RUN / OBSERVE & GOVERN — same section, beneath path cards */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            {/* BUILD — same pill badge style as the others */}
-            <div className="bg-[#F5F1E8] border border-[#D4C4A8] rounded-2xl p-5 flex items-start gap-4">
-              <BuildIcon className="w-9 h-9 flex-shrink-0" />
-              <div>
-                <span className="inline-block px-2.5 py-0.5 bg-[#F54E00] text-white rounded text-[10px] font-black tracking-widest mb-1.5">BUILD</span>
-                <ul className="space-y-0.5">
-                  {['Agents', 'Workflows', 'Tools'].map(item => (
-                    <li key={item} className="text-sm text-gray-700 font-medium leading-snug">{item}</li>
-                  ))}
-                </ul>
+              { value: '∞',    label: 'Agents per workspace' },
+              { value: '100%', label: 'Execution logged' },
+              { value: '<1s',  label: 'Webhook response' },
+              { value: '3',    label: 'Supported chains' },
+            ].map(s => (
+              <div key={s.label} className="bg-[#F9F5EF] border border-[#E8E0D0] rounded-xl p-4 text-center">
+                <div className="text-xl font-black text-[#111111]">{s.value}</div>
+                <div className="text-xs text-gray-400 mt-0.5">{s.label}</div>
               </div>
-            </div>
-            {/* DEPLOY & RUN — shape/pill is CTA orange */}
-            <div className="bg-[#F5F1E8] border border-[#D4C4A8] rounded-2xl p-5 flex items-start gap-4">
-              <RuntimeIcon className="w-9 h-9 flex-shrink-0" />
-              <div>
-                <span className="inline-block px-2.5 py-0.5 bg-[#F54E00] text-white rounded text-[10px] font-black tracking-widest mb-1.5">DEPLOY &amp; RUN</span>
-                <ul className="space-y-0.5">
-                  {['Rooms', 'Runtime', 'Automation'].map(item => (
-                    <li key={item} className="text-sm text-gray-700 font-medium leading-snug">{item}</li>
-                  ))}
-                </ul>
-              </div>
-            </div>
-            {/* OBSERVE & GOVERN — shape/pill is CTA orange */}
-            <div className="bg-[#F5F1E8] border border-[#D4C4A8] rounded-2xl p-5 flex items-start gap-4">
-              <GovernIcon className="w-9 h-9 flex-shrink-0" />
-              <div>
-                <span className="inline-block px-2.5 py-0.5 bg-[#F54E00] text-white rounded text-[10px] font-black tracking-widest mb-1.5">OBSERVE &amp; GOVERN</span>
-                <ul className="space-y-0.5">
-                  {['Live Runs', 'Dashboard', 'Control Plane'].map(item => (
-                    <li key={item} className="text-sm text-gray-700 font-medium leading-snug">{item}</li>
-                  ))}
-                </ul>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* ── Live System Status — left-scrolling marquee ── */}
-      <div className="bg-[#111111] border-b border-gray-800 py-3 overflow-hidden">
-        <div className="relative flex items-center">
-          {/* Left label */}
-          <div className="flex-shrink-0 flex items-center gap-2 px-4 z-10 bg-[#111111] border-r border-gray-700 pr-5 mr-0">
-            <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
-            <span className="text-[10px] font-black tracking-widest text-green-400 uppercase whitespace-nowrap">System Live</span>
-          </div>
-          {/* Fade left edge */}
-          <div className="pointer-events-none absolute left-[120px] top-0 bottom-0 w-12 bg-gradient-to-r from-[#111111] to-transparent z-10" />
-          {/* Fade right edge */}
-          <div className="pointer-events-none absolute right-0 top-0 bottom-0 w-16 bg-gradient-to-l from-[#111111] to-transparent z-10" />
-          {/* Scrolling items */}
-          <div className="flex gap-0 animate-marquee whitespace-nowrap w-max pl-4">
-            {[...statusMarqueeItems, ...statusMarqueeItems].map((s, i) => (
-              <span key={i} className="inline-flex items-center gap-1.5 px-5 text-xs font-mono border-r border-gray-800 last:border-r-0">
-                <span className="text-gray-500">{s.label}</span>
-                <span className={`font-bold ${s.color ?? 'text-white'}`}>{s.value}</span>
-              </span>
             ))}
           </div>
         </div>
       </div>
 
-      {/* ── Runtime Capabilities — split layout with vertical ticker ── */}
-      <div className="bg-[#111111] py-16 border-b-2 border-black overflow-hidden">
-        <div className="max-w-[95%] 2xl:max-w-[1600px] mx-auto px-4 sm:px-6 md:px-8">
-          <div className="flex flex-col lg:flex-row gap-12 lg:gap-20 items-start">
-            {/* Left — static content */}
-            <div className="lg:w-2/5 flex-shrink-0">
-              <span className="text-[10px] font-black tracking-widest text-[#F54E00] uppercase mb-3 inline-block">Runtime Capabilities</span>
-              <h2 className="text-3xl sm:text-4xl font-black text-white leading-tight mb-5">
-                Infrastructure<br />That Doesn&apos;t Flinch.
-              </h2>
-              <p className="text-base text-gray-400 leading-relaxed mb-8 max-w-sm">
-                While you sleep, agents run. Every decision logged, every execution auditable, every failure recoverable. Built to operate without supervision.
-              </p>
-              <div className="flex flex-col gap-3">
-                <Link href="/control-plane" className="inline-flex items-center gap-2 px-5 py-3 bg-[#F54E00] hover:bg-[#E24600] text-white text-sm font-bold rounded-xl transition-colors duration-200 w-fit">
-                  <span>See it in action</span>
-                  <ChevronRightIcon className="w-4 h-4" />
-                </Link>
-                <Link href="/live-runs" className="inline-flex items-center gap-2 px-5 py-3 border border-gray-700 hover:border-[#F54E00] text-gray-400 hover:text-white text-sm font-semibold rounded-xl transition-colors duration-200 w-fit">
-                  Live Runs
+      {/* ── Who is it for ────────────────────────────────────────────────────── */}
+      <div className="bg-[#F9F5EF] border-b border-[#E8E0D0] py-14">
+        <div className="max-w-6xl mx-auto px-6">
+          <div className="mb-8">
+            <span className="text-xs font-bold tracking-widest text-gray-400 uppercase mb-2 inline-block">Who uses OpenRooms</span>
+            <h2 className="text-2xl md:text-3xl font-extrabold text-[#111111]">Powerful for any team that moves fast and needs AI to keep up</h2>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+            {WHO_FOR.map(card => (
+              <div key={card.title} className="bg-white border border-[#E8E0D0] hover:border-[#F5A623] rounded-2xl p-7 flex flex-col hover:shadow-md transition-all group">
+                <card.Icon className="w-14 h-14 mb-5" />
+                <h3 className="text-lg font-extrabold text-[#111111] mb-2">{card.title}</h3>
+                <p className="text-sm text-gray-400 leading-relaxed mb-6 flex-1">{card.description}</p>
+                <Link href={card.href} className="inline-flex items-center gap-1.5 text-sm font-bold text-[#111111] group-hover:text-[#F5A623] transition-colors">
+                  {card.cta} <ChevronRightIcon className="w-4 h-4" />
                 </Link>
               </div>
-              <div className="mt-10 grid grid-cols-2 gap-4">
-                <div className="bg-white/5 rounded-xl p-4">
-                  <div className="text-xl font-black text-[#F54E00]">∞</div>
-                  <div className="text-xs text-gray-500 mt-0.5">Agents per workspace</div>
-                </div>
-                <div className="bg-white/5 rounded-xl p-4">
-                  <div className="text-xl font-black text-white">100%</div>
-                  <div className="text-xs text-gray-500 mt-0.5">Execution logged</div>
-                </div>
-              </div>
-            </div>
-            {/* Right — vertical scrolling ticker */}
-            <div className="lg:w-3/5 relative">
-              <div className="pointer-events-none absolute top-0 left-0 right-0 h-16 bg-gradient-to-b from-[#111111] to-transparent z-10" />
-              <div className="pointer-events-none absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-[#111111] to-transparent z-10" />
-              <div className="overflow-hidden h-[420px]">
-                <div className="animate-scroll-up flex flex-col gap-3">
-                  {[...featureHighlights, ...featureHighlights].map((feat, i) => {
-                    const Icon = feat.icon
-                    return (
-                      <div key={`${feat.title}-${i}`} className="bg-white/5 border border-white/10 rounded-2xl p-5 flex items-start gap-4 hover:bg-white/10 hover:border-white/20 transition-colors duration-200 flex-shrink-0">
-                        <div className="p-2 bg-white/10 rounded-lg flex-shrink-0">
-                          <Icon className="w-7 h-7" />
-                        </div>
-                        <div>
-                          <h3 className="text-sm font-bold text-white mb-1">{feat.title}</h3>
-                          <p className="text-xs text-gray-400 leading-relaxed">{feat.desc}</p>
-                        </div>
-                      </div>
-                    )
-                  })}
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* ── Live Platform Activity — dark terminal ── */}
-      <div className="py-12 border-b-2 border-black bg-[#E8DCC8]">
-        <div className="max-w-[95%] 2xl:max-w-[1600px] mx-auto px-8">
-          <div className="mb-6">
-            <p className="text-xs font-bold tracking-widest text-gray-500 uppercase mb-2">Observability</p>
-            <h2 className="text-2xl sm:text-3xl font-bold text-[#111111]">Live Platform Activity</h2>
-          </div>
-          <div className="bg-black rounded-2xl overflow-hidden">
-            <div className="flex items-center gap-2 px-5 py-3 border-b border-gray-800">
-              <div className="w-3 h-3 rounded-full bg-red-500" />
-              <div className="w-3 h-3 rounded-full bg-yellow-500" />
-              <div className="w-3 h-3 rounded-full bg-green-500" />
-              <span className="ml-3 text-xs text-gray-400 font-mono">live-activity — openrooms runtime</span>
-              <div className="ml-auto flex items-center gap-1.5">
-                <div className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse" />
-                <span className="text-xs text-green-400 font-mono">live</span>
-              </div>
-            </div>
-            <div className="p-6 font-mono min-h-[180px]">
-              {liveActivity.length === 0 ? (
-                <div className="space-y-1">
-                  <p className="text-sm text-gray-500">$ waiting for activity...</p>
-                  <p className="text-sm text-gray-600">Start a Room or run an agent to see live events here.</p>
-                  <span className="inline-block w-2 h-4 bg-gray-500 animate-pulse ml-0.5" />
-                </div>
-              ) : (
-                <div className="space-y-1.5">
-                  {liveActivity.map((activity, index) => (
-                    <div key={index} className="flex items-start gap-3 text-sm" style={{ animationDelay: `${index * 0.08}s` }}>
-                      <span className="text-[#FB923C] font-bold shrink-0">[{activity.time}]</span>
-                      <span className="text-[#86EFAC]">{activity.message}</span>
-                    </div>
-                  ))}
-                  <span className="inline-block w-2 h-4 bg-green-400 animate-pulse ml-0.5 mt-1" />
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* ── Powered By — scrolling marquee ── */}
-      <div className="bg-[#F5F1E8] border-b-2 border-black py-5 overflow-hidden">
-        <p className="text-center text-[10px] font-bold tracking-widest text-gray-500 uppercase mb-4">Powered by</p>
-        <div className="relative">
-          {/* Fade edges */}
-          <div className="pointer-events-none absolute left-0 top-0 bottom-0 w-24 bg-gradient-to-r from-[#F5F1E8] to-transparent z-10" />
-          <div className="pointer-events-none absolute right-0 top-0 bottom-0 w-24 bg-gradient-to-l from-[#F5F1E8] to-transparent z-10" />
-          {/* Marquee track — duplicated for seamless loop */}
-          <div className="flex gap-3 animate-marquee whitespace-nowrap w-max">
-            {[...poweredByItems, ...poweredByItems].map((item, i) => (
-              <span
-                key={i}
-                className="inline-flex items-center px-4 py-2 bg-[#E8DCC8] border border-[#D4C4A8] rounded-full text-xs font-semibold text-gray-700 flex-shrink-0 hover:border-[#F54E00] hover:bg-[#FDE8D8] transition-colors duration-150 cursor-default"
-              >
-                {item}
-              </span>
             ))}
           </div>
         </div>
       </div>
 
-      {/* ── Bottom Dock ── */}
-      <div className="fixed bottom-4 sm:bottom-8 left-1/2 -translate-x-1/2 z-50 animate-slide-up px-4" style={{ animationDelay: '2.3s' }}>
-        <div className="bg-white/95 backdrop-blur-md border-2 border-black rounded-2xl px-3 sm:px-6 py-3 sm:py-4 flex items-center gap-2 sm:gap-4 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-[8px_8px_0px_0px_rgba(245,78,0,1)] transition-all duration-500 hover:scale-105 overflow-x-auto">
-          {dockApps.map((app, index) => {
-            const Icon = app.icon
+      {/* ── CTA footer ───────────────────────────────────────────────────────── */}
+      <div className="bg-white border-b border-[#E8E0D0] py-14">
+        <div className="max-w-6xl mx-auto px-6 text-center">
+          <h2 className="text-2xl md:text-3xl font-extrabold text-[#111111] mb-3">Ready to launch your first Room?</h2>
+          <p className="text-gray-400 text-sm mb-8 max-w-md mx-auto">
+            Create a room, deploy an agent, connect a tool, trigger it — all in under 5 minutes.
+          </p>
+          <div className="flex items-center justify-center gap-3 flex-wrap">
+            <button
+              onClick={handleStartFree}
+              className="px-7 py-3.5 text-white font-bold rounded-xl text-sm transition-all inline-flex items-center gap-2"
+              style={{ backgroundColor: CTA }}
+              onMouseEnter={e => (e.currentTarget.style.backgroundColor = CTA_HOVER)}
+              onMouseLeave={e => (e.currentTarget.style.backgroundColor = CTA)}
+            >
+              Start for free <ChevronRightIcon className="w-4 h-4" />
+            </button>
+            <a href="#templates" className="px-7 py-3.5 border border-[#E8E0D0] hover:border-[#111111] text-[#111111] font-semibold rounded-xl text-sm transition-colors bg-[#F9F5EF]">
+              Browse templates
+            </a>
+          </div>
+        </div>
+      </div>
+
+      {/* ── Bottom dock ──────────────────────────────────────────────────────── */}
+      <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 px-4">
+        <div className="bg-white border border-[#E8E0D0] rounded-2xl px-4 sm:px-6 py-3 sm:py-4 flex items-center gap-3 sm:gap-5 shadow-lg hover:shadow-xl transition-all duration-300 overflow-x-auto">
+          {dockApps.map(app => {
+            const Icon = app.Icon
             return (
-              <Link
-                key={app.id}
-                href={app.href}
-                className="group relative flex-shrink-0 animate-bounce-in"
-                style={{ animationDelay: `${2.4 + index * 0.05}s` }}
-              >
-                <div className="transition-all duration-300 cursor-pointer hover:scale-125 hover:-translate-y-2 active:scale-95">
+              <Link key={app.id} href={app.href} className="group relative flex-shrink-0">
+                <div className="transition-all duration-200 hover:scale-125 hover:-translate-y-3 active:scale-95">
                   <Icon className="w-8 h-8 sm:w-10 sm:h-10" />
                 </div>
-                <div className="absolute -top-16 left-1/2 -translate-x-1/2 px-3 py-2 bg-[#F54E00] text-white text-xs font-bold rounded-lg opacity-0 group-hover:opacity-100 transition-all duration-300 whitespace-nowrap pointer-events-none group-hover:-translate-y-2 shadow-xl">
-                  {app.name}
-                  <div className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 w-2 h-2 bg-[#F54E00] rotate-45" />
+                {/* Tooltip with desc */}
+                <div className="absolute -top-16 left-1/2 -translate-x-1/2 px-3 py-2 bg-[#111] text-white rounded-xl opacity-0 group-hover:opacity-100 transition-all duration-200 whitespace-nowrap pointer-events-none shadow-lg">
+                  <p className="text-[11px] font-bold">{app.name}</p>
+                  <p className="text-[10px] text-white/50">{app.desc}</p>
+                  <div className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 w-2 h-2 bg-[#111] rotate-45" />
                 </div>
               </Link>
             )
           })}
         </div>
       </div>
+
     </div>
   )
 }

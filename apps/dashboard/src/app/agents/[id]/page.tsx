@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { AgentsIllustrationIcon } from '@/components/icons';
+import { AgentIcon } from '@/components/icons/system';
 import { getAgent, getAgentTraces, executeAgent, updateAgent, runAgent, getRuns, getLogsByRun, type Run, type ExecutionLog } from '@/lib/api';
 
 interface Agent {
@@ -135,9 +135,9 @@ export default function AgentDetailPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#E8DCC8] flex items-center justify-center">
+      <div className="min-h-screen bg-[#F9F5EF] flex items-center justify-center">
         <div className="text-center">
-          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-[#F54E00] mb-4"></div>
+          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-[#EA580C] mb-4"></div>
           <p className="text-gray-600">Loading agent...</p>
         </div>
       </div>
@@ -146,7 +146,7 @@ export default function AgentDetailPage() {
 
   if (!agent) {
     return (
-      <div className="min-h-screen bg-[#E8DCC8] flex items-center justify-center p-8">
+      <div className="min-h-screen bg-[#F9F5EF] flex items-center justify-center p-8">
         <div className="text-center max-w-sm">
           <div className="text-5xl mb-4">🤖</div>
           <h2 className="text-2xl font-bold text-[#111111] mb-2">Agent not found</h2>
@@ -154,10 +154,10 @@ export default function AgentDetailPage() {
             This agent may have been deleted or you may have an outdated link.
           </p>
           <div className="flex gap-3 justify-center">
-            <Link href="/agents" className="px-5 py-2 bg-[#F54E00] text-white font-bold rounded-lg text-sm hover:bg-[#E24600]">
+            <Link href="/agents" className="px-5 py-2 bg-[#EA580C] text-white font-bold rounded-lg text-sm hover:bg-[#C2410C]">
               ← View All Agents
             </Link>
-            <Link href="/agents/create" className="px-5 py-2 bg-white border-2 border-black text-[#111111] font-bold rounded-lg text-sm hover:bg-gray-50">
+            <Link href="/agents/create" className="px-5 py-2 bg-white border border-[#DDD5C8] text-[#111111] font-bold rounded-lg text-sm hover:bg-gray-50">
               + Create Agent
             </Link>
           </div>
@@ -188,20 +188,20 @@ export default function AgentDetailPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#E8DCC8] p-4 sm:p-6 md:p-8">
+    <div className="min-h-screen bg-[#F9F5EF] p-4 sm:p-6 md:p-8">
       <div className="max-w-7xl mx-auto">
         {/* Breadcrumb */}
         <div className="mb-6 animate-fade-in">
-          <Link href="/agents" className="text-[#F54E00] hover:underline font-semibold">
+          <Link href="/agents" className="text-[#EA580C] hover:underline font-semibold">
             ← Back to agents
           </Link>
         </div>
 
         {/* Header */}
-        <div className="bg-white border-2 border-black rounded-lg p-6 mb-6 animate-slide-up">
+        <div className="bg-white border border-[#DDD5C8] rounded-lg p-6 mb-6 animate-slide-up">
           <div className="flex items-start justify-between gap-4 mb-4">
             <div className="flex items-center gap-4">
-              <AgentsIllustrationIcon className="w-12 h-12" />
+              <AgentIcon className="w-12 h-12" />
               <div>
                 <h1 className="text-3xl font-bold text-[#111111] mb-1">{agent.name}</h1>
                 <div className="flex items-center gap-3">
@@ -232,14 +232,14 @@ export default function AgentDetailPage() {
               <button
                 onClick={handleExecute}
                 disabled={executing || agent.status !== 'ACTIVE'}
-                className="px-4 py-2 bg-[#F54E00] hover:bg-[#E24600] text-white font-bold rounded-lg transition-all hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="px-4 py-2 bg-[#EA580C] hover:bg-[#C2410C] text-white font-bold rounded-lg transition-all hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {executing ? 'Starting Run…' : '▶ Run Agent'}
               </button>
               <select
                 value={agent.status}
                 onChange={(e) => handleUpdateStatus(e.target.value as any)}
-                className="px-4 py-2 border-2 border-black rounded-lg bg-white font-bold"
+                className="px-4 py-2 border border-[#DDD5C8] rounded-lg bg-white font-bold"
               >
                 <option value="ACTIVE">ACTIVE</option>
                 <option value="PAUSED">PAUSED</option>
@@ -282,7 +282,7 @@ export default function AgentDetailPage() {
                   ))}
                 </div>
               )}
-              <Link href="/live-runs" className="mt-2 inline-block text-xs font-bold text-[#F54E00] hover:underline">
+              <Link href="/live-runs" className="mt-2 inline-block text-xs font-bold text-[#EA580C] hover:underline">
                 Full execution log →
               </Link>
             </div>
@@ -305,8 +305,8 @@ export default function AgentDetailPage() {
               onClick={() => setActiveTab(tab)}
               className={`px-6 py-3 font-bold rounded-lg transition-all ${
                 activeTab === tab
-                  ? 'bg-[#F54E00] text-white border-2 border-[#F54E00]'
-                  : 'bg-white text-[#111111] border-2 border-black hover:bg-gray-100'
+                  ? 'bg-[#EA580C] text-white border-2 border-[#EA580C]'
+                  : 'bg-white text-[#111111] border border-[#DDD5C8] hover:bg-gray-100'
               }`}
             >
               {tab.charAt(0).toUpperCase() + tab.slice(1)}
@@ -318,7 +318,7 @@ export default function AgentDetailPage() {
         <div className="animate-slide-up" style={{ animationDelay: '0.2s' }}>
           {activeTab === 'overview' && (
             <div className="grid gap-6">
-              <div className="bg-white border-2 border-black rounded-lg p-6">
+              <div className="bg-white border border-[#DDD5C8] rounded-lg p-6">
                 <h3 className="text-xl font-bold text-[#111111] mb-4">Configuration</h3>
                 <div className="grid sm:grid-cols-2 gap-4">
                   <div>
@@ -348,7 +348,7 @@ export default function AgentDetailPage() {
                 </div>
               </div>
 
-              <div className="bg-white border-2 border-black rounded-lg p-6">
+              <div className="bg-white border border-[#DDD5C8] rounded-lg p-6">
                 <h3 className="text-xl font-bold text-[#111111] mb-4">Allowed Tools ({agent.allowedTools.length})</h3>
                 <div className="flex flex-wrap gap-2">
                   {agent.allowedTools.map((tool) => (
@@ -365,7 +365,7 @@ export default function AgentDetailPage() {
           )}
 
           {activeTab === 'traces' && (
-            <div className="bg-white border-2 border-black rounded-lg p-6">
+            <div className="bg-white border border-[#DDD5C8] rounded-lg p-6">
               <h3 className="text-xl font-bold text-[#111111] mb-4">Execution Traces ({traces.length})</h3>
               {traces.length === 0 ? (
                 <p className="text-gray-600 text-center py-8">No execution traces yet. Run the agent to see traces.</p>
@@ -374,7 +374,7 @@ export default function AgentDetailPage() {
                   {traces.map((trace) => (
                     <div
                       key={trace.id}
-                      className="border-2 border-gray-200 rounded-lg p-4 hover:border-[#F54E00] transition-all"
+                      className="border-2 border-gray-200 rounded-lg p-4 hover:border-[#EA580C] transition-all"
                     >
                       <div className="flex items-center justify-between mb-2">
                         <div className="flex items-center gap-3">
@@ -410,7 +410,7 @@ export default function AgentDetailPage() {
           )}
 
           {activeTab === 'policy' && (
-            <div className="bg-white border-2 border-black rounded-lg p-6">
+            <div className="bg-white border border-[#DDD5C8] rounded-lg p-6">
               <h3 className="text-xl font-bold text-[#111111] mb-4">Policy Configuration</h3>
               <pre className="bg-gray-100 border border-gray-300 rounded p-4 overflow-x-auto text-sm font-mono">
                 {JSON.stringify(agent.policyConfig, null, 2)}
@@ -419,7 +419,7 @@ export default function AgentDetailPage() {
           )}
 
           {activeTab === 'memory' && (
-            <div className="bg-white border-2 border-black rounded-lg p-6">
+            <div className="bg-white border border-[#DDD5C8] rounded-lg p-6">
               <h3 className="text-xl font-bold text-[#111111] mb-4">Memory State</h3>
               <pre className="bg-gray-100 border border-gray-300 rounded p-4 overflow-x-auto text-sm font-mono">
                 {JSON.stringify(agent.memoryState, null, 2)}

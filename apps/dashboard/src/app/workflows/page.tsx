@@ -2,10 +2,9 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { Header } from '@/components/header'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
-import { PlayIcon, PlusIcon, SequentialWorkflowIcon, ParallelWorkflowIcon, AgentDecisionIcon, APIIntegrationIcon, WorkflowListIcon, AlertCircleIcon } from '@/components/icons'
-import { WorkflowIcon as WorkflowProductIcon } from '@/components/icons/product/WorkflowIcon'
+import { PlayIcon, PlusIcon, AlertCircleIcon } from '@/components/icons'
+import { WorkflowIcon, AgentIcon, APIIcon, AutomationIcon, LiveRunsIcon } from '@/components/icons/system'
 import { createWorkflow, getWorkflows, runWorkflow } from '@/lib/api'
 
 interface Workflow {
@@ -114,56 +113,61 @@ export default function WorkflowsPage() {
     {
       name: 'Simple Sequential',
       description: 'Linear workflow with sequential step execution',
-      icon: SequentialWorkflowIcon,
+      icon: WorkflowIcon,
       nodes: 5,
-      color: 'bg-purple-50 border-2 border-purple-200',
+      color: 'bg-[#F9F5EF] border-2 border-[#E8E0D0]',
       hoverBorder: 'hover:border-[#93C5FD]',
       accent: '#93C5FD',
     },
     {
       name: 'Parallel Processing',
       description: 'Execute multiple branches concurrently',
-      icon: ParallelWorkflowIcon,
+      icon: AutomationIcon,
       nodes: 8,
-      color: 'bg-emerald-50 border-2 border-emerald-200',
+      color: 'bg-[#F9F5EF] border-2 border-[#E8E0D0]',
       hoverBorder: 'hover:border-emerald-400',
       accent: '#6BCB77',
     },
     {
       name: 'Agent Decision',
       description: 'LLM-driven conditional branching',
-      icon: AgentDecisionIcon,
+      icon: AgentIcon,
       nodes: 10,
-      color: 'bg-teal-50 border-2 border-teal-200',
+      color: 'bg-[#F9F5EF] border-2 border-[#E8E0D0]',
       hoverBorder: 'hover:border-teal-400',
       accent: '#5EEAD4',
     },
     {
       name: 'API Integration',
       description: 'External API calls with retry logic',
-      icon: APIIntegrationIcon,
+      icon: APIIcon,
       nodes: 6,
-      color: 'bg-orange-50 border-2 border-orange-200',
+      color: 'bg-[#F9F5EF] border-2 border-[#E8E0D0]',
       hoverBorder: 'hover:border-[#FDBA74]',
       accent: '#FDBA74',
     },
   ]
 
   return (
-    <div className="bg-[#E8DCC8] min-h-screen">
-      <Header 
-        title="Workflows" 
-        subtitle={`${workflows.length} orchestration templates`}
-        actions={
-          <button
-            onClick={() => setShowCreate(true)}
-            className="inline-flex items-center gap-2 px-4 py-2 bg-[#F54E00] hover:bg-[#E24600] text-white text-sm font-bold rounded-lg transition-all duration-200"
-          >
-            <PlusIcon className="w-4 h-4" />
-            New Workflow
-          </button>
-        }
-      />
+    <div className="bg-[#F9F5EF] min-h-screen">
+      {/* Page header */}
+      <div className="border-b border-[#E8E0D0] bg-white px-8 py-5 flex items-center justify-between">
+        <div className="flex items-center gap-4">
+          <WorkflowIcon className="w-10 h-10 flex-shrink-0 transition-transform hover:scale-105 duration-200" />
+          <div>
+            <h1 className="text-xl font-extrabold text-[#111]">Workflows</h1>
+            <p className="text-gray-400 text-xs mt-0.5">{workflows.length} orchestration graphs — sequential, parallel, agent-driven</p>
+          </div>
+        </div>
+        <button onClick={() => setShowCreate(true)}
+          className="inline-flex items-center gap-2 px-5 py-2.5 text-white text-sm font-bold rounded-xl transition-all"
+          style={{ backgroundColor: '#EA580C' }}
+          onMouseEnter={e => e.currentTarget.style.backgroundColor = '#C2410C'}
+          onMouseLeave={e => e.currentTarget.style.backgroundColor = '#EA580C'}>
+          <PlusIcon className="w-4 h-4" />
+          New Workflow
+        </button>
+      </div>
       
       {lastRunId && (
         <div className="mx-8 mt-4 p-3 bg-emerald-50 border border-emerald-300 rounded-lg flex items-center justify-between">
@@ -182,7 +186,7 @@ export default function WorkflowsPage() {
           {/* Workflow Templates */}
           {/* Page hero icon */}
           <div className="flex items-center gap-6 mb-2">
-            <WorkflowProductIcon className="w-20 h-20 flex-shrink-0" />
+            <WorkflowIcon className="w-20 h-20 flex-shrink-0" />
             <div>
               <h1 className="text-2xl font-bold text-[#111111]">Workflows</h1>
               <p className="text-gray-600 text-sm mt-1">Orchestration templates connecting agents, tools and APIs into structured execution graphs.</p>
@@ -190,7 +194,7 @@ export default function WorkflowsPage() {
           </div>
 
           {showCreate && (
-            <Card className="border-2 border-black bg-white">
+            <Card className="border border-[#DDD5C8] bg-white">
               <CardHeader>
                 <CardTitle>Create Workflow</CardTitle>
                 <CardDescription>Start a new orchestration graph for rooms and agents.</CardDescription>
@@ -207,27 +211,27 @@ export default function WorkflowsPage() {
                     value={form.name}
                     onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
                     placeholder="Workflow name"
-                    className="w-full px-3 py-2 border-2 border-black rounded-lg text-sm"
+                    className="w-full px-3 py-2 border border-[#DDD5C8] rounded-lg text-sm"
                   />
                   <textarea
                     value={form.description}
                     onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
                     placeholder="Description (optional)"
                     rows={2}
-                    className="w-full px-3 py-2 border-2 border-black rounded-lg text-sm resize-none"
+                    className="w-full px-3 py-2 border border-[#DDD5C8] rounded-lg text-sm resize-none"
                   />
                   <div className="flex items-center gap-2">
                     <button
                       type="button"
                       onClick={() => setShowCreate(false)}
-                      className="px-4 py-2 border-2 border-black rounded-lg text-sm font-bold"
+                      className="px-4 py-2 border border-[#DDD5C8] rounded-lg text-sm font-bold"
                     >
                       Cancel
                     </button>
                     <button
                       type="submit"
                       disabled={creating}
-                      className="px-4 py-2 bg-[#F54E00] hover:bg-[#E24600] text-white text-sm font-bold rounded-lg disabled:opacity-50"
+                      className="px-4 py-2 bg-[#EA580C] hover:bg-[#C2410C] text-white text-sm font-bold rounded-lg disabled:opacity-50"
                     >
                       {creating ? 'Creating...' : 'Create Workflow'}
                     </button>
@@ -239,7 +243,7 @@ export default function WorkflowsPage() {
 
           <div>
             <h2 className="text-xl font-bold text-text-primary mb-4 flex items-center gap-2">
-              Quick Start Templates
+              Runtime Blueprints
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
               {templates.map((template, idx) => {
@@ -261,9 +265,9 @@ export default function WorkflowsPage() {
                         <button
                           onClick={() => useTemplate(template)}
                           disabled={creating}
-                          className="text-xs px-3 py-1 bg-[#F54E00] text-white rounded font-bold hover:bg-[#E24600] transition-colors disabled:opacity-50"
+                          className="text-xs px-3 py-1 bg-[#EA580C] text-white rounded font-bold hover:bg-[#C2410C] transition-colors disabled:opacity-50"
                         >
-                          {creating ? 'Creating...' : 'Use Template'}
+                          {creating ? 'Creating...' : 'Deploy'}
                         </button>
                       </div>
                     </CardContent>
@@ -281,7 +285,7 @@ export default function WorkflowsPage() {
                 onClick={() => setFilter(status)}
                 className={`px-4 py-2 text-sm font-semibold transition-colors duration-150 ease-in-out border-b-2 ${
                   filter === status
-                    ? 'border-[#F54E00] text-text-primary'
+                    ? 'border-[#EA580C] text-text-primary'
                     : 'border-transparent text-text-secondary hover:text-text-primary'
                 }`}
               >
@@ -294,18 +298,18 @@ export default function WorkflowsPage() {
           {/* Workflows List */}
           {loading ? (
             <div className="text-center py-16">
-              <div className="w-8 h-8 border-2 border-surface-active border-t-[#F54E00] rounded-full animate-spin mx-auto mb-4" />
+              <div className="w-8 h-8 border-2 border-surface-active border-t-[#EA580C] rounded-full animate-spin mx-auto mb-4" />
               <span className="text-text-secondary">Loading workflows...</span>
             </div>
           ) : filteredWorkflows.length === 0 ? (
-            <Card className="border-2 border-dashed border-[#D4C4A8] bg-[#F5F1E8]">
+            <Card className="border-2 border-dashed border-[#D4C4A8] bg-white">
               <CardContent className="py-12 text-center">
-                <WorkflowListIcon className="w-16 h-16 mx-auto mb-4 text-gray-400" />
+                <WorkflowIcon className="w-16 h-16 mx-auto mb-4 opacity-40" />
                 <h3 className="text-lg font-semibold text-text-primary mb-2">No workflows in this control plane yet</h3>
                 <p className="text-sm text-text-secondary mb-6">Create a workflow template to orchestrate rooms, agents, tools, and downstream systems.</p>
                 <button
                   onClick={() => setShowCreate(true)}
-                  className="px-6 py-2 bg-[#F54E00] hover:bg-[#E24600] text-white text-sm font-bold rounded-lg transition-all"
+                  className="px-6 py-2 bg-[#EA580C] hover:bg-[#C2410C] text-white text-sm font-bold rounded-lg transition-all"
                 >
                   Get Started
                 </button>
@@ -315,12 +319,12 @@ export default function WorkflowsPage() {
             <div className="grid grid-cols-1 gap-6">
               {filteredWorkflows.map((workflow) => (
                 <div key={workflow.id} className="block">
-                  <Card className="border border-[#D4C4A8] bg-[#F5F1E8] hover:bg-white hover:shadow-md transition-all duration-200 hover:-translate-y-0.5 group">
+                  <Card className="border border-[#D4C4A8] bg-white hover:bg-white hover:shadow-md transition-all duration-200 hover:-translate-y-0.5 group">
                     <CardContent className="p-6">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-4 flex-1 min-w-0">
-                          <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                            <WorkflowListIcon className="w-6 h-6 text-purple-600" />
+                          <div className="w-12 h-12 bg-[#F9F5EF] rounded-xl flex items-center justify-center flex-shrink-0">
+                            <WorkflowIcon className="w-10 h-10" />
                           </div>
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-3 mb-1">
@@ -347,14 +351,14 @@ export default function WorkflowsPage() {
                           <button
                             onClick={() => handleRunWorkflow(workflow.id)}
                             disabled={runningId === workflow.id}
-                            className="px-3 py-2 bg-[#F54E00] hover:bg-[#E24600] disabled:opacity-50 text-white text-xs font-bold rounded transition-colors flex items-center gap-2"
+                            className="px-3 py-2 bg-[#EA580C] hover:bg-[#C2410C] disabled:opacity-50 text-white text-xs font-bold rounded transition-colors flex items-center gap-2"
                           >
                             <PlayIcon className="w-4 h-4" />
                             {runningId === workflow.id ? 'Starting…' : 'Run'}
                           </button>
                           <Link
                             href={`/rooms?action=create&workflowId=${workflow.id}`}
-                            className="px-3 py-2 bg-white border border-[#D4C4A8] hover:border-[#F54E00] text-[#111111] text-xs font-bold rounded transition-colors flex items-center gap-2"
+                            className="px-3 py-2 bg-white border border-[#D4C4A8] hover:border-[#EA580C] text-[#111111] text-xs font-bold rounded transition-colors flex items-center gap-2"
                           >
                             Open in Room
                           </Link>

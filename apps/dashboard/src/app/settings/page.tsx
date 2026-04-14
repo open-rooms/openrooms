@@ -2,9 +2,9 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { SettingsIllustrationIcon, CheckCircleIcon, AlertCircleIcon, ZapIcon, ClockIcon } from '@/components/icons';
+import { CheckCircleIcon, AlertCircleIcon, ZapIcon, ClockIcon } from '@/components/icons';
 import { getProviderSettings, saveProviderSettings, getPlatformStatus, getAPIKeys, createAPIKey, deleteAPIKey } from '@/lib/api';
-
+import { SettingsIcon } from '@/components/icons/system';
 interface ProviderState {
   configured: boolean;
   keyPreview: string | null;
@@ -110,12 +110,12 @@ export default function SettingsPage() {
   const configured = providers?.openai.configured || providers?.anthropic.configured;
 
   return (
-    <div className="min-h-screen bg-[#E8DCC8] p-4 sm:p-6 md:p-8">
+    <div className="min-h-screen bg-[#F9F5EF] p-4 sm:p-6 md:p-8">
       <div className="max-w-4xl mx-auto space-y-8">
 
         {/* Header */}
         <div className="flex items-center gap-3">
-          <SettingsIllustrationIcon className="w-10 h-10" />
+          <SettingsIcon className="w-10 h-10" />
           <div>
             <h1 className="text-3xl font-bold text-[#111111]">Settings</h1>
             <p className="text-gray-600 text-sm mt-0.5">Configure your LLM providers and platform access</p>
@@ -145,7 +145,7 @@ export default function SettingsPage() {
             { label: 'Total Runs', value: status.runs, href: '/live-runs', color: 'text-emerald-600' },
           ].map(s => (
             <Link key={s.label} href={s.href}
-              className="bg-white border-2 border-black rounded-xl p-4 hover:shadow-lg transition-all group">
+              className="bg-white border border-[#DDD5C8] rounded-xl p-4 hover:shadow-lg transition-all group">
               <div className={`text-2xl font-bold ${s.color} group-hover:scale-110 transition-transform`}>{loading ? '…' : s.value}</div>
               <div className="text-xs text-gray-500 mt-0.5">{s.label}</div>
             </Link>
@@ -153,7 +153,7 @@ export default function SettingsPage() {
         </div>
 
         {/* ── LLM Providers ── */}
-        <div className="bg-white border-2 border-black rounded-xl overflow-hidden">
+        <div className="bg-white border border-[#DDD5C8] rounded-xl overflow-hidden">
           <div className="px-6 py-4 border-b-2 border-gray-100 flex items-center justify-between">
             <div>
               <h2 className="text-lg font-bold text-[#111111]">LLM Providers</h2>
@@ -176,7 +176,7 @@ export default function SettingsPage() {
                     onClick={() => setDefaultProvider(p)}
                     className={`px-4 py-2 rounded-lg text-sm font-bold border-2 transition-all ${
                       defaultProvider === p
-                        ? 'bg-[#F54E00] text-white border-[#F54E00]'
+                        ? 'bg-[#EA580C] text-white border-[#EA580C]'
                         : 'bg-white text-[#111111] border-black hover:bg-gray-50'
                     }`}>
                     {p === 'openai' ? 'OpenAI' : p === 'anthropic' ? 'Anthropic' : 'Simulation'}
@@ -218,7 +218,7 @@ export default function SettingsPage() {
                     value={openaiKey}
                     onChange={e => setOpenaiKey(e.target.value)}
                     placeholder={providers?.openai.configured ? '••••••••••••••••' : 'sk-proj-...'}
-                    className="w-full px-3 py-2.5 border-2 border-gray-200 rounded-lg text-sm focus:outline-none focus:border-[#F54E00] font-mono"
+                    className="w-full px-3 py-2.5 border-2 border-gray-200 rounded-lg text-sm focus:outline-none focus:border-[#EA580C] font-mono"
                   />
                 </div>
                 <div>
@@ -226,7 +226,7 @@ export default function SettingsPage() {
                   <select
                     value={openaiModel}
                     onChange={e => setOpenaiModel(e.target.value)}
-                    className="w-full px-3 py-2.5 border-2 border-gray-200 rounded-lg text-sm focus:outline-none focus:border-[#F54E00] bg-white"
+                    className="w-full px-3 py-2.5 border-2 border-gray-200 rounded-lg text-sm focus:outline-none focus:border-[#EA580C] bg-white"
                   >
                     {['gpt-3.5-turbo', 'gpt-4', 'gpt-4-turbo', 'gpt-4o', 'gpt-4o-mini'].map(m => (
                       <option key={m} value={m}>{m}</option>
@@ -266,7 +266,7 @@ export default function SettingsPage() {
                     value={anthropicKey}
                     onChange={e => setAnthropicKey(e.target.value)}
                     placeholder={providers?.anthropic.configured ? '••••••••••••••••' : 'sk-ant-...'}
-                    className="w-full px-3 py-2.5 border-2 border-gray-200 rounded-lg text-sm focus:outline-none focus:border-[#F54E00] font-mono"
+                    className="w-full px-3 py-2.5 border-2 border-gray-200 rounded-lg text-sm focus:outline-none focus:border-[#EA580C] font-mono"
                   />
                 </div>
                 <div>
@@ -274,7 +274,7 @@ export default function SettingsPage() {
                   <select
                     value={anthropicModel}
                     onChange={e => setAnthropicModel(e.target.value)}
-                    className="w-full px-3 py-2.5 border-2 border-gray-200 rounded-lg text-sm focus:outline-none focus:border-[#F54E00] bg-white"
+                    className="w-full px-3 py-2.5 border-2 border-gray-200 rounded-lg text-sm focus:outline-none focus:border-[#EA580C] bg-white"
                   >
                     {['claude-3-haiku-20240307', 'claude-3-sonnet-20240229', 'claude-3-opus-20240229'].map(m => (
                       <option key={m} value={m}>{m}</option>
@@ -292,21 +292,21 @@ export default function SettingsPage() {
             )}
 
             <button type="submit" disabled={saving}
-              className="w-full py-3 bg-[#F54E00] hover:bg-[#E24600] text-white font-bold rounded-xl transition-all hover:scale-[1.01] disabled:opacity-50">
+              className="w-full py-3 bg-[#EA580C] hover:bg-[#C2410C] text-white font-bold rounded-xl transition-all hover:scale-[1.01] disabled:opacity-50">
               {saving ? 'Saving…' : 'Save Provider Settings'}
             </button>
           </form>
         </div>
 
         {/* ── OpenRooms API Keys ── */}
-        <div className="bg-white border-2 border-black rounded-xl overflow-hidden">
+        <div className="bg-white border border-[#DDD5C8] rounded-xl overflow-hidden">
           <div className="px-6 py-4 border-b-2 border-gray-100 flex items-center justify-between">
             <div>
               <h2 className="text-lg font-bold text-[#111111]">API Keys</h2>
               <p className="text-sm text-gray-500 mt-0.5">Programmatic access to the OpenRooms control plane</p>
             </div>
             <button onClick={() => setShowKeyForm(true)}
-              className="px-4 py-2 bg-[#F54E00] hover:bg-[#E24600] text-white text-sm font-bold rounded-lg transition-all">
+              className="px-4 py-2 bg-[#EA580C] hover:bg-[#C2410C] text-white text-sm font-bold rounded-lg transition-all">
               + New Key
             </button>
           </div>
@@ -333,21 +333,21 @@ export default function SettingsPage() {
                 <div>
                   <label className="text-xs font-bold text-gray-600 mb-1 block">Key Name *</label>
                   <input required value={keyForm.name} onChange={e => setKeyForm({...keyForm, name: e.target.value})}
-                    placeholder="e.g. My App" className="w-full px-3 py-2 border-2 border-gray-200 rounded-lg text-sm focus:outline-none focus:border-[#F54E00]" />
+                    placeholder="e.g. My App" className="w-full px-3 py-2 border-2 border-gray-200 rounded-lg text-sm focus:outline-none focus:border-[#EA580C]" />
                 </div>
                 <div>
                   <label className="text-xs font-bold text-gray-600 mb-1 block">Scopes</label>
                   <input value={keyForm.scopes} onChange={e => setKeyForm({...keyForm, scopes: e.target.value})}
-                    className="w-full px-3 py-2 border-2 border-gray-200 rounded-lg text-sm focus:outline-none focus:border-[#F54E00]" />
+                    className="w-full px-3 py-2 border-2 border-gray-200 rounded-lg text-sm focus:outline-none focus:border-[#EA580C]" />
                 </div>
               </div>
               <div className="flex gap-3">
                 <button type="submit" disabled={creatingKey}
-                  className="flex-1 py-2 bg-[#F54E00] text-white text-sm font-bold rounded-lg disabled:opacity-50">
+                  className="flex-1 py-2 bg-[#EA580C] text-white text-sm font-bold rounded-lg disabled:opacity-50">
                   {creatingKey ? 'Creating…' : 'Generate Key'}
                 </button>
                 <button type="button" onClick={() => setShowKeyForm(false)}
-                  className="px-4 py-2 border-2 border-black text-sm font-bold rounded-lg hover:bg-gray-50">
+                  className="px-4 py-2 border border-[#DDD5C8] text-sm font-bold rounded-lg hover:bg-gray-50">
                   Cancel
                 </button>
               </div>

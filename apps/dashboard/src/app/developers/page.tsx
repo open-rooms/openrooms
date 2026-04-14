@@ -96,13 +96,13 @@ const dockItems = [
 export default function DevelopersPage() {
   return (
     <PageTransition>
-    <div className="min-h-screen bg-[#E8DCC8] pb-32">
+    <div className="min-h-screen bg-[#F9F5EF] pb-32">
 
       {/* Coloured accent bar */}
-      <div className="h-1 w-full bg-[#F54E00] animate-accent-expand" />
+      <div className="h-1 w-full bg-[#EA580C] animate-accent-expand" />
 
       {/* Hero */}
-      <div className="bg-[#F5F1E8] border-b-2 border-black">
+      <div className="bg-white border-b-2 border-black">
         <div className="max-w-[95%] 2xl:max-w-[1400px] mx-auto px-4 sm:px-6 md:px-10 py-10 md:py-16">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-8">
 
@@ -110,7 +110,7 @@ export default function DevelopersPage() {
             <div className="max-w-xl">
               <span
                 className="inline-block text-[10px] font-black tracking-widest uppercase px-3 py-1 rounded-full mb-4 animate-hero-enter"
-                style={{ background: '#F54E00', color: '#fff', animationDelay: '0s' }}
+                style={{ background: '#EA580C', color: '#fff', animationDelay: '0s' }}
               >
                 For Developers
               </span>
@@ -129,14 +129,14 @@ export default function DevelopersPage() {
               <div className="flex flex-wrap gap-3 animate-hero-enter" style={{ animationDelay: '0.22s' }}>
                 <Link
                   href="/control-plane"
-                  className="inline-flex items-center gap-2 px-5 py-3 bg-[#F54E00] hover:bg-[#E24600] text-white text-sm font-black rounded-xl transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
+                  className="inline-flex items-center gap-2 px-5 py-3 bg-[#EA580C] hover:bg-[#C2410C] text-white text-sm font-black rounded-xl transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
                 >
                   <span>Open Control Plane</span>
                   <ChevronRightIcon className="w-4 h-4" />
                 </Link>
                 <Link
                   href="/agents/create"
-                  className="inline-flex items-center gap-2 px-5 py-3 bg-white border-2 border-black hover:bg-gray-50 text-[#111111] text-sm font-black rounded-xl transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
+                  className="inline-flex items-center gap-2 px-5 py-3 bg-white border border-[#DDD5C8] hover:bg-gray-50 text-[#111111] text-sm font-black rounded-xl transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
                 >
                   Create an Agent
                 </Link>
@@ -172,7 +172,7 @@ export default function DevelopersPage() {
       <div className="max-w-[95%] 2xl:max-w-[1400px] mx-auto px-4 sm:px-6 md:px-10 py-10 md:py-14">
         <div className="mb-8 animate-section-enter" style={{ animationDelay: '0.1s' }}>
           <div className="flex items-center gap-3 mb-1">
-            <div className="w-1 h-6 rounded-full bg-[#F54E00]" />
+            <div className="w-1 h-6 rounded-full bg-[#EA580C]" />
             <h2 className="text-xl sm:text-2xl font-black text-[#111111]">Developer tools</h2>
           </div>
           <p className="text-sm text-gray-500 pl-4">Everything you need to build production agent systems.</p>
@@ -182,7 +182,7 @@ export default function DevelopersPage() {
 
       {/* API quick-start */}
       <div className="max-w-[95%] 2xl:max-w-[1400px] mx-auto px-4 sm:px-6 md:px-10 pb-4">
-        <div className="bg-[#111111] rounded-2xl border-2 border-black overflow-hidden">
+        <div className="bg-[#111111] rounded-2xl border border-[#DDD5C8] overflow-hidden">
           <div className="flex items-center gap-2 px-5 py-3 bg-black border-b border-gray-800">
             <div className="w-2.5 h-2.5 rounded-full bg-[#EF4444]" />
             <div className="w-2.5 h-2.5 rounded-full bg-[#F59E0B]" />
@@ -190,7 +190,7 @@ export default function DevelopersPage() {
             <span className="ml-2 text-[11px] text-gray-500 font-mono">openrooms — quick start</span>
           </div>
           <div className="p-5 sm:p-8">
-            <p className="text-[10px] font-black tracking-widest text-[#F54E00] uppercase mb-3">API Quick Start</p>
+            <p className="text-[10px] font-black tracking-widest text-[#EA580C] uppercase mb-3">API Quick Start</p>
             <h3 className="text-lg sm:text-xl font-black text-white mb-4">Trigger an agent run</h3>
             <pre className="text-xs sm:text-sm text-[#86EFAC] font-mono overflow-x-auto leading-relaxed bg-black/40 rounded-xl p-4 sm:p-5">
 {`POST /api/agents/:id/run
@@ -210,7 +210,7 @@ Content-Type: application/json
             <div className="mt-6 flex flex-wrap gap-3">
               <Link
                 href="/agents"
-                className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#F54E00] hover:bg-[#E24600] text-white text-sm font-black rounded-xl transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
+                className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#EA580C] hover:bg-[#C2410C] text-white text-sm font-black rounded-xl transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
               >
                 <span>Browse Agents</span>
                 <ChevronRightIcon className="w-4 h-4" />
@@ -227,7 +227,7 @@ Content-Type: application/json
       </div>
 
       {/* Path Dock */}
-      <PathDock items={dockItems} accentColor="#F54E00" />
+      <PathDock items={dockItems} accentColor="#EA580C" />
     </div>
     </PageTransition>
   )

@@ -264,6 +264,47 @@ export async function roomRoutes(
     }
   });
 
+  // Webhook Trigger — POST /api/rooms/:id/webhook
+  // External systems (APIs, blockchain event listeners, cron jobs) fire this
+  // to trigger room execution with arbitrary context passed as input.
+  fastify.post<{
+    Params: { id: string };
+    Body: Record<string, unknown>;
+  }>('/rooms/:id/webhook', async (request, reply) => {
+    const { id } = request.params;
+    const payload = request.body || {};
+
+    try {
+      const room = await container.roomRepository.findById(id);
+      if (!room) return reply.code(404).send({ error: 'Room not found' });
+
+      // Enqueue a workflow run with the webhook payload as context
+      const result = await container.workflowRunner.runWorkflow(room.workflowId, {
+        roomId: id,
+        context: { webhookPayload: payload, triggeredAt: new Date().toISOString(), trigger: 'webhook' },
+      });
+
+      // Publish event so SSE stream shows the trigger
+      await container.eventBus.emit('run.completed', result.runId, {
+        source: 'webhook',
+        roomId: id,
+        payload,
+      });
+
+      return reply.code(202).send({
+        runId: result.runId,
+        roomId: id,
+        status: 'queued',
+        message: 'Room execution triggered via webhook',
+      });
+    } catch (error) {
+      return reply.code(500).send({
+        error: 'Webhook trigger failed',
+        message: error instanceof Error ? error.message : String(error),
+      });
+    }
+  });
+
   // Delete Room
   fastify.delete<{
     Params: { id: string };

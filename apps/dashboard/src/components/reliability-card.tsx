@@ -32,7 +32,7 @@ export function ReliabilityCard({ className = '' }: ReliabilityCardProps) {
 
       <button
         onClick={() => setExpanded(!expanded)}
-        className="flex items-center gap-2 text-sm font-medium text-[#F54E00] hover:text-[#E24600] transition-colors"
+        className="flex items-center gap-2 text-sm font-medium text-[#EA580C] hover:text-[#C2410C] transition-colors"
       >
         {expanded ? '▼' : '▶'} How this works
       </button>

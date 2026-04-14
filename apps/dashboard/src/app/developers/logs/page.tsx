@@ -7,14 +7,14 @@ export default function Page() {
       path="developers"
       title="Logs"
       description="Detailed system logs including agent reasoning traces, tool call inputs and outputs, errors, retries, and infrastructure events. The full unfiltered stream of everything the platform did."
-      accentColor="#F54E00"
+      accentColor="#EA580C"
       textOnAccent="#fff"
       actionLabel="Open Logs"
       actionHref="/live-runs"
     >
       <div className="space-y-6">
         <StatGrid
-          accentColor="#F54E00"
+          accentColor="#EA580C"
           stats={[
             { label: 'Log Levels', value: '4', sub: 'DEBUG / INFO / WARN / ERROR' },
             { label: 'Retention', value: '30 days', sub: 'Searchable full-text' },
@@ -39,7 +39,7 @@ export default function Page() {
           body={`Each log line includes:\n\n• Timestamp (ms precision)\n• Log level (DEBUG / INFO / WARN / ERROR)\n• Room and run context\n• Agent or worker identity\n• Event type (tool_call, reasoning, system, error)\n• Structured payload (key-value pairs)\n\nLogs are searchable by any field. Use the filter bar to narrow by room, agent, log level, or time range.`}
         />
         <ActionRow
-          accentColor="#F54E00"
+          accentColor="#EA580C"
           textOnAccent="#fff"
           actions={[
             { label: 'Open Logs', href: '/live-runs', primary: true },

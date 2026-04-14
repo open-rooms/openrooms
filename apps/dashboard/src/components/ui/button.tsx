@@ -8,7 +8,7 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
 }
 
 const variantStyles = {
-  default: 'bg-[#F54E00] text-white hover:bg-[#E24600] active:bg-[#D03D00]',
+  default: 'bg-[#EA580C] text-white hover:bg-[#C2410C] active:bg-[#D03D00]',
   secondary: 'bg-surface-active text-text-primary hover:bg-[#F1EBE6]',
   outline: 'border border-[#DED8D2] bg-transparent hover:bg-[#FBF7F2] text-text-primary',
   ghost: 'hover:bg-[#FBF7F2] hover:text-text-primary text-text-secondary',
@@ -35,7 +35,7 @@ export function Button({
     return React.cloneElement(children as React.ReactElement<any>, {
       className: cn(
         'inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors duration-120 ease-in-out',
-        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F54E00] focus-visible:ring-offset-2',
+        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#EA580C] focus-visible:ring-offset-2',
         'disabled:pointer-events-none disabled:opacity-50',
         variantStyles[variant],
         sizeStyles[size],
@@ -49,7 +49,7 @@ export function Button({
     <button
       className={cn(
         'inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors duration-120 ease-in-out',
-        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F54E00] focus-visible:ring-offset-2',
+        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#EA580C] focus-visible:ring-offset-2',
         'disabled:pointer-events-none disabled:opacity-50',
         variantStyles[variant],
         sizeStyles[size],

@@ -22,7 +22,7 @@ const LAYERS = [
   {
     id: 'orchestration',
     label: 'ORCHESTRATION LAYER',
-    color: '#F54E00',
+    color: '#EA580C',
     textOnColor: '#fff',
     nodes: [
       { title: 'Control Plane', sub: 'System overview', href: '/developers/control-plane' },
@@ -61,7 +61,7 @@ const LAYERS = [
 
 const PATHS = [
   { label: 'Clients', href: '/clients', color: '#FDA4AF', textOn: '#111' },
-  { label: 'Developers', href: '/developers', color: '#F54E00', textOn: '#fff' },
+  { label: 'Developers', href: '/developers', color: '#EA580C', textOn: '#fff' },
   { label: 'Enterprise', href: '/enterprise', color: '#111827', textOn: '#fff' },
 ]
 
@@ -209,7 +209,7 @@ export default function SystemMapPage() {
               animate={{ x: ['-100%', '200%'] }}
               transition={{ repeat: Infinity, duration: 3.5, ease: 'linear', repeatDelay: 1 }}
               className="absolute top-0 left-0 w-1/3 h-px"
-              style={{ background: 'linear-gradient(90deg, transparent, #F54E00, transparent)' }}
+              style={{ background: 'linear-gradient(90deg, transparent, #EA580C, transparent)' }}
             />
             <p className="text-[10px] font-black tracking-widest uppercase text-gray-600 mb-3">The operating system for autonomous AI</p>
             <h2 className="text-xl sm:text-2xl font-black text-white mb-4 max-w-2xl">
@@ -221,7 +221,7 @@ export default function SystemMapPage() {
             <div className="flex flex-wrap gap-3">
               <Link
                 href="/developers/control-plane"
-                className="px-5 py-2.5 rounded-xl text-sm font-black bg-[#F54E00] text-white hover:scale-[1.02] active:scale-[0.98] transition-all"
+                className="px-5 py-2.5 rounded-xl text-sm font-black bg-[#EA580C] text-white hover:scale-[1.02] active:scale-[0.98] transition-all"
               >
                 Explore the Control Plane
               </Link>

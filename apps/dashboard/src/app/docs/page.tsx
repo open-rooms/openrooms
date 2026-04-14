@@ -9,7 +9,7 @@ const sections = [
   {
     id: 'control-plane',
     badge: 'Core Concept',
-    badgeColor: '#F54E00',
+    badgeColor: '#EA580C',
     title: 'The Control Plane',
     description: 'OpenRooms is not an agent tool. It is infrastructure for autonomous systems.',
     content: [
@@ -71,7 +71,7 @@ Clients do not write code. They configure agents, define goals, connect integrat
   {
     id: 'developer-path',
     badge: 'Developer Path',
-    badgeColor: '#F54E00',
+    badgeColor: '#EA580C',
     title: 'Developer Path',
     description: 'For engineers building, deploying, and operating agent infrastructure.',
     content: [
@@ -140,9 +140,9 @@ Every operation is policy-enforced, access-isolated, and fully auditable.`,
 export default function DocsPage() {
   return (
     <PageTransition>
-      <div className="min-h-screen bg-[#E8DCC8] pb-24">
+      <div className="min-h-screen bg-[#F9F5EF] pb-24">
         {/* Header */}
-        <div className="bg-[#F5F1E8] border-b-2 border-black">
+        <div className="bg-white border-b-2 border-black">
           <div className="max-w-[95%] 2xl:max-w-[1400px] mx-auto px-4 sm:px-6 md:px-10 py-10 md:py-14">
             <span className="inline-block text-[10px] font-black tracking-widest uppercase px-3 py-1 bg-black text-white rounded-full mb-4">
               Platform Docs
@@ -165,7 +165,7 @@ export default function DocsPage() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: '-40px' }}
               transition={{ duration: 0.4, delay: si * 0.05, ease: [0.16, 1, 0.3, 1] }}
-              className="bg-[#F5F1E8] border-2 border-black rounded-2xl overflow-hidden"
+              className="bg-white border border-[#DDD5C8] rounded-2xl overflow-hidden"
             >
               {/* Section header */}
               <div className="px-6 sm:px-8 py-5 border-b border-[#D4C4A8] flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
@@ -184,7 +184,7 @@ export default function DocsPage() {
                     <Link
                       key={link.href}
                       href={link.href}
-                      className="inline-flex items-center gap-1.5 px-4 py-2 bg-white border border-[#D4C4A8] hover:border-[#F54E00] text-xs font-black text-[#111111] rounded-lg transition-colors duration-150 whitespace-nowrap"
+                      className="inline-flex items-center gap-1.5 px-4 py-2 bg-white border border-[#D4C4A8] hover:border-[#EA580C] text-xs font-black text-[#111111] rounded-lg transition-colors duration-150 whitespace-nowrap"
                     >
                       {link.label}
                       <ChevronRightIcon className="w-3 h-3" />
@@ -218,7 +218,7 @@ export default function DocsPage() {
             <h3 className="text-xl font-black text-white mb-2">Ready to explore the platform?</h3>
             <p className="text-sm text-gray-400 mb-6">See the system map for a visual overview of how all components connect.</p>
             <div className="flex flex-wrap justify-center gap-3">
-              <Link href="/system" className="inline-flex items-center gap-2 px-6 py-3 bg-[#F54E00] hover:bg-[#E24600] text-white text-sm font-black rounded-xl transition-all hover:scale-[1.02]">
+              <Link href="/system" className="inline-flex items-center gap-2 px-6 py-3 bg-[#EA580C] hover:bg-[#C2410C] text-white text-sm font-black rounded-xl transition-all hover:scale-[1.02]">
                 <span>View System Map</span>
                 <ChevronRightIcon className="w-4 h-4" />
               </Link>

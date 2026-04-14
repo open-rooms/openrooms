@@ -40,7 +40,7 @@ export function StatGrid({
   accentColor: string
   variant?: 'cream' | 'light'
 }) {
-  const bg = variant === 'light' ? 'bg-white border-gray-200' : 'bg-[#F5F1E8] border-[#D4C4A8]'
+  const bg = variant === 'light' ? 'bg-white border-gray-200' : 'bg-white border-[#D4C4A8]'
   return (
     <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
       {stats.map((s) => (
@@ -81,7 +81,7 @@ export function InfoCard({
   body,
   variant = 'cream',
 }: InfoBlock & { variant?: 'cream' | 'light' }) {
-  const bg = variant === 'light' ? 'bg-white border-gray-200' : 'bg-[#F5F1E8] border-[#D4C4A8]'
+  const bg = variant === 'light' ? 'bg-white border-gray-200' : 'bg-white border-[#D4C4A8]'
   return (
     <div className={`${bg} border rounded-xl p-6`}>
       <p className="text-xs font-black text-gray-400 uppercase tracking-widest mb-3">{heading}</p>
@@ -100,7 +100,7 @@ export function StepList({
   accentColor: string
   variant?: 'cream' | 'light'
 }) {
-  const bg = variant === 'light' ? 'bg-white border-gray-200' : 'bg-[#F5F1E8] border-[#D4C4A8]'
+  const bg = variant === 'light' ? 'bg-white border-gray-200' : 'bg-white border-[#D4C4A8]'
   return (
     <div className="space-y-3">
       {steps.map((s, i) => (
@@ -133,7 +133,7 @@ export function CapabilityGrid({
   accentColor: string
   variant?: 'cream' | 'light'
 }) {
-  const bg = variant === 'light' ? 'bg-white border-gray-200' : 'bg-[#F5F1E8] border-[#D4C4A8]'
+  const bg = variant === 'light' ? 'bg-white border-gray-200' : 'bg-white border-[#D4C4A8]'
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
       {items.map((item) => (

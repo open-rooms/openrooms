@@ -39,9 +39,9 @@ export function AuthGate({ feature, children }: AuthGateProps) {
             initial={{ opacity: 0, scale: 0.95, y: 16 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             transition={{ duration: 0.3, ease: 'easeOut' }}
-            className="bg-white rounded-2xl border-2 border-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] max-w-sm w-full p-8 text-center"
+            className="bg-white rounded-2xl border border-[#DDD5C8] shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] max-w-sm w-full p-8 text-center"
           >
-            <div className="w-12 h-12 bg-[#F54E00] rounded-xl flex items-center justify-center mx-auto mb-5">
+            <div className="w-12 h-12 bg-[#EA580C] rounded-xl flex items-center justify-center mx-auto mb-5">
               <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
               </svg>
@@ -53,13 +53,13 @@ export function AuthGate({ feature, children }: AuthGateProps) {
             <div className="flex flex-col gap-3">
               <Link
                 href="/settings"
-                className="w-full inline-flex items-center justify-center px-5 py-3 bg-[#F54E00] hover:bg-[#E24600] text-white text-sm font-black rounded-xl transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
+                className="w-full inline-flex items-center justify-center px-5 py-3 bg-[#EA580C] hover:bg-[#C2410C] text-white text-sm font-black rounded-xl transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
               >
                 Sign In
               </Link>
               <Link
                 href="/settings"
-                className="w-full inline-flex items-center justify-center px-5 py-3 bg-white border-2 border-black hover:bg-gray-50 text-gray-900 text-sm font-black rounded-xl transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
+                className="w-full inline-flex items-center justify-center px-5 py-3 bg-white border border-[#DDD5C8] hover:bg-gray-50 text-gray-900 text-sm font-black rounded-xl transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
               >
                 Create Free Account
               </Link>

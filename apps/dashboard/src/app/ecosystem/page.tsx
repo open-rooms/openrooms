@@ -53,7 +53,7 @@ const paths = [
     id: 'developers',
     label: 'Developer Infrastructure',
     tagline: 'The control plane for building production agent systems.',
-    accentColor: '#F54E00',
+    accentColor: '#EA580C',
     textOnAccent: '#fff',
     cta: 'Start Developer Path',
     href: '/developers',
@@ -205,10 +205,10 @@ export default function EcosystemPage() {
 
   return (
     <PageTransition>
-      <div className="min-h-screen bg-[#E8DCC8] pb-24 overflow-x-hidden">
+      <div className="min-h-screen bg-[#F9F5EF] pb-24 overflow-x-hidden">
 
         {/* ── Header ── */}
-        <div className="bg-[#F5F1E8] border-b-2 border-black relative overflow-hidden">
+        <div className="bg-white border-b-2 border-black relative overflow-hidden">
           {/* Subtle animated grid lines in background */}
           <motion.div
             initial={{ opacity: 0 }}
@@ -257,10 +257,10 @@ export default function EcosystemPage() {
               transition={{ delay: 0.85, duration: 0.4, ease: 'easeOut' }}
               className="flex flex-wrap gap-3"
             >
-              <Link href="/home" className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#F54E00] hover:bg-[#E24600] text-white text-sm font-black rounded-xl transition-all duration-200 hover:scale-[1.02]">
+              <Link href="/home" className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#EA580C] hover:bg-[#C2410C] text-white text-sm font-black rounded-xl transition-all duration-200 hover:scale-[1.02]">
                 Back to Home
               </Link>
-              <Link href="/developers/control-plane" className="inline-flex items-center gap-2 px-5 py-2.5 bg-white border-2 border-black hover:bg-gray-50 text-[#111111] text-sm font-black rounded-xl transition-all duration-200 hover:scale-[1.02]">
+              <Link href="/developers/control-plane" className="inline-flex items-center gap-2 px-5 py-2.5 bg-white border border-[#DDD5C8] hover:bg-gray-50 text-[#111111] text-sm font-black rounded-xl transition-all duration-200 hover:scale-[1.02]">
                 Open Control Plane
                 <ChevronRightIcon className="w-4 h-4" />
               </Link>
@@ -284,7 +284,7 @@ export default function EcosystemPage() {
                 { val: '1', label: 'Control Plane' },
               ].map((s) => (
                 <div key={s.label} className="flex-shrink-0 text-center">
-                  <div className="text-lg sm:text-xl font-black text-[#F54E00]">{s.val}</div>
+                  <div className="text-lg sm:text-xl font-black text-[#EA580C]">{s.val}</div>
                   <div className="text-[10px] text-gray-500 whitespace-nowrap">{s.label}</div>
                 </div>
               ))}
@@ -372,7 +372,7 @@ export default function EcosystemPage() {
             initial={{ x: '-100%' }}
             animate={{ x: '200%' }}
             transition={{ duration: 4, repeat: Infinity, ease: 'linear', repeatDelay: 3 }}
-            className="absolute top-0 left-0 w-1/3 h-px bg-gradient-to-r from-transparent via-[#F54E00]/60 to-transparent pointer-events-none"
+            className="absolute top-0 left-0 w-1/3 h-px bg-gradient-to-r from-transparent via-[#EA580C]/60 to-transparent pointer-events-none"
           />
 
           <div className="max-w-[95%] 2xl:max-w-[1400px] mx-auto px-4 sm:px-6 md:px-10 py-16 text-center relative z-10">
@@ -411,7 +411,7 @@ export default function EcosystemPage() {
               transition={{ delay: 0.45 }}
               className="flex flex-wrap justify-center gap-3"
             >
-              <Link href="/developers/control-plane" className="inline-flex items-center gap-2 px-6 py-3 bg-[#F54E00] hover:bg-[#E24600] text-white text-sm font-black rounded-xl transition-all duration-200 hover:scale-[1.02]">
+              <Link href="/developers/control-plane" className="inline-flex items-center gap-2 px-6 py-3 bg-[#EA580C] hover:bg-[#C2410C] text-white text-sm font-black rounded-xl transition-all duration-200 hover:scale-[1.02]">
                 <span>Open Control Plane</span>
                 <ChevronRightIcon className="w-4 h-4" />
               </Link>

@@ -7,14 +7,14 @@ export default function Page() {
       path="developers"
       title="Workflows"
       description="Infrastructure-level workflow definitions and orchestration. Define steps, data contracts between agents, branching logic, and error handling policies directly via the developer interface."
-      accentColor="#F54E00"
+      accentColor="#EA580C"
       textOnAccent="#fff"
       actionLabel="Define Workflow"
       actionHref="/workflows"
     >
       <div className="space-y-6">
         <StatGrid
-          accentColor="#F54E00"
+          accentColor="#EA580C"
           stats={[
             { label: 'Step Types', value: '4', sub: 'Agent, Tool, Transform, Branch' },
             { label: 'Concurrency', value: 'Parallel', sub: 'Fan-out / fan-in patterns' },
@@ -45,7 +45,7 @@ steps:
     output_to: knowledge.reports`}
         />
         <CapabilityGrid
-          accentColor="#F54E00"
+          accentColor="#EA580C"
           items={[
             { title: 'DAG Execution', desc: 'Steps are executed as a directed acyclic graph. Parallel steps run concurrently.' },
             { title: 'Data Contracts', desc: 'Each step output is typed and validated before passing to the next step.' },
@@ -56,7 +56,7 @@ steps:
           ]}
         />
         <ActionRow
-          accentColor="#F54E00"
+          accentColor="#EA580C"
           textOnAccent="#fff"
           actions={[
             { label: 'Define Workflow', href: '/workflows', primary: true },

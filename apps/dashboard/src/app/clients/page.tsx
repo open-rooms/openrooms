@@ -96,13 +96,13 @@ const dockItems = [
 export default function ClientsPage() {
   return (
     <PageTransition>
-    <div className="min-h-screen bg-[#E8DCC8] pb-32">
+    <div className="min-h-screen bg-[#F9F5EF] pb-32">
 
       {/* Coloured accent bar */}
       <div className="h-1 w-full bg-[#FDA4AF] animate-accent-expand" />
 
       {/* Hero */}
-      <div className="bg-[#F5F1E8] border-b-2 border-black">
+      <div className="bg-white border-b-2 border-black">
         <div className="max-w-[95%] 2xl:max-w-[1400px] mx-auto px-4 sm:px-6 md:px-10 py-10 md:py-16">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-8">
 
@@ -137,7 +137,7 @@ export default function ClientsPage() {
                 </Link>
                 <Link
                   href="/agents"
-                  className="inline-flex items-center gap-2 px-5 py-3 bg-white border-2 border-black hover:bg-gray-50 text-[#111111] text-sm font-black rounded-xl transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
+                  className="inline-flex items-center gap-2 px-5 py-3 bg-white border border-[#DDD5C8] hover:bg-gray-50 text-[#111111] text-sm font-black rounded-xl transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
                 >
                   View Agents
                 </Link>
@@ -184,7 +184,7 @@ export default function ClientsPage() {
       {/* Bottom CTA */}
       <div className="max-w-[95%] 2xl:max-w-[1400px] mx-auto px-4 sm:px-6 md:px-10 pb-4">
         <div
-          className="rounded-2xl border-2 border-black p-6 sm:p-8 md:p-10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6"
+          className="rounded-2xl border border-[#DDD5C8] p-6 sm:p-8 md:p-10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6"
           style={{ background: '#FDA4AF' }}
         >
           <div>

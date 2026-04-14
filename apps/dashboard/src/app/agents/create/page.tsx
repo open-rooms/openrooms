@@ -1,9 +1,9 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { Suspense, useState, useEffect } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import { AgentsIllustrationIcon } from '@/components/icons';
+import { AgentIcon } from '@/components/icons/system';
 import { createAgent, getTools, runAgent } from '@/lib/api';
 
 interface Tool { id: string; name: string; description: string; category: string; }
@@ -18,14 +18,17 @@ const GOAL_TEMPLATES = [
   { label: 'Custom', goal: '' },
 ];
 
-export default function CreateAgentPage() {
+function CreateAgentPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const presetRoomId = searchParams.get('roomId') || '';
   const [tools, setTools] = useState<Tool[]>([]);
   const [loadingTools, setLoadingTools] = useState(true);
   const [creating, setCreating] = useState(false);
   const [selectedTools, setSelectedTools] = useState<string[]>([]);
   const [goalTemplate, setGoalTemplate] = useState(0);
   const [runAfterCreate, setRunAfterCreate] = useState(true);
+  const [roomId, setRoomId] = useState(presetRoomId);
 
   const [formData, setFormData] = useState({
     name: '',
@@ -73,6 +76,7 @@ export default function CreateAgentPage() {
         description: formData.description || undefined,
         goal: formData.goal,
         allowedTools: selectedTools,
+        roomId: roomId || undefined,
         policyConfig: {
           provider: formData.provider,
           model: formData.model,
@@ -85,13 +89,13 @@ export default function CreateAgentPage() {
       if (runAfterCreate) {
         // Create and immediately run
         try {
-          const run = await runAgent(agent.id, { maxIterations: parseInt(formData.maxLoopIterations) });
+          const run = await runAgent(agent.id, { maxIterations: parseInt(formData.maxLoopIterations), roomId: roomId || undefined });
           router.push(`/live-runs?highlight=${run.runId}`);
         } catch {
-          router.push(`/agents/${agent.id}`);
+          router.push(presetRoomId ? `/rooms/${presetRoomId}` : `/agents/${agent.id}`);
         }
       } else {
-        router.push(`/agents/${agent.id}`);
+        router.push(presetRoomId ? `/rooms/${presetRoomId}` : `/agents/${agent.id}`);
       }
     } catch (error: any) {
       alert(`Failed to create agent: ${error.message || 'Unknown error'}`);
@@ -101,16 +105,16 @@ export default function CreateAgentPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#E8DCC8] p-4 sm:p-6 md:p-8">
+    <div className="min-h-screen bg-[#F9F5EF] p-4 sm:p-6 md:p-8">
       <div className="max-w-3xl mx-auto">
         {/* Breadcrumb */}
-        <Link href="/agents" className="text-[#F54E00] hover:underline font-semibold text-sm mb-6 block">
+        <Link href="/agents" className="text-[#EA580C] hover:underline font-semibold text-sm mb-6 block">
           ← Back to agents
         </Link>
 
         {/* Header */}
         <div className="flex items-center gap-3 mb-8">
-          <AgentsIllustrationIcon className="w-10 h-10" />
+          <AgentIcon className="w-10 h-10" />
           <div>
             <h1 className="text-3xl font-bold text-[#111111]">Create Agent</h1>
             <p className="text-gray-600 text-sm">Define an autonomous agent with a goal, tools, and a model</p>
@@ -120,9 +124,9 @@ export default function CreateAgentPage() {
         <form onSubmit={handleSubmit} className="space-y-6">
 
           {/* Step 1 — Name & Goal */}
-          <div className="bg-white border-2 border-black rounded-xl p-6">
+          <div className="bg-white border border-[#DDD5C8] rounded-xl p-6">
             <h3 className="text-base font-bold text-[#111111] mb-4 flex items-center gap-2">
-              <span className="w-6 h-6 bg-[#F54E00] text-white rounded-full flex items-center justify-center text-xs font-bold">1</span>
+              <span className="w-6 h-6 bg-[#EA580C] text-white rounded-full flex items-center justify-center text-xs font-bold">1</span>
               Identity & Goal
             </h3>
             <div className="space-y-4">
@@ -130,7 +134,7 @@ export default function CreateAgentPage() {
                 <label className="text-xs font-bold text-gray-600 mb-1.5 block">Agent Name *</label>
                 <input required value={formData.name} onChange={e => setFormData({ ...formData, name: e.target.value })}
                   placeholder="e.g. Crypto Scout, Tech Researcher, Data Analyst"
-                  className="w-full px-4 py-2.5 border-2 border-gray-200 rounded-lg text-sm focus:outline-none focus:border-[#F54E00]" />
+                  className="w-full px-4 py-2.5 border-2 border-gray-200 rounded-lg text-sm focus:outline-none focus:border-[#EA580C]" />
               </div>
 
               <div>
@@ -139,7 +143,7 @@ export default function CreateAgentPage() {
                   {GOAL_TEMPLATES.map((t, i) => (
                     <button key={t.label} type="button" onClick={() => applyTemplate(i)}
                       className={`px-3 py-1.5 text-xs font-bold rounded-lg border-2 transition-all ${
-                        goalTemplate === i ? 'bg-[#F54E00] text-white border-[#F54E00]' : 'bg-white border-gray-200 hover:border-gray-400'
+                        goalTemplate === i ? 'bg-[#EA580C] text-white border-[#EA580C]' : 'bg-white border-gray-200 hover:border-gray-400'
                       }`}>
                       {t.label}
                     </button>
@@ -149,7 +153,7 @@ export default function CreateAgentPage() {
                   onFocus={() => setGoalTemplate(GOAL_TEMPLATES.length - 1)}
                   rows={4}
                   placeholder="Describe exactly what this agent should do — be specific about the task, expected output, and any constraints."
-                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg text-sm focus:outline-none focus:border-[#F54E00] resize-none" />
+                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg text-sm focus:outline-none focus:border-[#EA580C] resize-none" />
                 <p className="text-xs text-gray-400 mt-1">The more specific the goal, the better the agent performs.</p>
               </div>
 
@@ -157,24 +161,37 @@ export default function CreateAgentPage() {
                 <label className="text-xs font-bold text-gray-600 mb-1.5 block">Description (optional)</label>
                 <input value={formData.description} onChange={e => setFormData({ ...formData, description: e.target.value })}
                   placeholder="Short summary for the agents list"
-                  className="w-full px-4 py-2.5 border-2 border-gray-200 rounded-lg text-sm focus:outline-none focus:border-[#F54E00]" />
+                  className="w-full px-4 py-2.5 border-2 border-gray-200 rounded-lg text-sm focus:outline-none focus:border-[#EA580C]" />
+              </div>
+
+              <div>
+                <label className="text-xs font-bold text-gray-600 mb-1.5 block">
+                  Assign to Room <span className="font-normal text-gray-400">(optional)</span>
+                </label>
+                <input value={roomId} onChange={e => setRoomId(e.target.value)}
+                  placeholder="Room ID — paste from the Rooms page"
+                  className="w-full px-4 py-2.5 border-2 border-gray-200 rounded-lg text-sm font-mono focus:outline-none focus:border-[#EA580C]" />
+                {presetRoomId && (
+                  <p className="text-xs text-emerald-600 mt-1">✓ Pre-assigned to room <code className="bg-emerald-50 px-1 rounded">{presetRoomId.slice(0, 16)}…</code></p>
+                )}
+                <p className="text-xs text-gray-400 mt-1">Agents in the same room share memory and can see each other's output.</p>
               </div>
             </div>
           </div>
 
           {/* Step 2 — Tools */}
-          <div className="bg-white border-2 border-black rounded-xl p-6">
+          <div className="bg-white border border-[#DDD5C8] rounded-xl p-6">
             <h3 className="text-base font-bold text-[#111111] mb-1 flex items-center gap-2">
-              <span className="w-6 h-6 bg-[#F54E00] text-white rounded-full flex items-center justify-center text-xs font-bold">2</span>
+              <span className="w-6 h-6 bg-[#EA580C] text-white rounded-full flex items-center justify-center text-xs font-bold">2</span>
               Tools
               <span className="text-xs text-gray-400 font-normal">({selectedTools.length} selected)</span>
             </h3>
             <p className="text-xs text-gray-500 mb-4 ml-8">Pick the tools this agent can call. The AI decides which to use based on the goal.</p>
 
             {loadingTools ? (
-              <div className="text-center py-6"><div className="inline-block animate-spin rounded-full h-6 w-6 border-b-2 border-[#F54E00]" /></div>
+              <div className="text-center py-6"><div className="inline-block animate-spin rounded-full h-6 w-6 border-b-2 border-[#EA580C]" /></div>
             ) : tools.length === 0 ? (
-              <p className="text-sm text-gray-500 text-center py-4">No tools registered. <Link href="/tools" className="text-[#F54E00] font-bold hover:underline">Add tools →</Link></p>
+              <p className="text-sm text-gray-500 text-center py-4">No tools registered. <Link href="/tools" className="text-[#EA580C] font-bold hover:underline">Add tools →</Link></p>
             ) : (
               <div className="grid sm:grid-cols-2 gap-2">
                 {tools.map(tool => {
@@ -182,10 +199,10 @@ export default function CreateAgentPage() {
                   return (
                     <button key={tool.id} type="button" onClick={() => toggleTool(tool.name)}
                       className={`flex items-start gap-3 p-3 rounded-xl border-2 text-left transition-all ${
-                        selected ? 'border-[#F54E00] bg-orange-50' : 'border-gray-200 hover:border-gray-400'
+                        selected ? 'border-[#EA580C] bg-orange-50' : 'border-gray-200 hover:border-gray-400'
                       }`}>
                       <div className={`w-4 h-4 rounded border-2 mt-0.5 flex-shrink-0 flex items-center justify-center ${
-                        selected ? 'bg-[#F54E00] border-[#F54E00]' : 'border-gray-400'
+                        selected ? 'bg-[#EA580C] border-[#EA580C]' : 'border-gray-400'
                       }`}>
                         {selected && <svg className="w-2.5 h-2.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" /></svg>}
                       </div>
@@ -204,23 +221,23 @@ export default function CreateAgentPage() {
           </div>
 
           {/* Step 3 — Model & Limits */}
-          <div className="bg-white border-2 border-black rounded-xl p-6">
+          <div className="bg-white border border-[#DDD5C8] rounded-xl p-6">
             <h3 className="text-base font-bold text-[#111111] mb-4 flex items-center gap-2">
-              <span className="w-6 h-6 bg-[#F54E00] text-white rounded-full flex items-center justify-center text-xs font-bold">3</span>
+              <span className="w-6 h-6 bg-[#EA580C] text-white rounded-full flex items-center justify-center text-xs font-bold">3</span>
               Model & Limits
             </h3>
             <div className="grid sm:grid-cols-2 gap-4">
               <div>
                 <label className="text-xs font-bold text-gray-600 mb-1.5 block">Provider</label>
                 <select value={formData.provider} onChange={e => setFormData({ ...formData, provider: e.target.value })}
-                  className="w-full px-3 py-2.5 border-2 border-gray-200 rounded-lg text-sm bg-white focus:outline-none focus:border-[#F54E00]">
+                  className="w-full px-3 py-2.5 border-2 border-gray-200 rounded-lg text-sm bg-white focus:outline-none focus:border-[#EA580C]">
                   {PROVIDERS.map(p => <option key={p} value={p}>{p === 'simulation' ? 'Simulation (no API key)' : p}</option>)}
                 </select>
               </div>
               <div>
                 <label className="text-xs font-bold text-gray-600 mb-1.5 block">Model</label>
                 <select value={formData.model} onChange={e => setFormData({ ...formData, model: e.target.value })}
-                  className="w-full px-3 py-2.5 border-2 border-gray-200 rounded-lg text-sm bg-white focus:outline-none focus:border-[#F54E00]">
+                  className="w-full px-3 py-2.5 border-2 border-gray-200 rounded-lg text-sm bg-white focus:outline-none focus:border-[#EA580C]">
                   {MODELS.map(m => <option key={m} value={m}>{m}</option>)}
                 </select>
               </div>
@@ -228,23 +245,23 @@ export default function CreateAgentPage() {
                 <label className="text-xs font-bold text-gray-600 mb-1.5 block">Max Iterations</label>
                 <input type="number" min="1" max="20" value={formData.maxLoopIterations}
                   onChange={e => setFormData({ ...formData, maxLoopIterations: e.target.value })}
-                  className="w-full px-3 py-2.5 border-2 border-gray-200 rounded-lg text-sm focus:outline-none focus:border-[#F54E00]" />
+                  className="w-full px-3 py-2.5 border-2 border-gray-200 rounded-lg text-sm focus:outline-none focus:border-[#EA580C]" />
               </div>
               <div>
                 <label className="text-xs font-bold text-gray-600 mb-1.5 block">Max Cost ($)</label>
                 <input type="number" min="0" step="0.01" value={formData.maxCostPerExecution}
                   onChange={e => setFormData({ ...formData, maxCostPerExecution: e.target.value })}
-                  className="w-full px-3 py-2.5 border-2 border-gray-200 rounded-lg text-sm focus:outline-none focus:border-[#F54E00]" />
+                  className="w-full px-3 py-2.5 border-2 border-gray-200 rounded-lg text-sm focus:outline-none focus:border-[#EA580C]" />
               </div>
             </div>
           </div>
 
           {/* Submit */}
-          <div className="bg-white border-2 border-black rounded-xl p-6">
+          <div className="bg-white border border-[#DDD5C8] rounded-xl p-6">
             <label className="flex items-center gap-3 mb-5 cursor-pointer">
               <div
                 onClick={() => setRunAfterCreate(!runAfterCreate)}
-                className={`w-10 h-6 rounded-full transition-colors relative ${runAfterCreate ? 'bg-[#F54E00]' : 'bg-gray-200'}`}>
+                className={`w-10 h-6 rounded-full transition-colors relative ${runAfterCreate ? 'bg-[#EA580C]' : 'bg-gray-200'}`}>
                 <div className={`absolute top-1 w-4 h-4 bg-white rounded-full shadow transition-transform ${runAfterCreate ? 'translate-x-5' : 'translate-x-1'}`} />
               </div>
               <div>
@@ -255,11 +272,11 @@ export default function CreateAgentPage() {
 
             <div className="flex gap-3">
               <button type="submit" disabled={creating || selectedTools.length === 0}
-                className="flex-1 py-3 bg-[#F54E00] hover:bg-[#E24600] text-white font-bold rounded-xl transition-all hover:scale-[1.01] disabled:opacity-50 disabled:cursor-not-allowed text-sm">
+                className="flex-1 py-3 bg-[#EA580C] hover:bg-[#C2410C] text-white font-bold rounded-xl transition-all hover:scale-[1.01] disabled:opacity-50 disabled:cursor-not-allowed text-sm">
                 {creating ? 'Creating…' : runAfterCreate ? '🚀 Create & Run Agent' : 'Create Agent'}
               </button>
               <Link href="/agents"
-                className="px-6 py-3 bg-white border-2 border-black text-[#111111] font-bold rounded-xl hover:bg-gray-50 transition-all text-sm text-center">
+                className="px-6 py-3 bg-white border border-[#DDD5C8] text-[#111111] font-bold rounded-xl hover:bg-gray-50 transition-all text-sm text-center">
                 Cancel
               </Link>
             </div>
@@ -269,4 +286,12 @@ export default function CreateAgentPage() {
       </div>
     </div>
   );
+}
+
+export default function CreateAgentPageWrapper() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-[#F9F5EF] flex items-center justify-center"><div className="w-8 h-8 border-2 border-[#D4C4A8] border-t-[#EA580C] rounded-full animate-spin" /></div>}>
+      <CreateAgentPage />
+    </Suspense>
+  )
 }

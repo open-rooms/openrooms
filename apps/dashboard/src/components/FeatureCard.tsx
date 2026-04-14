@@ -14,9 +14,9 @@ interface FeatureCardProps {
 export function FeatureCard({ icon: Icon, title, description, href, variant = 'cream' }: FeatureCardProps) {
   const base = variant === 'light'
     ? 'bg-white border border-gray-200 hover:border-gray-400 hover:shadow-lg'
-    : 'bg-[#F5F1E8] border border-[#D4C4A8] hover:border-[#F54E00] hover:shadow-[0_4px_20px_rgba(0,0,0,0.1)]'
+    : 'bg-white border border-[#D4C4A8] hover:border-[#EA580C] hover:shadow-[0_4px_20px_rgba(0,0,0,0.1)]'
 
-  const accentLine = variant === 'light' ? 'bg-gray-900' : 'bg-[#F54E00]'
+  const accentLine = variant === 'light' ? 'bg-gray-900' : 'bg-[#EA580C]'
 
   const inner = (
     <motion.div

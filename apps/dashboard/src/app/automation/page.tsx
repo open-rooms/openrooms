@@ -82,12 +82,12 @@ export default function AutomationPage() {
   ]
 
   return (
-    <div className="bg-[#E8DCC8] min-h-screen">
+    <div className="bg-[#F9F5EF] min-h-screen">
       <Header 
         title="Automation" 
         subtitle={`${triggers.length} active triggers`}
         actions={
-          <Link href="/docs#automation" className="inline-flex items-center gap-2 px-4 py-2 bg-[#F54E00] hover:bg-[#E24600] text-white text-sm font-bold rounded-lg transition-all duration-200">
+          <Link href="/docs#automation" className="inline-flex items-center gap-2 px-4 py-2 bg-[#EA580C] hover:bg-[#C2410C] text-white text-sm font-bold rounded-lg transition-all duration-200">
             <PlusIcon className="w-4 h-4" />
             Automation Spec
           </Link>
@@ -136,7 +136,7 @@ export default function AutomationPage() {
                       <CardDescription className="text-sm">{template.description}</CardDescription>
                     </CardHeader>
                     <CardContent>
-                      <Link href="/docs#automation" className="block w-full text-center text-xs px-3 py-2 bg-[#F54E00] text-white rounded font-bold hover:bg-[#E24600] transition-colors">
+                      <Link href="/docs#automation" className="block w-full text-center text-xs px-3 py-2 bg-[#EA580C] text-white rounded font-bold hover:bg-[#C2410C] transition-colors">
                         Configure Pattern
                       </Link>
                     </CardContent>
@@ -149,7 +149,7 @@ export default function AutomationPage() {
           {/* Active Triggers */}
           <div>
             <h2 className="text-xl font-bold text-text-primary mb-4">Active Triggers</h2>
-            <Card className="border border-[#D4C4A8] bg-[#F5F1E8]">
+            <Card className="border border-[#D4C4A8] bg-white">
               <CardContent className="py-12 text-center">
                 <AutomationProductIcon className="w-20 h-20 mx-auto mb-4 opacity-30" />
                 <h3 className="font-semibold text-[#111111] mb-2">No active automation policies</h3>

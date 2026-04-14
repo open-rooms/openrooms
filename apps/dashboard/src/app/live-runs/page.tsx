@@ -2,10 +2,9 @@
 
 import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
-import { Header } from '@/components/header'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { CheckCircleIcon, AlertCircleIcon, ClockIcon, PlayIcon } from '@/components/icons'
-import { RunsIcon as RunsProductIcon } from '@/components/icons/product/RunsIcon'
+import { LiveRunsIcon } from '@/components/icons/system'
 import { getRooms, getRoomLogs, getAgents, getRuns, getLogsByRun, type ExecutionLog, type Room, type Run } from '@/lib/api'
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'
@@ -178,24 +177,29 @@ export default function LiveRunsPage() {
   const completedRuns = runs.filter(r => r.status === 'completed' || r.status === 'failed')
 
   return (
-    <div className="bg-[#E8DCC8] min-h-screen">
-      <Header
-        title="Live Runs"
-        subtitle="Real-time orchestration — agent loops, workflow executions, tool calls"
-        actions={
-          <div className="flex items-center gap-3">
-            <div className={`flex items-center gap-2 px-3 py-2 rounded-lg ${sseConnected ? 'bg-emerald-100' : 'bg-yellow-100'}`}>
-              <div className={`w-2 h-2 rounded-full ${sseConnected ? 'bg-emerald-500 animate-pulse' : 'bg-yellow-500'}`} />
-              <span className={`text-sm font-semibold ${sseConnected ? 'text-emerald-700' : 'text-yellow-700'}`}>
-                {sseConnected ? 'SSE · Live' : 'Polling · 3s'}
-              </span>
-            </div>
-            <Link href="/rooms" className="px-4 py-2 bg-[#F54E00] hover:bg-[#E24600] text-white text-sm font-bold rounded-lg transition-colors">
-              + New Run
-            </Link>
+    <div className="bg-[#F9F5EF] min-h-screen">
+      {/* Page header */}
+      <div className="border-b border-[#E8E0D0] bg-white px-8 py-5 flex items-center justify-between">
+        <div className="flex items-center gap-4">
+          <LiveRunsIcon className="w-10 h-10 flex-shrink-0 transition-transform hover:scale-105 duration-200" />
+          <div>
+            <h1 className="text-xl font-extrabold text-[#111]">Live Runs</h1>
+            <p className="text-gray-400 text-xs mt-0.5">Real-time orchestration — agent loops, workflow executions, tool calls</p>
           </div>
-        }
-      />
+        </div>
+        <div className="flex items-center gap-3">
+          <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold border ${sseConnected ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-yellow-50 text-yellow-700 border-yellow-200'}`}>
+            <div className={`w-1.5 h-1.5 rounded-full ${sseConnected ? 'bg-emerald-500 animate-pulse' : 'bg-yellow-500'}`} />
+            {sseConnected ? 'SSE Live' : 'Polling 3s'}
+          </div>
+          <Link href="/rooms" className="px-4 py-2 text-white text-sm font-bold rounded-xl transition-all"
+            style={{ backgroundColor: '#EA580C' }}
+            onMouseEnter={e => (e.currentTarget as HTMLAnchorElement).style.backgroundColor = '#C2410C'}
+            onMouseLeave={e => (e.currentTarget as HTMLAnchorElement).style.backgroundColor = '#EA580C'}>
+            + Trigger Run
+          </Link>
+        </div>
+      </div>
 
       <div className="p-6 md:p-8">
         <div className="max-w-7xl mx-auto space-y-6">
@@ -214,9 +218,9 @@ export default function LiveRunsPage() {
               { label: 'Total Runs', value: stats.totalRuns, color: 'text-[#111111]' },
               { label: 'Active Now', value: activeRuns.length, color: 'text-blue-600', pulse: activeRuns.length > 0 },
               { label: 'Agents Deployed', value: stats.agents, color: 'text-purple-600' },
-              { label: 'Rooms', value: stats.totalRooms, color: 'text-[#F54E00]' },
+              { label: 'Rooms', value: stats.totalRooms, color: 'text-[#EA580C]' },
             ].map(stat => (
-              <Card key={stat.label} className="border border-[#D4C4A8] bg-[#F5F1E8]">
+              <Card key={stat.label} className="border border-[#D4C4A8] bg-white">
                 <CardContent className="pt-5 pb-4">
                   <div className="text-xs text-gray-500 mb-1">{stat.label}</div>
                   <div className={`text-3xl font-bold flex items-center gap-2 ${stat.color}`}>
@@ -282,7 +286,7 @@ export default function LiveRunsPage() {
                       <button
                         key={run.id}
                         onClick={() => loadRunLogs(run.id)}
-                        className={`w-full text-left p-3 rounded-lg border-2 transition-all ${selectedRun === run.id ? 'border-[#F54E00] bg-white' : 'border-blue-200 bg-white hover:border-[#F54E00]'}`}
+                        className={`w-full text-left p-3 rounded-lg border-2 transition-all ${selectedRun === run.id ? 'border-[#EA580C] bg-white' : 'border-blue-200 bg-white hover:border-[#EA580C]'}`}
                       >
                         <div className="flex items-center justify-between mb-2">
                           <div className="flex items-center gap-2">
@@ -304,26 +308,26 @@ export default function LiveRunsPage() {
               )}
 
               {/* Completed runs */}
-              <Card className="border border-[#D4C4A8] bg-[#F5F1E8]">
+              <Card className="border border-[#D4C4A8] bg-white">
                 <CardHeader className="pb-3">
                   <CardTitle className="text-sm">Run History</CardTitle>
                 </CardHeader>
                 <CardContent>
                   {loading && (
                     <div className="text-center py-8">
-                      <div className="inline-block animate-spin rounded-full h-6 w-6 border-b-2 border-[#F54E00]" />
+                      <div className="inline-block animate-spin rounded-full h-6 w-6 border-b-2 border-[#EA580C]" />
                     </div>
                   )}
                   {!loading && runs.length === 0 && (
                     <div className="text-center py-10">
-                      <RunsProductIcon className="w-14 h-14 mx-auto mb-3 opacity-25" />
+                      <LiveRunsIcon className="w-14 h-14 mx-auto mb-3 opacity-25" />
                       <p className="text-sm font-semibold text-gray-600 mb-1">No runs yet</p>
                       <p className="text-xs text-gray-500 mb-4">
                         Click <strong>Run</strong> on a workflow or <strong>Run Agent</strong> on an agent to start execution.
                       </p>
                       <div className="flex justify-center gap-3">
-                        <Link href="/workflows" className="text-xs font-bold text-[#F54E00] hover:underline">→ Workflows</Link>
-                        <Link href="/agents" className="text-xs font-bold text-[#F54E00] hover:underline">→ Agents</Link>
+                        <Link href="/workflows" className="text-xs font-bold text-[#EA580C] hover:underline">→ Workflows</Link>
+                        <Link href="/agents" className="text-xs font-bold text-[#EA580C] hover:underline">→ Agents</Link>
                       </div>
                     </div>
                   )}
@@ -333,7 +337,7 @@ export default function LiveRunsPage() {
                         <button
                           key={run.id}
                           onClick={() => loadRunLogs(run.id)}
-                          className={`w-full text-left p-3 rounded-lg border transition-all ${selectedRun === run.id ? 'border-[#F54E00] bg-white shadow-sm' : 'border-[#D4C4A8] bg-white hover:border-[#F54E00]'}`}
+                          className={`w-full text-left p-3 rounded-lg border transition-all ${selectedRun === run.id ? 'border-[#EA580C] bg-white shadow-sm' : 'border-[#D4C4A8] bg-white hover:border-[#EA580C]'}`}
                         >
                           <div className="flex items-center justify-between mb-1.5">
                             <div className="flex items-center gap-2">
@@ -357,12 +361,12 @@ export default function LiveRunsPage() {
 
             {/* ── Log Inspector ─────────────────────────────────── */}
             <div>
-              <Card className="border border-[#D4C4A8] bg-[#F5F1E8] h-full">
+              <Card className="border border-[#D4C4A8] bg-white h-full">
                 <CardHeader className="pb-3">
                   <CardTitle className="text-sm flex items-center gap-2">
                     {selectedRun ? (
                       <>
-                        <PlayIcon className="w-4 h-4 text-[#F54E00]" />
+                        <PlayIcon className="w-4 h-4 text-[#EA580C]" />
                         Run Execution Log
                         <code className="text-xs font-mono bg-gray-100 px-2 py-0.5 rounded ml-2">{selectedRun.slice(0, 8)}…</code>
                       </>
@@ -405,7 +409,7 @@ export default function LiveRunsPage() {
                     /* General room event stream */
                     roomEvents.length === 0 ? (
                       <div className="text-center py-12">
-                        <RunsProductIcon className="w-14 h-14 mx-auto mb-3 opacity-25" />
+                        <LiveRunsIcon className="w-14 h-14 mx-auto mb-3 opacity-25" />
                         <p className="text-sm font-semibold text-gray-600 mb-1">No events yet</p>
                         <p className="text-xs text-gray-500">
                           Start a run and click it in the list to inspect its execution logs.

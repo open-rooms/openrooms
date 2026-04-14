@@ -7,14 +7,14 @@ export default function Page() {
       path="developers"
       title="SDK"
       description="Client libraries for integrating OpenRooms into your applications. The SDK wraps the REST API with typed clients, event subscription helpers, and workflow trigger utilities."
-      accentColor="#F54E00"
+      accentColor="#EA580C"
       textOnAccent="#fff"
       actionLabel="View SDK Docs"
       actionHref="/docs"
     >
       <div className="space-y-6">
         <StatGrid
-          accentColor="#F54E00"
+          accentColor="#EA580C"
           stats={[
             { label: 'Languages', value: 'TypeScript', sub: 'JavaScript / Node.js compatible' },
             { label: 'Install', value: 'npm / pnpm', sub: '@openrooms/sdk' },
@@ -47,7 +47,7 @@ client.events.subscribe('room_defi_monitor', (event) => {
 })`}
         />
         <CapabilityGrid
-          accentColor="#F54E00"
+          accentColor="#EA580C"
           items={[
             { title: 'TypeScript First', desc: 'Full type safety with generated types for every resource, run, and event.' },
             { title: 'Workflow Trigger', desc: 'One-line function to trigger any workflow with a typed payload.' },
@@ -58,7 +58,7 @@ client.events.subscribe('room_defi_monitor', (event) => {
           ]}
         />
         <ActionRow
-          accentColor="#F54E00"
+          accentColor="#EA580C"
           textOnAccent="#fff"
           actions={[
             { label: 'View SDK Docs', href: '/docs', primary: true },

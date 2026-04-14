@@ -2,8 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import { getTools, createTool, deleteTool, type Tool } from '@/lib/api';
-import { CheckCircleIcon, AlertCircleIcon, ToolRegistryIcon, PlusIcon } from '@/components/icons';
-import { ToolsIcon as ToolsProductIcon } from '@/components/icons/product/ToolsIcon';
+import { CheckCircleIcon, AlertCircleIcon, PlusIcon } from '@/components/icons';
+import { ToolIcon } from '@/components/icons/system';
 
 const BUILTIN_IDS = new Set([
   '00000000-0000-0000-0000-000000000001',
@@ -90,13 +90,13 @@ export default function ToolsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#E8DCC8] p-4 sm:p-6 md:p-8">
+    <div className="min-h-screen bg-[#F9F5EF] p-4 sm:p-6 md:p-8">
       <div className="max-w-7xl mx-auto">
 
         {/* Header */}
         <div className="mb-8 flex flex-wrap items-start justify-between gap-4">
           <div className="flex items-center gap-6">
-            <ToolsProductIcon className="w-20 h-20 flex-shrink-0" />
+            <ToolIcon className="w-20 h-20 flex-shrink-0" />
             <div>
               <h1 className="text-3xl sm:text-4xl font-bold text-[#111111]">Tool Registry</h1>
               <p className="text-gray-600 mt-1 max-w-2xl">
@@ -106,7 +106,7 @@ export default function ToolsPage() {
           </div>
           <button
             onClick={() => setShowAdd(true)}
-            className="inline-flex items-center gap-2 px-5 py-3 bg-[#F54E00] hover:bg-[#E24600] text-white font-bold rounded-lg transition-all"
+            className="inline-flex items-center gap-2 px-5 py-3 bg-[#EA580C] hover:bg-[#C2410C] text-white font-bold rounded-lg transition-all"
           >
             <PlusIcon className="w-5 h-5" />
             Add Tool
@@ -117,7 +117,7 @@ export default function ToolsPage() {
         {showAdd && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
             <div className="absolute inset-0 bg-black/50" onClick={() => setShowAdd(false)} />
-            <div className="relative bg-white border-2 border-black rounded-2xl w-full max-w-lg shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
+            <div className="relative bg-white border border-[#DDD5C8] rounded-2xl w-full max-w-lg shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
               <div className="flex items-center justify-between p-6 border-b-2 border-black">
                 <h2 className="text-xl font-bold text-[#111111]">Register Tool</h2>
                 <button onClick={() => setShowAdd(false)} className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-100 font-bold text-lg">×</button>
@@ -132,7 +132,7 @@ export default function ToolsPage() {
                     value={addForm.name}
                     onChange={e => setAddForm(f => ({ ...f, name: e.target.value }))}
                     placeholder="e.g. my_webhook"
-                    className="w-full px-3 py-2 border-2 border-black rounded-lg text-sm"
+                    className="w-full px-3 py-2 border border-[#DDD5C8] rounded-lg text-sm"
                   />
                 </div>
                 <div>
@@ -141,7 +141,7 @@ export default function ToolsPage() {
                     value={addForm.description}
                     onChange={e => setAddForm(f => ({ ...f, description: e.target.value }))}
                     placeholder="What this tool does"
-                    className="w-full px-3 py-2 border-2 border-black rounded-lg text-sm"
+                    className="w-full px-3 py-2 border border-[#DDD5C8] rounded-lg text-sm"
                   />
                 </div>
                 <div>
@@ -149,7 +149,7 @@ export default function ToolsPage() {
                   <select
                     value={addForm.category}
                     onChange={e => setAddForm(f => ({ ...f, category: e.target.value as any }))}
-                    className="w-full px-3 py-2 border-2 border-black rounded-lg text-sm bg-white"
+                    className="w-full px-3 py-2 border border-[#DDD5C8] rounded-lg text-sm bg-white"
                   >
                     <option value="API">API</option>
                     <option value="Webhook">Webhook</option>
@@ -165,7 +165,7 @@ export default function ToolsPage() {
                         value={addForm.url}
                         onChange={e => setAddForm(f => ({ ...f, url: e.target.value }))}
                         placeholder="https://api.example.com/webhook"
-                        className="w-full px-3 py-2 border-2 border-black rounded-lg text-sm"
+                        className="w-full px-3 py-2 border border-[#DDD5C8] rounded-lg text-sm"
                       />
                     </div>
                     <div>
@@ -173,7 +173,7 @@ export default function ToolsPage() {
                       <select
                         value={addForm.method}
                         onChange={e => setAddForm(f => ({ ...f, method: e.target.value }))}
-                        className="w-full px-3 py-2 border-2 border-black rounded-lg text-sm bg-white"
+                        className="w-full px-3 py-2 border border-[#DDD5C8] rounded-lg text-sm bg-white"
                       >
                         <option value="GET">GET</option>
                         <option value="POST">POST</option>
@@ -185,8 +185,8 @@ export default function ToolsPage() {
                   </>
                 )}
                 <div className="flex gap-3 pt-2">
-                  <button type="button" onClick={() => setShowAdd(false)} className="flex-1 py-2.5 border-2 border-black rounded-lg text-sm font-bold">Cancel</button>
-                  <button type="submit" disabled={adding} className="flex-1 py-2.5 bg-[#F54E00] hover:bg-[#E24600] disabled:opacity-50 text-white rounded-lg text-sm font-bold">
+                  <button type="button" onClick={() => setShowAdd(false)} className="flex-1 py-2.5 border border-[#DDD5C8] rounded-lg text-sm font-bold">Cancel</button>
+                  <button type="submit" disabled={adding} className="flex-1 py-2.5 bg-[#EA580C] hover:bg-[#C2410C] disabled:opacity-50 text-white rounded-lg text-sm font-bold">
                     {adding ? 'Adding...' : 'Add Tool'}
                   </button>
                 </div>
@@ -212,7 +212,7 @@ export default function ToolsPage() {
             { label: 'Avg Timeout', value: tools.length ? `${Math.round(tools.reduce((a, t) => a + t.timeout, 0) / tools.length / 1000)}s` : '—', color: 'text-purple-600' },
             { label: 'Showing', value: filteredTools.length, color: 'text-[#5EEAD4]' },
           ].map(stat => (
-            <div key={stat.label} className="bg-white border-2 border-black rounded-lg p-4">
+            <div key={stat.label} className="bg-white border border-[#DDD5C8] rounded-lg p-4">
               <div className={`text-2xl font-bold ${stat.color}`}>{stat.value}</div>
               <div className="text-sm text-gray-600 mt-1">{stat.label}</div>
             </div>
@@ -227,8 +227,8 @@ export default function ToolsPage() {
               onClick={() => setCategoryFilter(cat)}
               className={`px-4 py-2 rounded-lg font-bold text-sm transition-all ${
                 categoryFilter === cat
-                  ? 'bg-[#F54E00] text-white border-2 border-[#F54E00]'
-                  : 'bg-white text-[#111111] border-2 border-black hover:bg-gray-100'
+                  ? 'bg-[#EA580C] text-white border-2 border-[#EA580C]'
+                  : 'bg-white text-[#111111] border border-[#DDD5C8] hover:bg-gray-100'
               }`}
             >
               {cat === 'all' ? 'All' : cat}
@@ -239,15 +239,15 @@ export default function ToolsPage() {
         {/* Loading */}
         {loading && (
           <div className="text-center py-16">
-            <div className="inline-block animate-spin rounded-full h-10 w-10 border-b-2 border-[#F54E00] mb-4" />
+            <div className="inline-block animate-spin rounded-full h-10 w-10 border-b-2 border-[#EA580C] mb-4" />
             <p className="text-gray-600">Loading tools from registry...</p>
           </div>
         )}
 
         {/* Empty state */}
         {!loading && !error && filteredTools.length === 0 && (
-          <div className="bg-white border-2 border-black rounded-lg p-12 text-center">
-            <ToolsProductIcon className="w-20 h-20 mx-auto mb-4 opacity-40" />
+          <div className="bg-white border border-[#DDD5C8] rounded-lg p-12 text-center">
+            <ToolIcon className="w-20 h-20 mx-auto mb-4 opacity-40" />
             <h3 className="text-xl font-bold text-[#111111] mb-2">No tools in this filter</h3>
             <p className="text-gray-600 mb-6">
               {categoryFilter === 'all' ? 'Add a custom tool or start the API to load built-in tools.' : 'Try a different category.'}
@@ -255,7 +255,7 @@ export default function ToolsPage() {
             {categoryFilter === 'all' && (
               <button
                 onClick={() => setShowAdd(true)}
-                className="inline-flex items-center gap-2 px-5 py-3 bg-[#F54E00] hover:bg-[#E24600] text-white font-bold rounded-lg transition-all"
+                className="inline-flex items-center gap-2 px-5 py-3 bg-[#EA580C] hover:bg-[#C2410C] text-white font-bold rounded-lg transition-all"
               >
                 <PlusIcon className="w-5 h-5" />
                 Add Tool
@@ -270,13 +270,13 @@ export default function ToolsPage() {
             {filteredTools.map(tool => (
               <div
                 key={tool.id}
-                className="bg-white border-2 border-black rounded-lg p-6 hover:shadow-lg hover:border-[#5EEAD4] transition-all duration-200 group"
+                className="bg-white border border-[#DDD5C8] rounded-lg p-6 hover:shadow-lg hover:border-[#5EEAD4] transition-all duration-200 group"
               >
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex items-start gap-4 flex-1">
                     {/* Icon block */}
-                    <div className="bg-[#5EEAD4] bg-opacity-20 border-2 border-black rounded-lg p-3 group-hover:scale-105 transition-transform duration-200">
-                      <ToolRegistryIcon className="w-6 h-6 text-[#5EEAD4]" />
+                    <div className="bg-[#5EEAD4] bg-opacity-20 border border-[#DDD5C8] rounded-lg p-3 group-hover:scale-105 transition-transform duration-200">
+                      <ToolIcon className="w-6 h-6 text-[#5EEAD4]" />
                     </div>
 
                     <div className="flex-1 min-w-0">

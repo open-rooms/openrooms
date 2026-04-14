@@ -7,14 +7,14 @@ export default function Page() {
       path="developers"
       title="Tools"
       description="Build, register, and manage tools that agents call during execution. Each tool is a typed, sandboxed capability — from API calls and code runners to database queries and blockchain operations."
-      accentColor="#F54E00"
+      accentColor="#EA580C"
       textOnAccent="#fff"
       actionLabel="Build a Tool"
       actionHref="/tools"
     >
       <div className="space-y-6">
         <StatGrid
-          accentColor="#F54E00"
+          accentColor="#EA580C"
           stats={[
             { label: 'Definition', value: 'JSON Schema', sub: 'Typed inputs and outputs' },
             { label: 'Execution', value: 'Sandboxed', sub: 'Isolated per agent invocation' },
@@ -49,7 +49,7 @@ export default function Page() {
 }`}
         />
         <CapabilityGrid
-          accentColor="#F54E00"
+          accentColor="#EA580C"
           items={[
             { title: 'Custom Tools', desc: 'Register any HTTP endpoint as a tool with a JSON Schema input/output definition.' },
             { title: 'Sandboxed Code', desc: 'Tools that run code execute in isolated containers — no host access.' },
@@ -60,7 +60,7 @@ export default function Page() {
           ]}
         />
         <ActionRow
-          accentColor="#F54E00"
+          accentColor="#EA580C"
           textOnAccent="#fff"
           actions={[
             { label: 'Build a Tool', href: '/tools', primary: true },

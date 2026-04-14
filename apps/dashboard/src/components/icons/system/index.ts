@@ -14,6 +14,11 @@ export { SettingsIcon } from '../SettingsIcon'
 export { ToolIcon } from '../ToolIcon'
 export { DashboardIcon } from '../DashboardIcon'
 export { LaunchRoomIcon } from '../LaunchRoomIcon'
+export { MessageIcon } from '../MessageIcon'
+export { WebhookIcon } from '../WebhookIcon'
+export { EventIcon } from '../EventIcon'
+export { StorageIcon } from '../StorageIcon'
+export { TriggerIcon } from '../TriggerIcon'
 
 // New dock-style icons
 export {

@@ -7,14 +7,14 @@ export default function Page() {
       path="developers"
       title="API"
       description="The OpenRooms REST API gives you full programmatic control over every platform resource — Rooms, agents, workflows, tools, runs, and logs. Build integrations, automate deployments, and query the control plane from any system."
-      accentColor="#F54E00"
+      accentColor="#EA580C"
       textOnAccent="#fff"
       actionLabel="View API Docs"
       actionHref="/settings"
     >
       <div className="space-y-6">
         <StatGrid
-          accentColor="#F54E00"
+          accentColor="#EA580C"
           stats={[
             { label: 'Protocol', value: 'REST', sub: 'JSON over HTTPS' },
             { label: 'Auth', value: 'API Key', sub: 'Bearer token in header' },
@@ -45,7 +45,7 @@ curl -X POST https://api.openrooms.io/v1/workflows/trigger \\
 }`}
         />
         <CapabilityGrid
-          accentColor="#F54E00"
+          accentColor="#EA580C"
           items={[
             { title: 'Rooms API', desc: 'Create, list, update, and delete Rooms programmatically.' },
             { title: 'Agents API', desc: 'Deploy agents, update configs, and trigger direct agent runs.' },
@@ -56,7 +56,7 @@ curl -X POST https://api.openrooms.io/v1/workflows/trigger \\
           ]}
         />
         <ActionRow
-          accentColor="#F54E00"
+          accentColor="#EA580C"
           textOnAccent="#fff"
           actions={[
             { label: 'View API Reference', href: '/settings', primary: true },

@@ -34,30 +34,30 @@ export default function WorkflowDetailPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#E8DCC8] flex items-center justify-center">
-        <div className="w-8 h-8 border-2 border-[#D4C4A8] border-t-[#F54E00] rounded-full animate-spin" />
+      <div className="min-h-screen bg-[#F9F5EF] flex items-center justify-center">
+        <div className="w-8 h-8 border-2 border-[#D4C4A8] border-t-[#EA580C] rounded-full animate-spin" />
       </div>
     )
   }
 
   if (!workflow) {
     return (
-      <div className="min-h-screen bg-[#E8DCC8] p-8">
-        <Link href="/workflows" className="text-[#F54E00] font-semibold hover:underline">← Back to workflows</Link>
+      <div className="min-h-screen bg-[#F9F5EF] p-8">
+        <Link href="/workflows" className="text-[#EA580C] font-semibold hover:underline">← Back to workflows</Link>
         <div className="mt-8 text-gray-600">Workflow not found.</div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-[#E8DCC8]">
+    <div className="min-h-screen bg-[#F9F5EF]">
       <Header
         title={workflow.name}
         subtitle={`Workflow ${workflow.id.slice(0, 8)}...`}
         actions={
           <Link
             href={`/rooms?action=create&workflowId=${workflow.id}`}
-            className="inline-flex items-center gap-2 px-4 py-2 bg-[#F54E00] hover:bg-[#E24600] text-white text-sm font-bold rounded-lg transition-all duration-200"
+            className="inline-flex items-center gap-2 px-4 py-2 bg-[#EA580C] hover:bg-[#C2410C] text-white text-sm font-bold rounded-lg transition-all duration-200"
           >
             <PlusIcon className="w-4 h-4" />
             Create Room from Workflow
@@ -75,7 +75,7 @@ export default function WorkflowDetailPage() {
             </div>
           </div>
 
-          <Card className="border border-[#D4C4A8] bg-[#F5F1E8]">
+          <Card className="border border-[#D4C4A8] bg-white">
             <CardHeader>
               <CardTitle>Execution Graph</CardTitle>
               <CardDescription>{nodes.length} nodes</CardDescription>

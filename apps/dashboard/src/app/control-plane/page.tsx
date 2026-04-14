@@ -1,9 +1,9 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Header } from '@/components/header'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
-import { CheckCircleIcon, AlertCircleIcon, DatabaseFilledIcon, RedisCacheIcon, WorkersIcon, AgentRuntimeIcon, ResourceLimitsIcon, ControlPlaneIllustrationIcon, SettingsIllustrationIcon, APIIllustrationIcon } from '@/components/icons'
+import { CheckCircleIcon, AlertCircleIcon } from '@/components/icons'
+import { DashboardIcon, SettingsIcon, APIIcon, AgentIcon, AutomationIcon, MemoryIcon, SecurityIcon, LiveRunsIcon, ToolIcon } from '@/components/icons/system'
 import { getHealth } from '@/lib/api'
 
 export default function ControlPlanePage() {
@@ -42,10 +42,10 @@ export default function ControlPlanePage() {
   }, [])
 
   const services = [
-    { name: 'PostgreSQL Database', status: 'Connected', version: '16.0', IconComponent: DatabaseFilledIcon, color: 'text-emerald-600' },
-    { name: 'Redis Cache', status: 'Online', version: '7.2', IconComponent: RedisCacheIcon, color: 'text-blue-600' },
-    { name: 'BullMQ Workers', status: 'Active', version: '5.1.0', IconComponent: WorkersIcon, color: 'text-purple-600' },
-    { name: 'Agent Runtime', status: 'Running', version: '0.3.0', IconComponent: AgentRuntimeIcon, color: 'text-orange-600' },
+    { name: 'PostgreSQL Database', status: 'Connected', version: '16.0', IconComponent: MemoryIcon,     color: 'text-emerald-600' },
+    { name: 'Redis Cache',         status: 'Online',    version: '7.2',   IconComponent: LiveRunsIcon,  color: 'text-blue-600' },
+    { name: 'BullMQ Workers',      status: 'Active',    version: '5.1.0', IconComponent: AutomationIcon,color: 'text-purple-600' },
+    { name: 'Agent Runtime',       status: 'Running',   version: '0.3.0', IconComponent: AgentIcon,     color: 'text-orange-600' },
   ]
 
   const configuration = [
@@ -78,16 +78,21 @@ export default function ControlPlanePage() {
   }
 
   return (
-    <div className="bg-[#E8DCC8] min-h-screen">
-      <Header
-        title="Control Plane"
-        subtitle="System configuration and governance"
-        actions={
-          systemHealth.timestamp ? (
-            <span className="text-xs text-gray-500">Last checked: {new Date(systemHealth.timestamp).toLocaleTimeString()}</span>
-          ) : undefined
-        }
-      />
+    <div className="bg-[#F9F5EF] min-h-screen">
+      <div className="border-b border-[#E8E0D0] bg-white px-8 py-5 flex items-center justify-between">
+        <div className="flex items-center gap-4">
+          <DashboardIcon className="w-10 h-10 flex-shrink-0 transition-transform hover:scale-105 duration-200" />
+          <div>
+            <h1 className="text-xl font-extrabold text-[#111]">Control Plane</h1>
+            <p className="text-gray-400 text-xs mt-0.5">System configuration, health monitoring and governance</p>
+          </div>
+        </div>
+        {systemHealth.timestamp && (
+          <span className="text-xs text-gray-400 font-mono">
+            Checked: {new Date(systemHealth.timestamp).toLocaleTimeString()}
+          </span>
+        )}
+      </div>
 
       <div className="p-8 animate-fade-in">
         <div className="max-w-7xl mx-auto space-y-8">
@@ -99,10 +104,10 @@ export default function ControlPlanePage() {
           )}
 
           {/* System Health */}
-          <Card className="border border-[#D4C4A8] bg-[#F5F1E8]">
+          <Card className="border border-[#D4C4A8] bg-white">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <ControlPlaneIllustrationIcon className="w-8 h-8" />
+                <DashboardIcon className="w-8 h-8" />
                 System Health
               </CardTitle>
               <CardDescription>
@@ -135,10 +140,10 @@ export default function ControlPlanePage() {
           </Card>
 
           {/* Connected Services */}
-          <Card className="border border-[#D4C4A8] bg-[#F5F1E8]">
+          <Card className="border border-[#D4C4A8] bg-white">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <WorkersIcon className="w-8 h-8" />
+                <ToolIcon className="w-8 h-8" />
                 Connected Services
               </CardTitle>
             </CardHeader>
@@ -171,10 +176,10 @@ export default function ControlPlanePage() {
           </Card>
 
           {/* Configuration */}
-          <Card className="border border-[#D4C4A8] bg-[#F5F1E8]">
+          <Card className="border border-[#D4C4A8] bg-white">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <SettingsIllustrationIcon className="w-8 h-8" />
+                <SettingsIcon className="w-8 h-8" />
                 Configuration
               </CardTitle>
               <CardDescription>Environment variables and settings</CardDescription>
@@ -184,7 +189,7 @@ export default function ControlPlanePage() {
                 {configuration.map((config, idx) => (
                   <div key={idx} className="flex items-center justify-between p-3 bg-white rounded border border-[#D4C4A8]">
                     <div className="flex items-center gap-4">
-                      <APIIllustrationIcon className="w-4 h-4" />
+                      <APIIcon className="w-5 h-5" />
                       <span className="text-xs px-2 py-1 bg-blue-100 text-blue-700 rounded font-semibold">
                         {config.category}
                       </span>
@@ -207,10 +212,10 @@ export default function ControlPlanePage() {
           </Card>
 
           {/* Resource Limits */}
-          <Card className="border border-[#D4C4A8] bg-[#F5F1E8]">
+          <Card className="border border-[#D4C4A8] bg-white">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <ResourceLimitsIcon className="w-8 h-8" />
+                <SecurityIcon className="w-8 h-8" />
                 Resource Limits & Policies
               </CardTitle>
             </CardHeader>
@@ -224,12 +229,12 @@ export default function ControlPlanePage() {
                       </span>
                       <span className="text-sm font-semibold">{limit.name}</span>
                     </div>
-                    <span className="text-sm font-mono font-bold text-[#F54E00]">{limit.value}</span>
+                    <span className="text-sm font-mono font-bold text-[#EA580C]">{limit.value}</span>
                   </div>
                 ))}
               </div>
               <div className="mt-4 pt-4 border-t border-[#D4C4A8]">
-                <button className="w-full px-4 py-2 bg-[#F54E00] hover:bg-[#E24600] text-white text-sm font-bold rounded transition-colors">
+                <button className="w-full px-4 py-2 bg-[#EA580C] hover:bg-[#C2410C] text-white text-sm font-bold rounded transition-colors">
                   Edit Policies
                 </button>
               </div>

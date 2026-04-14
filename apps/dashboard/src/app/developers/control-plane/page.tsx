@@ -7,14 +7,14 @@ export default function Page() {
       path="developers"
       title="Control Plane"
       description="The OpenRooms Control Plane is the central orchestration layer for your entire autonomous system infrastructure — Rooms, agents, workers, and runtime execution, all from one view."
-      accentColor="#F54E00"
+      accentColor="#EA580C"
       textOnAccent="#fff"
       actionLabel="Open Control Plane"
       actionHref="/control-plane"
     >
       <div className="space-y-6">
         <StatGrid
-          accentColor="#F54E00"
+          accentColor="#EA580C"
           stats={[
             { label: 'Components', value: '7 Layers', sub: 'Rooms → Runtime → Observability' },
             { label: 'Status', value: 'Live', sub: 'Real-time system health' },
@@ -36,7 +36,7 @@ Knowledge Graph      ✓ live   1,204 nodes
 Last heartbeat: 800ms ago`}
         />
         <CapabilityGrid
-          accentColor="#F54E00"
+          accentColor="#EA580C"
           items={[
             { title: 'System Health', desc: 'Real-time status of every platform component — workers, queues, API, and event bus.' },
             { title: 'Room Management', desc: 'Create, configure, and terminate Rooms programmatically via the control plane API.' },
@@ -47,7 +47,7 @@ Last heartbeat: 800ms ago`}
           ]}
         />
         <ActionRow
-          accentColor="#F54E00"
+          accentColor="#EA580C"
           textOnAccent="#fff"
           actions={[
             { label: 'Open Control Plane', href: '/control-plane', primary: true },

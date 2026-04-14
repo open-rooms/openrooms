@@ -11,7 +11,7 @@ type DockItem = {
   href: string
 }
 
-export function PathDock({ items, accentColor = '#F54E00' }: { items: DockItem[]; accentColor?: string }) {
+export function PathDock({ items, accentColor = '#EA580C' }: { items: DockItem[]; accentColor?: string }) {
   const [open, setOpen] = useState(true)
   const dockRef = useRef<HTMLDivElement>(null)
 
@@ -48,7 +48,7 @@ export function PathDock({ items, accentColor = '#F54E00' }: { items: DockItem[]
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 24 }}
             transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-            className="pointer-events-auto bg-white/95 backdrop-blur-md border-2 border-black rounded-2xl px-3 sm:px-4 py-2.5 sm:py-3 flex items-end gap-1.5 sm:gap-2.5 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] overflow-x-auto max-w-full"
+            className="pointer-events-auto bg-white/95 backdrop-blur-md border border-[#DDD5C8] rounded-2xl px-3 sm:px-4 py-2.5 sm:py-3 flex items-end gap-1.5 sm:gap-2.5 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] overflow-x-auto max-w-full"
           >
             {items.map((item) => {
               const Icon = item.icon
@@ -101,7 +101,7 @@ export function PathDock({ items, accentColor = '#F54E00' }: { items: DockItem[]
             exit={{ opacity: 0, scale: 0.8 }}
             transition={{ duration: 0.2, ease: 'easeOut' }}
             onClick={() => setOpen(true)}
-            className="pointer-events-auto w-10 h-10 rounded-xl border-2 border-black bg-white shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] flex items-center justify-center hover:scale-105 active:scale-95 transition-transform"
+            className="pointer-events-auto w-10 h-10 rounded-xl border border-[#DDD5C8] bg-white shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] flex items-center justify-center hover:scale-105 active:scale-95 transition-transform"
             aria-label="Open dock"
           >
             <svg className="w-4 h-4 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>

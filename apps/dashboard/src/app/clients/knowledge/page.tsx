@@ -18,14 +18,14 @@ export default function Page() {
             { label: 'Persistence', value: 'Permanent', sub: 'Survives across sessions' },
             { label: 'Access', value: 'All Agents', sub: 'Shared within the Room' },
           ].map((s) => (
-            <div key={s.label} className="bg-[#F5F1E8] border border-[#D4C4A8] rounded-xl p-5 text-center">
+            <div key={s.label} className="bg-white border border-[#D4C4A8] rounded-xl p-5 text-center">
               <div className="text-lg font-black text-[#111]">{s.value}</div>
               <div className="text-xs font-bold" style={{ color: '#FDA4AF' }}>{s.label}</div>
               <div className="text-[10px] text-gray-400 mt-0.5">{s.sub}</div>
             </div>
           ))}
         </div>
-        <div className="bg-[#F5F1E8] border border-[#D4C4A8] rounded-xl p-6">
+        <div className="bg-white border border-[#D4C4A8] rounded-xl p-6">
           <p className="text-xs font-black text-gray-500 uppercase tracking-widest mb-3">How the Memory Graph works</p>
           <p className="text-sm text-gray-600 leading-relaxed">
             Every time an agent executes inside a Room, it reads from and writes to the Room&apos;s Knowledge graph. This includes facts it discovered, summaries it produced, tool outputs it received, and context it built.

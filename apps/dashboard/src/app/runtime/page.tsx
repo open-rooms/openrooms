@@ -1,9 +1,9 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Header } from '@/components/header'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
-import { CpuIcon, DatabaseIcon, ZapIcon, WorkersIcon, JobQueueIcon, RunsIllustrationIcon, MetricsIllustrationIcon, StorageIllustrationIcon, AgentsIllustrationIcon, ControlPlaneIllustrationIcon, CheckCircleIcon, AlertCircleIcon } from '@/components/icons'
+import { CheckCircleIcon, AlertCircleIcon } from '@/components/icons'
+import { ObservabilityIcon, MemoryIcon, LiveRunsIcon, AutomationIcon, AgentIcon, DashboardIcon, ReportsIcon, ToolIcon } from '@/components/icons/system'
 import { getHealth, getRooms, getAgents, getRuntimeStatus } from '@/lib/api'
 
 export default function RuntimePage() {
@@ -67,11 +67,20 @@ export default function RuntimePage() {
   ]
 
   return (
-    <div className="bg-[#E8DCC8] min-h-screen">
-      <Header 
-        title="Runtime" 
-        subtitle="Execution engine powering autonomous systems"
-      />
+    <div className="bg-[#F9F5EF] min-h-screen">
+      <div className="border-b border-[#E8E0D0] bg-white px-8 py-5 flex items-center justify-between">
+        <div className="flex items-center gap-4">
+          <ObservabilityIcon className="w-10 h-10 flex-shrink-0 transition-transform hover:scale-105 duration-200" />
+          <div>
+            <h1 className="text-xl font-extrabold text-[#111]">Runtime</h1>
+            <p className="text-gray-400 text-xs mt-0.5">Execution engine — agent workers, job queues, memory, tool execution</p>
+          </div>
+        </div>
+        <div className="flex items-center gap-1.5 px-3 py-1.5 bg-white border border-[#E8E0D0] rounded-full text-[11px] text-gray-400">
+          <div className="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse" />
+          Live monitoring
+        </div>
+      </div>
       
       <div className="p-8 animate-fade-in">
         <div className="max-w-7xl mx-auto space-y-8">
@@ -95,7 +104,7 @@ export default function RuntimePage() {
                 { label: 'Redis', value: health?.redis || '…', ok: health?.redis === 'healthy' },
                 { label: 'BullMQ', value: health?.redis === 'healthy' ? 'healthy' : health ? 'degraded' : '…', ok: health?.redis === 'healthy' },
               ].map(({ label, value, ok }) => (
-                <div key={label} className="bg-white border-2 border-black rounded-lg p-4 flex items-center justify-between">
+                <div key={label} className="bg-white border border-[#DDD5C8] rounded-lg p-4 flex items-center justify-between">
                   <div>
                     <div className="text-xs text-gray-500 mb-1">{label}</div>
                     <div className={`text-sm font-bold capitalize ${ok ? 'text-emerald-600' : value === '…' ? 'text-gray-400' : 'text-red-500'}`}>{value}</div>
@@ -112,12 +121,12 @@ export default function RuntimePage() {
 
           {/* Real room/agent counts */}
           <div className="grid grid-cols-2 gap-4">
-            <div className="bg-white border-2 border-black rounded-lg p-5">
+            <div className="bg-white border border-[#DDD5C8] rounded-lg p-5">
               <div className="text-xs text-gray-500 mb-1">Rooms Running</div>
               <div className="text-3xl font-bold text-blue-600">{roomCount ?? '…'}</div>
               <div className="text-xs text-gray-400 mt-1">live from /api/rooms</div>
             </div>
-            <div className="bg-white border-2 border-black rounded-lg p-5">
+            <div className="bg-white border border-[#DDD5C8] rounded-lg p-5">
               <div className="text-xs text-gray-500 mb-1">Total Agents</div>
               <div className="text-3xl font-bold text-purple-600">{agentCount ?? '…'}</div>
               <div className="text-xs text-gray-400 mt-1">live from /api/agents</div>
@@ -132,12 +141,12 @@ export default function RuntimePage() {
             </h2>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
-            <Card className="border border-[#D4C4A8] bg-[#F5F1E8] hover:shadow-md transition-all">
+            <Card className="border border-[#D4C4A8] bg-white hover:shadow-md transition-all">
               <CardHeader className="pb-3">
                 <div className="flex items-center justify-between mb-2">
                   <CardDescription>Active Workers</CardDescription>
                   <div className="w-10 h-10 bg-emerald-100 rounded-lg flex items-center justify-center">
-                    <CpuIcon className="w-6 h-6 text-emerald-600" />
+                    <AutomationIcon className="w-8 h-8" />
                   </div>
                 </div>
                 <CardTitle className="text-4xl font-bold text-emerald-600">
@@ -152,12 +161,12 @@ export default function RuntimePage() {
               </CardContent>
             </Card>
 
-            <Card className="border border-[#D4C4A8] bg-[#F5F1E8] hover:shadow-md transition-all">
+            <Card className="border border-[#D4C4A8] bg-white hover:shadow-md transition-all">
               <CardHeader className="pb-3">
                 <div className="flex items-center justify-between mb-2">
                   <CardDescription>Queued Jobs</CardDescription>
                   <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                    <DatabaseIcon className="w-6 h-6 text-blue-600" />
+                    <MemoryIcon className="w-8 h-8" />
                   </div>
                 </div>
                 <CardTitle className="text-4xl font-bold text-blue-600">
@@ -169,12 +178,12 @@ export default function RuntimePage() {
               </CardContent>
             </Card>
 
-            <Card className="border border-[#D4C4A8] bg-[#F5F1E8] hover:shadow-md transition-all">
+            <Card className="border border-[#D4C4A8] bg-white hover:shadow-md transition-all">
               <CardHeader className="pb-3">
                 <div className="flex items-center justify-between mb-2">
                   <CardDescription>Processing Rate</CardDescription>
                   <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
-                    <ZapIcon className="w-6 h-6 text-purple-600" />
+                    <LiveRunsIcon className="w-8 h-8" />
                   </div>
                 </div>
                 <CardTitle className="text-4xl font-bold text-purple-600">
@@ -186,7 +195,7 @@ export default function RuntimePage() {
               </CardContent>
             </Card>
 
-            <Card className="border border-[#D4C4A8] bg-[#F5F1E8] hover:shadow-md transition-all">
+            <Card className="border border-[#D4C4A8] bg-white hover:shadow-md transition-all">
               <CardHeader className="pb-3">
                 <div className="flex items-center justify-between mb-2">
                   <CardDescription>Avg Execution</CardDescription>
@@ -206,10 +215,10 @@ export default function RuntimePage() {
 
           {/* System Resources */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <Card className="border border-[#D4C4A8] bg-[#F5F1E8]">
+            <Card className="border border-[#D4C4A8] bg-white">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <MetricsIllustrationIcon className="w-8 h-8" />
+                  <ReportsIcon className="w-8 h-8" />
                   CPU Usage
                 </CardTitle>
               </CardHeader>
@@ -229,10 +238,10 @@ export default function RuntimePage() {
               </CardContent>
             </Card>
 
-            <Card className="border border-[#D4C4A8] bg-[#F5F1E8]">
+            <Card className="border border-[#D4C4A8] bg-white">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <StorageIllustrationIcon className="w-8 h-8" />
+                  <MemoryIcon className="w-8 h-8" />
                   Memory Usage
                 </CardTitle>
               </CardHeader>
@@ -254,10 +263,10 @@ export default function RuntimePage() {
           </div>
 
           {/* Workers Status */}
-          <Card className="border border-[#D4C4A8] bg-[#F5F1E8]">
+          <Card className="border border-[#D4C4A8] bg-white">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <RunsIllustrationIcon className="w-8 h-8" />
+                <LiveRunsIcon className="w-8 h-8" />
                 Worker Pool Status
               </CardTitle>
             </CardHeader>
@@ -267,7 +276,7 @@ export default function RuntimePage() {
                   <div key={worker.id} className="flex items-center justify-between p-4 bg-white rounded-lg border border-[#D4C4A8]">
                     <div className="flex items-center gap-4">
                       <div className="w-10 h-10 bg-emerald-100 rounded-lg flex items-center justify-center">
-                        <CpuIcon className="w-5 h-5 text-emerald-600" />
+                        <AutomationIcon className="w-8 h-8" />
                       </div>
                       <div>
                         <h4 className="font-semibold text-sm">{worker.name}</h4>
@@ -288,10 +297,10 @@ export default function RuntimePage() {
           </Card>
 
           {/* Job Queue */}
-          <Card className="border border-[#D4C4A8] bg-[#F5F1E8]">
+          <Card className="border border-[#D4C4A8] bg-white">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <JobQueueIcon className="w-8 h-8" />
+                <ToolIcon className="w-8 h-8" />
                 Job Queue
               </CardTitle>
               <CardDescription>{metrics.queuedJobs} pending jobs</CardDescription>
@@ -305,9 +314,9 @@ export default function RuntimePage() {
                         job.type === 'agent-execution' ? 'bg-blue-100' : 'bg-purple-100'
                       }`}>
                         {job.type === 'agent-execution' ? (
-                          <AgentsIllustrationIcon className="w-6 h-6" />
+                          <AgentIcon className="w-8 h-8" />
                         ) : (
-                          <ControlPlaneIllustrationIcon className="w-6 h-6" />
+                          <DashboardIcon className="w-8 h-8" />
                         )}
                       </div>
                       <div>

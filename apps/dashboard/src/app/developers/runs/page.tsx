@@ -7,14 +7,14 @@ export default function Page() {
       path="developers"
       title="Runs"
       description="Full history of agent and workflow executions. Every run includes its trigger, step trace, agent outputs, tool calls, token usage, and final status — queryable and exportable."
-      accentColor="#F54E00"
+      accentColor="#EA580C"
       textOnAccent="#fff"
       actionLabel="View All Runs"
       actionHref="/live-runs"
     >
       <div className="space-y-6">
         <StatGrid
-          accentColor="#F54E00"
+          accentColor="#EA580C"
           stats={[
             { label: 'Retention', value: '90 days', sub: 'Full run history' },
             { label: 'Resolution', value: 'Per Step', sub: 'Every agent step logged' },
@@ -34,7 +34,7 @@ run_4ba6t      automation  daily-defi-scan         SUCCESS   8.1s      6h ago
 run_3az5u      agent       ReportAgent             SUCCESS   1.4s      6h ago`}
         />
         <CapabilityGrid
-          accentColor="#F54E00"
+          accentColor="#EA580C"
           items={[
             { title: 'Full Trace', desc: 'Each run stores every step, agent decision, tool call, and output in order.' },
             { title: 'Failure Inspection', desc: 'For failed runs, inspect exactly which step failed, the error message, and the agent\'s last state.' },
@@ -45,7 +45,7 @@ run_3az5u      agent       ReportAgent             SUCCESS   1.4s      6h ago`}
           ]}
         />
         <ActionRow
-          accentColor="#F54E00"
+          accentColor="#EA580C"
           textOnAccent="#fff"
           actions={[
             { label: 'View All Runs', href: '/live-runs', primary: true },

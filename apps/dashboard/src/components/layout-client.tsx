@@ -3,6 +3,7 @@
 import { usePathname } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { Sidebar } from '@/components/sidebar'
+import { AuthGuard } from '@/components/auth-guard'
 import { ProgressBar } from '@/components/ui/progress'
 import { CommandPalette } from '@/components/command-palette'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -19,7 +20,8 @@ const themeMap: Record<string, string> = {
 
 export function LayoutClient({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
-  const isHomePage = pathname === '/home' || pathname === '/' || pathname === '/ecosystem' || pathname === '/system'
+  const isLoginPage = pathname === '/login'
+  const isHomePage  = !isLoginPage && (pathname === '/home' || pathname === '/' || pathname === '/ecosystem' || pathname === '/system')
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false)
 
   // Close mobile sidebar on route change
@@ -40,18 +42,23 @@ export function LayoutClient({ children }: { children: React.ReactNode }) {
     root.setAttribute('data-page-theme', pageTheme)
   }, [pathname])
 
+  if (isLoginPage) {
+    return <main className="min-h-screen">{children}</main>
+  }
+
   if (isHomePage) {
     return (
-      <>
+      <AuthGuard>
         <ProgressBar />
         <CommandPalette />
         <main className="min-h-screen">{children}</main>
-      </>
+      </AuthGuard>
     )
   }
 
   return (
-    <>
+    <AuthGuard>
+      <>
       <ProgressBar />
       <CommandPalette />
 
@@ -107,6 +114,7 @@ export function LayoutClient({ children }: { children: React.ReactNode }) {
           {children}
         </main>
       </div>
-    </>
+      </>
+    </AuthGuard>
   )
 }
