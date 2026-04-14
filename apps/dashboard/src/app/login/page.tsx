@@ -7,51 +7,87 @@ import { OpenRoomsLogo } from '@/components/openrooms-logo'
 const CTA = '#EA580C'
 const CTA_HOVER = '#C2410C'
 
-// ─── Chat messages inside a terminal shell (WhatsApp style, but dark terminal) ──
-interface ChatLine {
-  from: 'user' | 'agent' | 'sys'
-  text: string
-  delay: number
+// ─── Contextual icons for chat messages ──────────────────────────────────────
+function IconPayment() {
+  return (
+    <svg viewBox="0 0 22 22" className="w-4 h-4" fill="none">
+      <rect x="2" y="5" width="18" height="12" rx="3" fill="#FBBF24" stroke="#111" strokeWidth="1.3"/>
+      <rect x="2" y="9" width="18" height="3" fill="#111" opacity="0.2"/>
+      <rect x="5" y="13" width="4" height="1.5" rx="0.75" fill="#111" opacity="0.4"/>
+    </svg>
+  )
+}
+function IconSupport() {
+  return (
+    <svg viewBox="0 0 22 22" className="w-4 h-4" fill="none">
+      <circle cx="11" cy="11" r="9" fill="#93C5FD" stroke="#111" strokeWidth="1.3"/>
+      <path d="M7 10 Q7 7 11 7 Q15 7 15 10 Q15 13 11 13" stroke="#111" strokeWidth="1.3" fill="none" strokeLinecap="round"/>
+      <circle cx="11" cy="16" r="1.2" fill="#111"/>
+    </svg>
+  )
+}
+function IconPipeline() {
+  return (
+    <svg viewBox="0 0 22 22" className="w-4 h-4" fill="none">
+      <rect x="2" y="3" width="5" height="5" rx="1.5" fill="#6EE7B7" stroke="#111" strokeWidth="1.2"/>
+      <rect x="8.5" y="3" width="5" height="5" rx="1.5" fill="#6EE7B7" stroke="#111" strokeWidth="1.2"/>
+      <rect x="15" y="3" width="5" height="5" rx="1.5" fill="#6EE7B7" stroke="#111" strokeWidth="1.2"/>
+      <line x1="7" y1="5.5" x2="8.5" y2="5.5" stroke="#111" strokeWidth="1"/>
+      <line x1="13.5" y1="5.5" x2="15" y2="5.5" stroke="#111" strokeWidth="1"/>
+      <rect x="5" y="13" width="12" height="5" rx="2" fill="#F4A89A" stroke="#111" strokeWidth="1.2"/>
+      <line x1="11" y1="8" x2="11" y2="13" stroke="#111" strokeWidth="1"/>
+    </svg>
+  )
+}
+function IconMonitor() {
+  return (
+    <svg viewBox="0 0 22 22" className="w-4 h-4" fill="none">
+      <rect x="2" y="3" width="18" height="13" rx="3" fill="#C4B5FD" stroke="#111" strokeWidth="1.3"/>
+      <path d="M5 12 L7 9 L9 11 L12 6 L15 10 L17 8" stroke="#111" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
+      <rect x="8" y="16" width="6" height="2" rx="1" fill="#111" opacity="0.3"/>
+    </svg>
+  )
 }
 
+// Per-conversation user icon
+const CONV_ICONS = [<IconPayment key="p"/>, <IconSupport key="s"/>, <IconPipeline key="pi"/>]
+
+// ─── Chat conversation data ───────────────────────────────────────────────────
+interface ChatLine { from: 'user' | 'agent' | 'sys'; text: string; delay: number }
+
 const CHATS: ChatLine[][] = [
-  // Automation use-case
   [
     { from: 'user',  text: 'Alert my team when a payment fails', delay: 0 },
-    { from: 'sys',   text: '→ spawning payment-monitor agent…',   delay: 850 },
-    { from: 'agent', text: 'Connected to Stripe webhook. Watching.', delay: 1700 },
-    { from: 'sys',   text: '→ Workflow: failure → Slack + email. ✓', delay: 2500 },
-    { from: 'agent', text: 'First test run passed in 143ms. Done.', delay: 3200 },
-    { from: 'user',  text: 'Can it auto-retry the charge too?',   delay: 4100 },
-    { from: 'agent', text: 'Added retry node (max 3×, 1h delay). Live.', delay: 5000 },
+    { from: 'sys',   text: '→ spawning payment-monitor agent…', delay: 850 },
+    { from: 'agent', text: 'Connected to Stripe webhook. Watching for failures.', delay: 1700 },
+    { from: 'sys',   text: '→ Workflow: failure → Slack + email. ✓ Active', delay: 2500 },
+    { from: 'agent', text: 'First test run passed in 143ms. Your team is covered.', delay: 3300 },
+    { from: 'user',  text: 'Can it auto-retry the charge?', delay: 4200 },
+    { from: 'agent', text: 'Retry node added — max 3×, 1h delay. Already live.', delay: 5000 },
   ],
-  // Support triage use-case
   [
     { from: 'user',  text: 'Auto-reply to Zendesk tickets when possible', delay: 0 },
-    { from: 'sys',   text: '→ deploying support-triage Room…',    delay: 750 },
-    { from: 'agent', text: 'Connector: Zendesk registered. Reading queue.', delay: 1600 },
-    { from: 'agent', text: 'Ticket #4821: "Reset password?" → replied.', delay: 2400 },
-    { from: 'sys',   text: '→ CSAT predicted 4.7★. Time: 1.1s',   delay: 3100 },
-    { from: 'user',  text: 'What about complex tickets?',         delay: 4000 },
-    { from: 'agent', text: 'Flagged + routed with full context attached.', delay: 4700 },
-    { from: 'sys',   text: '→ 91 tickets resolved today. 0 humans needed.', delay: 5400 },
+    { from: 'sys',   text: '→ deploying support-triage Room…', delay: 750 },
+    { from: 'agent', text: 'Connector: Zendesk registered. Reading ticket queue.', delay: 1600 },
+    { from: 'agent', text: 'Ticket #4821 "Reset password?" → reply drafted + sent.', delay: 2400 },
+    { from: 'sys',   text: '→ CSAT predicted 4.7★. Resolved in 1.1s', delay: 3100 },
+    { from: 'user',  text: 'What about complex tickets?', delay: 4000 },
+    { from: 'agent', text: 'Flagged + routed with full context. 91 resolved today.', delay: 4800 },
   ],
-  // Dev pipeline use-case
   [
     { from: 'user',  text: 'Set up ingest → classify → route pipeline', delay: 0 },
-    { from: 'sys',   text: '→ provisioning data-pipeline Room…',   delay: 700 },
+    { from: 'sys',   text: '→ provisioning data-pipeline Room…', delay: 700 },
     { from: 'agent', text: 'Agent 1 (ingest) live on /webhook/data.', delay: 1500 },
-    { from: 'agent', text: 'Agent 2 (classify) loaded. GPT-4o ready.', delay: 2300 },
-    { from: 'agent', text: 'Agent 3 (router): 4 connectors configured.', delay: 3000 },
-    { from: 'sys',   text: '→ Test event: classified in 890ms. ✓',  delay: 3700 },
-    { from: 'user',  text: 'Log every agent decision for audit',   delay: 4600 },
-    { from: 'agent', text: 'Trace logger on. Every step is replayable.', delay: 5400 },
+    { from: 'agent', text: 'Agent 2 (classify) loaded GPT-4o. Awaiting events.', delay: 2300 },
+    { from: 'agent', text: 'Agent 3 (router) — 4 downstream connectors configured.', delay: 3000 },
+    { from: 'sys',   text: '→ Test event: classified in 890ms. Pipeline live ✓', delay: 3700 },
+    { from: 'user',  text: 'Log every decision for audit trail', delay: 4600 },
+    { from: 'agent', text: 'Trace logger on. Every step replayable forever.', delay: 5400 },
   ],
 ]
-
 const TAB_LABELS = ['Automation', 'Support AI', 'Dev Pipeline']
 
-// ─── Bot face for agent bubble ────────────────────────────────────────────────
+// ─── Bot face avatar ──────────────────────────────────────────────────────────
 function BotAvatar() {
   return (
     <svg width="22" height="22" viewBox="0 0 40 40" fill="none" className="flex-shrink-0">
@@ -71,7 +107,7 @@ function BotAvatar() {
   )
 }
 
-// ─── Terminal with chat bubbles inside ───────────────────────────────────────
+// ─── Terminal with WhatsApp-style chat inside ─────────────────────────────────
 function AgentTerminal() {
   const [tabIdx, setTabIdx] = useState(0)
   const [shown, setShown] = useState(0)
@@ -93,90 +129,89 @@ function AgentTerminal() {
           setTyping(false)
           setShown(i + 1)
           bodyRef.current?.scrollTo({ top: 9999, behavior: 'smooth' })
-        }, line.from === 'agent' ? 550 : 80)
+        }, line.from === 'agent' ? 500 : 80)
       }, line.delay)
       timers.current.push(t)
     })
 
-    // cycle to next conversation
     const last = conv[conv.length - 1]!
     const cycle = setTimeout(() => setTabIdx(i => (i + 1) % CHATS.length), last.delay + 4000)
     timers.current.push(cycle)
-
     return () => timers.current.forEach(clearTimeout)
   }, [tabIdx])
 
   const conv = CHATS[tabIdx]!
   const slug = ['payment-monitor', 'support-triage', 'data-pipeline'][tabIdx]!
+  const UserIcon = CONV_ICONS[tabIdx]!
 
   return (
     <div className="rounded-2xl overflow-hidden border border-white/10 shadow-xl" style={{ background: '#0D0F1A' }}>
-      {/* title bar — macOS style */}
-      <div className="flex items-center gap-2 px-4 py-2.5 border-b border-white/10" style={{ background: '#171928' }}>
+      {/* macOS title bar */}
+      <div className="flex items-center gap-2 px-4 py-2.5 border-b border-white/8" style={{ background: '#171928' }}>
         <span className="w-3 h-3 rounded-full bg-red-400/80" />
         <span className="w-3 h-3 rounded-full bg-yellow-400/80" />
         <span className="w-3 h-3 rounded-full bg-green-400/80" />
-        {/* tab switcher */}
-        <div className="flex gap-1 ml-4 overflow-hidden">
+        <div className="flex gap-1 ml-3">
           {TAB_LABELS.map((t, i) => (
             <button key={t} onClick={() => setTabIdx(i)}
-              className={`text-[10px] font-mono px-2.5 py-0.5 rounded transition-all ${
-                i === tabIdx ? 'bg-white/10 text-white' : 'text-white/30 hover:text-white/60'
-              }`}>
+              className={`text-[10px] font-mono px-2.5 py-0.5 rounded transition-all ${i === tabIdx ? 'bg-white/10 text-white' : 'text-white/30 hover:text-white/50'}`}>
               {t}
             </button>
           ))}
         </div>
-        <span className="ml-auto font-mono text-[10px] text-white/30">{slug}</span>
+        <span className="ml-auto font-mono text-[10px] text-white/25">{slug}</span>
         <span className="flex items-center gap-1 ml-2">
           <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
           <span className="text-[10px] font-mono text-green-400">live</span>
         </span>
       </div>
 
-      {/* chat body */}
-      <div ref={bodyRef} className="p-4 space-y-2.5 overflow-y-auto" style={{ minHeight: 260, maxHeight: 300 }}>
+      {/* Chat messages */}
+      <div ref={bodyRef} className="p-4 space-y-2.5 overflow-y-auto" style={{ minHeight: 255, maxHeight: 290 }}>
         {conv.slice(0, shown).map((line, i) => {
           if (line.from === 'sys') {
             return (
               <div key={i} className="flex items-center gap-2 py-0.5">
                 <div className="flex-1 h-px bg-white/8" />
-                <span className="text-[10px] font-mono text-white/35 whitespace-nowrap px-1">{line.text}</span>
+                <span className="text-[10px] font-mono text-white/30 whitespace-nowrap px-1">{line.text}</span>
                 <div className="flex-1 h-px bg-white/8" />
               </div>
             )
           }
           if (line.from === 'user') {
             return (
-              <div key={i} className="flex justify-end">
-                <div className="max-w-[78%] px-3 py-2 rounded-2xl rounded-tr-none"
-                  style={{ background: '#1E2240', border: '1px solid rgba(255,255,255,0.08)' }}>
-                  <p className="text-[12px] font-mono leading-snug" style={{ color: 'rgba(255,255,255,0.8)' }}>{line.text}</p>
+              <div key={i} className="flex justify-end items-end gap-1.5">
+                <div className="max-w-[76%] px-3 py-2 rounded-2xl rounded-tr-none"
+                  style={{ background: '#1E2240', border: '1px solid rgba(255,255,255,0.07)' }}>
+                  <p className="text-[11.5px] font-mono leading-snug text-white/80">{line.text}</p>
+                </div>
+                {/* Contextual user icon */}
+                <div className="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0"
+                  style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)' }}>
+                  {UserIcon}
                 </div>
               </div>
             )
           }
           return (
-            <div key={i} className="flex items-end gap-2">
+            <div key={i} className="flex items-end gap-1.5">
               <BotAvatar />
-              <div className="max-w-[78%] px-3 py-2 rounded-2xl rounded-tl-none"
-                style={{ background: 'rgba(234,88,12,0.13)', border: '1px solid rgba(234,88,12,0.25)' }}>
-                <p className="text-[12px] font-mono leading-snug text-[#FCA882]">{line.text}</p>
+              <div className="max-w-[76%] px-3 py-2 rounded-2xl rounded-tl-none"
+                style={{ background: 'rgba(234,88,12,0.12)', border: '1px solid rgba(234,88,12,0.22)' }}>
+                <p className="text-[11.5px] font-mono leading-snug text-[#FCA882]">{line.text}</p>
               </div>
             </div>
           )
         })}
-
-        {/* typing indicator */}
         {typing && (
-          <div className="flex items-end gap-2">
+          <div className="flex items-end gap-1.5">
             <BotAvatar />
             <div className="px-3 py-2.5 rounded-2xl rounded-tl-none"
-              style={{ background: 'rgba(234,88,12,0.1)', border: '1px solid rgba(234,88,12,0.2)' }}>
+              style={{ background: 'rgba(234,88,12,0.08)', border: '1px solid rgba(234,88,12,0.18)' }}>
               <div className="flex gap-1">
                 {[0,1,2].map(j => (
                   <span key={j} className="w-1.5 h-1.5 rounded-full bg-orange-400 animate-bounce"
-                    style={{ animationDelay: `${j*0.15}s` }} />
+                    style={{ animationDelay: `${j*0.14}s` }} />
                 ))}
               </div>
             </div>
@@ -184,13 +219,12 @@ function AgentTerminal() {
         )}
       </div>
 
-      {/* fake input bar */}
+      {/* Input bar — decorative */}
       <div className="px-4 py-2.5 border-t border-white/8 flex items-center gap-2.5">
         <div className="flex-1 bg-white/5 border border-white/8 rounded-xl px-3 py-2 text-[11px] font-mono text-white/20">
           Tell your agent what to automate…
         </div>
-        <div className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0"
-          style={{ background: CTA }}>
+        <div className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: CTA }}>
           <svg viewBox="0 0 16 16" className="w-4 h-4" fill="none">
             <path d="M3 8 L13 8 M9 4 L13 8 L9 12" stroke="white" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
           </svg>
@@ -200,7 +234,7 @@ function AgentTerminal() {
   )
 }
 
-// ─── Pitch items (restored from previous version) ─────────────────────────────
+// ─── Pitch items ──────────────────────────────────────────────────────────────
 const PITCH = [
   {
     icon: (
@@ -254,16 +288,58 @@ const PITCH = [
           fill="#F4A89A" stroke="#111" strokeWidth="1.5" strokeLinejoin="round"/>
       </svg>
     ),
-    text: 'Trigger any Room from a webhook, a schedule, or a single API call — your rules.',
+    text: 'Trigger any Room from a webhook, schedule, or a single API call — your rules.',
   },
 ]
 
 // ─── Boot steps ───────────────────────────────────────────────────────────────
-const BOOT_STEPS = [
-  'Initialising agent runtime…',
-  'Connecting to event bus…',
-  'Provisioning workspace…',
-  'All systems go.',
+const BOOT_STEPS = ['Initialising agent runtime…', 'Connecting to event bus…', 'Provisioning workspace…', 'All systems go.']
+
+// ─── Included icons ───────────────────────────────────────────────────────────
+const INCLUDED = [
+  {
+    icon: (
+      <svg viewBox="0 0 28 28" className="w-5 h-5" fill="none">
+        <rect x="3" y="5" width="22" height="18" rx="5" fill="#F4A89A" stroke="#111" strokeWidth="1.5"/>
+        <line x1="3" y1="11" x2="25" y2="11" stroke="#111" strokeWidth="1.2"/>
+        <circle cx="8" cy="8" r="1.5" fill="#111" opacity="0.4"/>
+        <circle cx="12" cy="8" r="1.5" fill="#111" opacity="0.4"/>
+        <circle cx="16" cy="8" r="1.5" fill="#111" opacity="0.4"/>
+        <rect x="7" y="15" width="14" height="2" rx="1" fill="#111" opacity="0.3"/>
+        <rect x="7" y="19" width="9" height="2" rx="1" fill="#111" opacity="0.3"/>
+      </svg>
+    ),
+    text: 'Autonomous agents with memory and tool access',
+  },
+  {
+    icon: (
+      <svg viewBox="0 0 28 28" className="w-5 h-5" fill="none">
+        <path d="M7 4 L4 14 L12 14 L9 24 L24 10 L15 10 L19 4 Z" fill="#FBBF24" stroke="#111" strokeWidth="1.5" strokeLinejoin="round"/>
+      </svg>
+    ),
+    text: 'Real-time workflow execution + event bus',
+  },
+  {
+    icon: (
+      <svg viewBox="0 0 28 28" className="w-5 h-5" fill="none">
+        <circle cx="14" cy="12" r="7" fill="#7DD3FC" stroke="#111" strokeWidth="1.5"/>
+        <path d="M10 12 C10 10 11.8 8.5 14 8.5 C16.2 8.5 18 10 18 12" stroke="#111" strokeWidth="1.4" fill="none" strokeLinecap="round"/>
+        <rect x="12.2" y="11" width="3.5" height="5" rx="1.5" fill="#111"/>
+        <rect x="10" y="20" width="8" height="2" rx="1" fill="#111" opacity="0.3"/>
+      </svg>
+    ),
+    text: 'Register any REST API as an agent-callable tool',
+  },
+  {
+    icon: (
+      <svg viewBox="0 0 28 28" className="w-5 h-5" fill="none">
+        <rect x="3" y="16" width="5" height="9" rx="2" fill="#6EE7B7" stroke="#111" strokeWidth="1.3"/>
+        <rect x="11" y="10" width="5" height="15" rx="2" fill="#6EE7B7" stroke="#111" strokeWidth="1.3"/>
+        <rect x="19" y="4" width="5" height="21" rx="2" fill="#6EE7B7" stroke="#111" strokeWidth="1.3"/>
+      </svg>
+    ),
+    text: 'Full observability — every decision traced',
+  },
 ]
 
 // ─── Main page ────────────────────────────────────────────────────────────────
@@ -287,11 +363,7 @@ export default function LoginPage() {
         setBootStep(i)
         if (i === BOOT_STEPS.length - 1) {
           setTimeout(() => {
-            localStorage.setItem('or_workspace', JSON.stringify({
-              name: workspace.trim(),
-              email: email.trim(),
-              token: `demo_${Date.now()}`,
-            }))
+            localStorage.setItem('or_workspace', JSON.stringify({ name: workspace.trim(), email: email.trim(), token: `demo_${Date.now()}` }))
             router.push('/home')
           }, 600)
         }
@@ -302,9 +374,9 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen flex flex-col md:flex-row" style={{ background: '#F9F5EF' }}>
 
-      {/* ── LEFT: terminal + pitch ───────────────────────────────────────────── */}
+      {/* ── LEFT: hero + chat terminal + pitch ──────────────────────────────── */}
       <div className="hidden md:flex flex-col flex-1 px-10 py-10 max-w-[54%] relative overflow-hidden">
-        {/* subtle grid */}
+        {/* grid texture */}
         <div className="absolute inset-0 pointer-events-none"
           style={{ backgroundImage: 'linear-gradient(rgba(0,0,0,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(0,0,0,0.03) 1px,transparent 1px)', backgroundSize: '28px 28px' }} />
         <div className="absolute -top-20 -left-20 w-80 h-80 pointer-events-none rounded-full"
@@ -313,36 +385,35 @@ export default function LoginPage() {
         {/* Logo */}
         <div className="relative z-10">
           <OpenRoomsLogo size={44} textSize="text-xl" />
-          <p className="mt-1.5 text-[11px] text-gray-400 font-mono tracking-wider">
-            AI agents that work while you sleep.
+          <p className="mt-1 text-[11px] text-gray-400 font-mono tracking-wide">
+            Control plane for AI agents, workflows and autonomous systems.
           </p>
         </div>
 
-        {/* Hero copy */}
+        {/* Hero — powerful, dangerous, humble */}
         <div className="relative z-10 mt-8">
-          <p className="text-[11px] font-bold uppercase tracking-widest text-[#EA580C] mb-2">What OpenRooms does</p>
-          <h1 className="text-[26px] font-extrabold text-[#111] leading-tight">
-            Your business on autopilot.<br/>For real this time.
+          <p className="text-[11px] font-bold uppercase tracking-widest text-[#EA580C] mb-2">OpenRooms</p>
+          <h1 className="text-[28px] font-extrabold text-[#111] leading-tight">
+            Ship AI systems that<br/>work in prod,<br/>not just in demos.
           </h1>
-          <p className="mt-3 text-[13px] text-gray-500 leading-relaxed max-w-xs">
-            Deploy AI agents that watch your systems, handle customers,
-            process data and trigger actions — no code, no babysitting.
+          <p className="mt-4 text-[13px] text-gray-500 leading-relaxed max-w-xs">
+            Orchestrate agents, workflows, APIs and blockchain across any model —
+            without babysitting infrastructure. OpenRooms runs it while you sleep.
           </p>
         </div>
 
-        {/* Chat terminal (WhatsApp-style bubbles inside dark terminal shell) */}
+        {/* Chat terminal */}
         <div className="relative z-10 mt-7">
           <div className="flex items-center justify-between mb-2">
             <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400">Watch it work</p>
             <span className="flex items-center gap-1 text-[10px] text-gray-400 font-mono">
-              <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse inline-block" />
-              live agent
+              <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse inline-block" />live agent
             </span>
           </div>
           <AgentTerminal />
         </div>
 
-        {/* Pitch items (restored style) */}
+        {/* Pitch items */}
         <div className="relative z-10 mt-7 space-y-3">
           <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-3">What you can build today</p>
           {PITCH.map((p, i) => (
@@ -372,10 +443,7 @@ export default function LoginPage() {
       {/* ── RIGHT: form ──────────────────────────────────────────────────────── */}
       <div className="flex flex-1 flex-col items-center justify-center px-8 py-12 md:max-w-[46%]">
         <div className="w-full max-w-sm">
-          {/* Mobile logo */}
-          <div className="md:hidden mb-8">
-            <OpenRoomsLogo size={42} textSize="text-xl" />
-          </div>
+          <div className="md:hidden mb-8"><OpenRoomsLogo size={42} textSize="text-xl" /></div>
 
           <div className="mb-8">
             <h2 className="text-2xl font-extrabold text-[#111]">Get your workspace</h2>
@@ -390,20 +458,17 @@ export default function LoginPage() {
                 <label className="block text-[11px] font-bold text-gray-500 mb-1.5 tracking-wide uppercase">Work email</label>
                 <input type="email" value={email} onChange={e => setEmail(e.target.value)}
                   placeholder="you@company.com"
-                  className="w-full px-4 py-3 rounded-xl border border-[#DDD5C8] bg-white text-[14px] text-[#111] focus:outline-none focus:ring-2 focus:ring-[#EA580C] transition-all placeholder:text-gray-300"
-                />
+                  className="w-full px-4 py-3 rounded-xl border border-[#DDD5C8] bg-white text-[14px] text-[#111] focus:outline-none focus:ring-2 focus:ring-[#EA580C] transition-all placeholder:text-gray-300"/>
               </div>
               <div>
                 <label className="block text-[11px] font-bold text-gray-500 mb-1.5 tracking-wide uppercase">Workspace name</label>
-                <input type="text" value={workspace} onChange={e => setWorkspace(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '-'))}
+                <input type="text" value={workspace}
+                  onChange={e => setWorkspace(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '-'))}
                   placeholder="acme-corp"
-                  className="w-full px-4 py-3 rounded-xl border border-[#DDD5C8] bg-white text-[14px] text-[#111] focus:outline-none focus:ring-2 focus:ring-[#EA580C] transition-all placeholder:text-gray-300"
-                />
+                  className="w-full px-4 py-3 rounded-xl border border-[#DDD5C8] bg-white text-[14px] text-[#111] focus:outline-none focus:ring-2 focus:ring-[#EA580C] transition-all placeholder:text-gray-300"/>
                 <p className="text-[11px] text-gray-400 mt-1.5">Lowercase + hyphens only. Becomes your Room namespace.</p>
               </div>
-
               {error && <p className="text-[12px] text-red-500 font-medium">{error}</p>}
-
               <button type="submit"
                 className="w-full py-3.5 rounded-xl text-white text-[14px] font-bold transition-all hover:opacity-90 mt-2"
                 style={{ backgroundColor: CTA }}
@@ -412,58 +477,15 @@ export default function LoginPage() {
                 Launch my workspace →
               </button>
 
+              {/* Included section with platform icons */}
               <div className="pt-3 space-y-3">
                 <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Included on day one</p>
-                {[
-                  {
-                    icon: (
-                      <svg viewBox="0 0 28 28" className="w-5 h-5" fill="none">
-                        <rect x="3" y="5" width="22" height="18" rx="5" fill="#F4A89A" stroke="#111" strokeWidth="1.5"/>
-                        <line x1="3" y1="11" x2="25" y2="11" stroke="#111" strokeWidth="1.2"/>
-                        <circle cx="8" cy="8" r="1.5" fill="#111" opacity="0.4"/>
-                        <circle cx="12" cy="8" r="1.5" fill="#111" opacity="0.4"/>
-                        <circle cx="16" cy="8" r="1.5" fill="#111" opacity="0.4"/>
-                        <rect x="7" y="15" width="14" height="2" rx="1" fill="#111" opacity="0.3"/>
-                        <rect x="7" y="19" width="9" height="2" rx="1" fill="#111" opacity="0.3"/>
-                      </svg>
-                    ),
-                    t: 'Autonomous agents with memory and tool access',
-                  },
-                  {
-                    icon: (
-                      <svg viewBox="0 0 28 28" className="w-5 h-5" fill="none">
-                        <path d="M7 4 L4 14 L12 14 L9 24 L24 10 L15 10 L19 4 Z" fill="#FBBF24" stroke="#111" strokeWidth="1.5" strokeLinejoin="round"/>
-                      </svg>
-                    ),
-                    t: 'Real-time workflow execution + event bus',
-                  },
-                  {
-                    icon: (
-                      <svg viewBox="0 0 28 28" className="w-5 h-5" fill="none">
-                        <circle cx="14" cy="14" r="10" fill="#7DD3FC" stroke="#111" strokeWidth="1.5"/>
-                        <path d="M9 14 C9 11 11 9 14 9 C17 9 19 11 19 14" stroke="#111" strokeWidth="1.5" fill="none" strokeLinecap="round"/>
-                        <circle cx="14" cy="19" r="2.5" fill="#111"/>
-                        <rect x="13" y="13" width="2" height="4" rx="1" fill="#111"/>
-                      </svg>
-                    ),
-                    t: 'Register any REST API as an agent tool',
-                  },
-                  {
-                    icon: (
-                      <svg viewBox="0 0 28 28" className="w-5 h-5" fill="none">
-                        <rect x="3" y="16" width="5" height="9" rx="2" fill="#6EE7B7" stroke="#111" strokeWidth="1.3"/>
-                        <rect x="11" y="10" width="5" height="15" rx="2" fill="#6EE7B7" stroke="#111" strokeWidth="1.3"/>
-                        <rect x="19" y="4" width="5" height="21" rx="2" fill="#6EE7B7" stroke="#111" strokeWidth="1.3"/>
-                      </svg>
-                    ),
-                    t: 'Full observability — every decision traced',
-                  },
-                ].map((item, i) => (
+                {INCLUDED.map((item, i) => (
                   <div key={i} className="flex items-center gap-3">
                     <div className="w-8 h-8 flex items-center justify-center rounded-xl border border-[#E0D6CC] bg-white shadow-sm flex-shrink-0">
                       {item.icon}
                     </div>
-                    <span className="text-[12px] text-gray-500">{item.t}</span>
+                    <span className="text-[12px] text-gray-500">{item.text}</span>
                   </div>
                 ))}
               </div>
@@ -480,7 +502,8 @@ export default function LoginPage() {
                         <path d="M5 8 L7 10 L11 6" stroke="#111" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
                       </svg>
                     ) : bootStep === i ? (
-                      <div className="w-4 h-4 border-2 border-t-transparent rounded-full animate-spin flex-shrink-0" style={{ borderColor: CTA, borderTopColor: 'transparent' }} />
+                      <div className="w-4 h-4 border-2 border-t-transparent rounded-full animate-spin flex-shrink-0"
+                        style={{ borderColor: CTA, borderTopColor: 'transparent' }} />
                     ) : (
                       <div className="w-4 h-4 rounded-full border border-white/20 flex-shrink-0" />
                     )}
@@ -494,12 +517,8 @@ export default function LoginPage() {
           <p className="mt-6 text-center text-[11px] text-gray-400">
             Returning?{' '}
             <button onClick={() => {
-              const n = prompt('Workspace name?')
-              const em = prompt('Email?')
-              if (n && em) {
-                localStorage.setItem('or_workspace', JSON.stringify({ name: n, email: em, token: `demo_${Date.now()}` }))
-                router.push('/home')
-              }
+              const n = prompt('Workspace name?'); const em = prompt('Email?')
+              if (n && em) { localStorage.setItem('or_workspace', JSON.stringify({ name: n, email: em, token: `demo_${Date.now()}` })); router.push('/home') }
             }} className="underline hover:text-[#EA580C] transition-colors">Sign in</button>
           </p>
         </div>

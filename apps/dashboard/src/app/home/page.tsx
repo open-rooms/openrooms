@@ -42,97 +42,97 @@ const TEMPLATES = [
     id: 'incident-responder',
     Icon: SecurityIcon,
     title: 'Incident Responder',
-    tag: 'Ops Automation',
+    tag: 'Ops · Swarm',
     tagColor: 'bg-red-100 text-red-700',
     accentColor: '#FCA5A5',
-    description: 'Monitors health endpoints every 60s. When a service degrades, agents triage root cause, open a ticket, and page on-call.',
+    description: 'Multi-agent swarm: a sentinel agent polls health, a triage agent classifies severity, a router agent pages on-call — all in parallel.',
     what: [
-      'Polls /health endpoints on a schedule',
-      'Agent classifies severity + likely cause',
-      'Creates ticket via API, triggers alert',
+      'Agent 1: Polls /health every 60s',
+      'Agent 2: Classifies severity + root cause',
+      'Agent 3: Creates ticket + fires alert via API',
     ],
-    trigger: 'Schedule · every 60s or via webhook from alertmanager',
+    trigger: 'Schedule · or webhook from Alertmanager / PagerDuty',
     workflow: { name: 'Incident Response Flow', agentGoal: 'Check the health status of all registered services, classify any degraded service by severity and likely root cause, create an incident ticket via the API connector, and output a structured incident report with recommended next steps.' },
   },
   {
-    id: 'support-triage',
+    id: 'autonomous-support-bot',
     Icon: AgentClustersIcon,
-    title: 'Support Triage',
-    tag: 'Customer Ops',
+    title: 'Autonomous Support Bot',
+    tag: 'Customer Ops · Bot',
     tagColor: 'bg-blue-100 text-blue-700',
     accentColor: '#93C5FD',
-    description: 'Receives support requests via webhook. Agents classify intent, check knowledge base, draft a reply or escalate to a human queue.',
+    description: 'Deploy a self-contained support bot that classifies intent, queries shared memory for known solutions, and replies or escalates — no human in the loop.',
     what: [
-      'Classifies request: bug / how-to / billing / churn',
-      'Queries memory for known solutions',
-      'Drafts reply or routes to correct queue via API',
+      'Classifies intent: bug / how-to / billing / churn',
+      'Queries Room memory for known resolutions',
+      'Replies autonomously or escalates with context',
     ],
-    trigger: 'Webhook · from Intercom, Zendesk, Slack, or any form',
-    workflow: { name: 'Support Triage Flow', agentGoal: 'Receive an incoming support request from the webhook payload, classify its intent and urgency, search the knowledge base for matching resolutions, then either draft a complete response or escalate to the appropriate human queue with a detailed context summary.' },
+    trigger: 'Webhook · from Intercom, Zendesk, Slack or any form',
+    workflow: { name: 'Support Bot Flow', agentGoal: 'Receive an incoming support request from the webhook payload, classify its intent and urgency, search the knowledge base for matching resolutions, then either draft a complete response or escalate to the appropriate human queue with a detailed context summary.' },
   },
   {
-    id: 'content-intelligence',
+    id: 'llm-orchestration',
     Icon: ReportsIcon,
-    title: 'Content Intelligence',
-    tag: 'Media & Research',
+    title: 'LLM Orchestration Pipeline',
+    tag: 'AI · Orchestration',
     tagColor: 'bg-emerald-100 text-emerald-700',
     accentColor: '#6EE7B7',
-    description: 'Crawls a list of URLs on a schedule, extracts key signals, and delivers a structured daily brief to any endpoint you configure.',
+    description: 'Chain GPT-4o, Claude and your own models in a single Room. Each agent handles a step — extract, reason, verify — using the best model for the task.',
     what: [
-      'Fetches pages from a URL watchlist',
-      'Agent extracts key facts, quotes, and sentiment',
-      'POSTs a structured brief to Slack, email, or API',
+      'Agent 1 (GPT-4o): extracts structured data',
+      'Agent 2 (Claude): reasons and fact-checks',
+      'Agent 3: synthesises and posts result',
     ],
-    trigger: 'Schedule · daily, hourly, or on-demand',
-    workflow: { name: 'Content Intelligence Flow', agentGoal: 'Fetch content from the configured URL list, extract key facts, named entities, sentiment, and competitive signals, then synthesise a structured intelligence brief and deliver it via the configured output connector.' },
-  },
-  {
-    id: 'data-reconciliation',
-    Icon: ComplianceIcon,
-    title: 'Data Reconciliation',
-    tag: 'Data Integrity',
-    tagColor: 'bg-amber-100 text-amber-700',
-    accentColor: '#FCD34D',
-    description: 'Pulls the same dataset from two sources (DB + API, or two APIs), compares them, and flags records that are out of sync.',
-    what: [
-      'Fetches data from source A and source B',
-      'Agent diffs records field-by-field',
-      'Outputs a reconciliation report with discrepancies',
-    ],
-    trigger: 'Schedule · run before daily reporting or on-demand',
-    workflow: { name: 'Data Reconciliation Flow', agentGoal: 'Fetch datasets from both configured sources, perform a detailed field-by-field comparison, identify all records that are missing, duplicated, or contain conflicting values, and produce a structured reconciliation report with counts and representative examples.' },
+    trigger: 'Webhook or schedule — any signal fires the chain',
+    workflow: { name: 'LLM Orchestration Flow', agentGoal: 'Fetch content from the configured URL list, extract key facts, named entities, sentiment, and competitive signals, then synthesise a structured intelligence brief and deliver it via the configured output connector.' },
   },
   {
     id: 'api-pipeline',
     Icon: APIIcon,
-    title: 'Multi-API Pipeline',
-    tag: 'Integration',
+    title: 'Multi-API Data Pipeline',
+    tag: 'Integration · Automation',
     tagColor: 'bg-indigo-100 text-indigo-700',
     accentColor: '#A5B4FC',
-    description: 'Chains calls across multiple REST APIs — an agent fetches, enriches, and merges data from disparate sources into one output.',
+    description: 'Agents chain HTTP calls across N REST APIs, merge the results, resolve conflicts, and push a unified record to any downstream system.',
     what: [
       'Sequential HTTP calls to N configured APIs',
-      'Agent resolves conflicts and fills gaps',
-      'Returns a single enriched unified record',
+      'Agent resolves conflicts, fills data gaps',
+      'Pushes enriched unified record downstream',
     ],
     trigger: 'Webhook · triggered by any upstream system',
     workflow: { name: 'API Pipeline Flow', agentGoal: 'Make sequential HTTP requests to all configured API connectors, cross-reference and enrich the results, resolve any field conflicts using business logic rules, and synthesise a unified structured JSON record highlighting key findings and data gaps.' },
   },
   {
     id: 'compliance-audit',
+    Icon: ComplianceIcon,
+    title: 'Compliance & Audit Agent',
+    tag: 'Governance · Policy',
+    tagColor: 'bg-amber-100 text-amber-700',
+    accentColor: '#FCD34D',
+    description: 'Continuously scans outputs, logs, and API responses against a policy ruleset stored in Room memory. Flags violations, scores conformance, and produces audit trail.',
+    what: [
+      'Ingests log payload or content via webhook',
+      'Agent evaluates against policy rules in memory',
+      'Scores conformance 0-100, flags violations',
+    ],
+    trigger: 'Webhook · from any system producing auditable output',
+    workflow: { name: 'Compliance Audit Flow', agentGoal: 'Receive the content or log payload from the webhook, evaluate it against the stored compliance policy rules, score overall conformance from 0-100, identify and quote specific rule violations, and generate a structured audit report with recommended remediation steps.' },
+  },
+  {
+    id: 'agent-swarm',
     Icon: ObservabilityIcon,
-    title: 'Compliance Audit',
-    tag: 'Governance',
+    title: 'Research Swarm',
+    tag: 'Multi-Agent · Swarm',
     tagColor: 'bg-violet-100 text-violet-700',
     accentColor: '#C4B5FD',
-    description: 'Scans outputs, logs, or content against a defined policy ruleset. Flags violations, scores conformance, and generates audit trail.',
+    description: 'Spawn a coordinated swarm of 5 agents that fan out across sources, each researching a sub-topic, then converge into a single synthesised report.',
     what: [
-      'Ingests content or log payload via webhook',
-      'Agent evaluates against policy rules in memory',
-      'Scores conformance and flags specific violations',
+      '5 agents fan out across configured sources',
+      'Each agent owns a sub-topic + writes to shared memory',
+      'Final agent synthesises all findings into one report',
     ],
-    trigger: 'Webhook · from any system that produces auditable output',
-    workflow: { name: 'Compliance Audit Flow', agentGoal: 'Receive the content or log payload from the webhook, evaluate it against the stored compliance policy rules, score overall conformance from 0-100, identify and quote specific rule violations, and generate a structured audit report with recommended remediation steps.' },
+    trigger: 'API call or webhook — pass a research topic as payload',
+    workflow: { name: 'Research Swarm Flow', agentGoal: 'Decompose the research topic into 5 sub-topics, spawn parallel research threads, fetch and summarise evidence from configured sources for each sub-topic, store findings in shared Room memory, then synthesise all findings into a structured research report with citations, confidence scores, and recommended next steps.' },
   },
 ]
 
@@ -456,7 +456,7 @@ export default function HomePage() {
               </button>
               <a href="#templates"
                 className="px-6 py-3 border border-[#D4C9B8] hover:border-[#111111] text-[#111111] font-semibold rounded-lg text-sm transition-colors text-center bg-white">
-                See templates
+                Explore features
               </a>
             </div>
 
@@ -689,19 +689,96 @@ export default function HomePage() {
             </div>
           )}
 
-          {/* ── Non-tech quick actions (4 big simple cards) ── */}
+          {/* ── Non-tech quick actions (6 cards with SVG icons) ── */}
           <div className="mb-10">
-            <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">For everyone — no code needed</p>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">For everyone — no code needed</p>
+            <p className="text-xs text-gray-400 mb-4">Click to deploy a real Room, Workflow + Agent. Live in seconds.</p>
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
               {[
-                { id: 'email-auto',   emoji: '✉️',  label: 'Auto-reply to emails',    sub: 'AI reads, classifies and replies to customer emails', color: '#6EE7B7',
-                  workflow: { name: 'Email Automation', agentGoal: 'Read incoming emails, classify each by intent (support, sales, billing, spam), draft and send an appropriate reply or forward to the right team. Prioritise urgent requests.' } },
-                { id: 'pay-alert',    emoji: '💳',  label: 'Payment failure alerts',   sub: 'Get notified instantly when a payment fails', color: '#FCA5A5',
-                  workflow: { name: 'Payment Monitor', agentGoal: 'Monitor payment events, detect failures or disputes, immediately notify the team via the configured connector, and log each event with amount, customer, and error code.' } },
-                { id: 'uptime',       emoji: '📡',  label: 'Website uptime monitor',   sub: 'Check your site every minute, alert on downtime', color: '#93C5FD',
-                  workflow: { name: 'Uptime Monitor', agentGoal: 'Periodically check the configured health endpoints, measure response times, detect any 4xx/5xx responses or timeouts, and immediately alert via the notification connector.' } },
-                { id: 'daily-brief',  emoji: '📊',  label: 'Daily business brief',     sub: 'AI summarises your key metrics and posts to Slack', color: '#C4B5FD',
-                  workflow: { name: 'Daily Briefing', agentGoal: 'Pull key business metrics from the configured API connectors, summarise trends, flag anomalies, and post a structured daily brief to the notification channel.' } },
+                {
+                  id: 'email-auto', color: '#6EE7B7', label: 'Auto-reply to emails',
+                  sub: 'AI reads, classifies and replies to customer emails round the clock.',
+                  icon: (
+                    <svg viewBox="0 0 28 28" className="w-6 h-6" fill="none">
+                      <rect x="2" y="6" width="24" height="16" rx="4" fill="#6EE7B7" stroke="#111" strokeWidth="1.4"/>
+                      <path d="M2 10 L14 17 L26 10" stroke="#111" strokeWidth="1.4"/>
+                      <circle cx="21" cy="8" r="3.5" fill="#F87171" stroke="#111" strokeWidth="1"/>
+                      <path d="M19.5 8 L20.5 9 L22.5 7" stroke="white" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                  ),
+                  workflow: { name: 'Email Automation', agentGoal: 'Read incoming emails, classify each by intent (support, sales, billing, spam), draft and send an appropriate reply or forward to the right team. Prioritise urgent requests.' },
+                },
+                {
+                  id: 'pay-alert', color: '#FCA5A5', label: 'Payment failure alerts',
+                  sub: 'Agents watch your Stripe events and notify your team the moment something fails.',
+                  icon: (
+                    <svg viewBox="0 0 28 28" className="w-6 h-6" fill="none">
+                      <rect x="2" y="7" width="24" height="14" rx="4" fill="#FCA5A5" stroke="#111" strokeWidth="1.4"/>
+                      <rect x="2" y="11" width="24" height="3.5" fill="#111" opacity="0.15"/>
+                      <rect x="5" y="16" width="5" height="2" rx="1" fill="#111" opacity="0.3"/>
+                      <circle cx="21" cy="8" r="4" fill="#FBBF24" stroke="#111" strokeWidth="1"/>
+                      <path d="M21 6 L21 9" stroke="#111" strokeWidth="1.3" strokeLinecap="round"/>
+                      <circle cx="21" cy="10.5" r="0.6" fill="#111"/>
+                    </svg>
+                  ),
+                  workflow: { name: 'Payment Monitor', agentGoal: 'Monitor payment events, detect failures or disputes, immediately notify the team via the configured connector, and log each event with amount, customer, and error code.' },
+                },
+                {
+                  id: 'uptime', color: '#93C5FD', label: 'Uptime monitor',
+                  sub: 'Know when your website is down before your customers do. Alerts in 60s.',
+                  icon: (
+                    <svg viewBox="0 0 28 28" className="w-6 h-6" fill="none">
+                      <circle cx="14" cy="14" r="11" fill="#93C5FD" stroke="#111" strokeWidth="1.4"/>
+                      <circle cx="14" cy="14" r="6" fill="none" stroke="#111" strokeWidth="1" opacity="0.3"/>
+                      <circle cx="14" cy="14" r="2.5" fill="#111"/>
+                      <path d="M14 14 L18 9" stroke="#111" strokeWidth="1.4" strokeLinecap="round"/>
+                      <circle cx="14" cy="6" r="1.5" fill="#111" opacity="0.3"/>
+                      <circle cx="22" cy="14" r="1.5" fill="#111" opacity="0.3"/>
+                    </svg>
+                  ),
+                  workflow: { name: 'Uptime Monitor', agentGoal: 'Periodically check the configured health endpoints, measure response times, detect any 4xx/5xx responses or timeouts, and immediately alert via the notification connector.' },
+                },
+                {
+                  id: 'daily-brief', color: '#C4B5FD', label: 'Daily business brief',
+                  sub: 'AI pulls your metrics, spots trends, and posts a summary to Slack each morning.',
+                  icon: (
+                    <svg viewBox="0 0 28 28" className="w-6 h-6" fill="none">
+                      <rect x="3" y="3" width="22" height="22" rx="5" fill="#C4B5FD" stroke="#111" strokeWidth="1.4"/>
+                      <rect x="6" y="18" width="4" height="4" rx="1" fill="#111" opacity="0.35"/>
+                      <rect x="12" y="13" width="4" height="9" rx="1" fill="#111" opacity="0.35"/>
+                      <rect x="18" y="7" width="4" height="15" rx="1" fill="#111" opacity="0.5"/>
+                      <path d="M7 12 L10 9 L14 11 L18 6" stroke="#111" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
+                    </svg>
+                  ),
+                  workflow: { name: 'Daily Briefing', agentGoal: 'Pull key business metrics from the configured API connectors, summarise trends, flag anomalies, and post a structured daily brief to the notification channel.' },
+                },
+                {
+                  id: 'lead-qualify', color: '#FDE68A', label: 'Qualify leads automatically',
+                  sub: 'Agent scores inbound leads and routes hot ones to your CRM or sales channel.',
+                  icon: (
+                    <svg viewBox="0 0 28 28" className="w-6 h-6" fill="none">
+                      <circle cx="10" cy="9" r="5" fill="#FDE68A" stroke="#111" strokeWidth="1.4"/>
+                      <path d="M4 22 C4 17 16 17 16 22" stroke="#111" strokeWidth="1.4" strokeLinecap="round" fill="none"/>
+                      <path d="M18 12 L20 14 L24 10" stroke="#111" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                  ),
+                  workflow: { name: 'Lead Qualification', agentGoal: 'Receive inbound lead data, score each lead based on company size, intent signals and fit criteria, route high-score leads to CRM via API connector, and send a qualification summary to the sales channel.' },
+                },
+                {
+                  id: 'data-sync', color: '#A7F3D0', label: 'Sync data across apps',
+                  sub: 'Connect any two systems and let AI keep them in sync — no ETL scripts needed.',
+                  icon: (
+                    <svg viewBox="0 0 28 28" className="w-6 h-6" fill="none">
+                      <rect x="2" y="4" width="10" height="10" rx="3" fill="#A7F3D0" stroke="#111" strokeWidth="1.4"/>
+                      <rect x="16" y="14" width="10" height="10" rx="3" fill="#A7F3D0" stroke="#111" strokeWidth="1.4"/>
+                      <path d="M12 9 Q20 9 20 14" stroke="#111" strokeWidth="1.3" fill="none" strokeLinecap="round"/>
+                      <path d="M18 12 L20 14 L22 12" stroke="#111" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/>
+                      <path d="M16 19 Q8 19 8 14" stroke="#111" strokeWidth="1.3" fill="none" strokeLinecap="round"/>
+                      <path d="M6 16 L8 14 L10 16" stroke="#111" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                  ),
+                  workflow: { name: 'Data Sync Agent', agentGoal: 'Fetch records from the source API connector, transform and map fields to the destination schema, push updates to the destination connector, and log all sync operations with timestamps and change counts.' },
+                },
               ].map(a => {
                 const isLaunching = launching === a.id
                 const isDone = launched === a.id
@@ -709,16 +786,16 @@ export default function HomePage() {
                   <button key={a.id} onClick={() => useTemplate({ id: a.id, Icon: AgentIcon, title: a.label, tag: 'Quick Action', tagColor: '', accentColor: a.color, description: a.sub, what: [], trigger: 'On demand or scheduled', workflow: a.workflow })}
                     disabled={isLaunching || isDone}
                     className="bg-white border border-[#E8E0D0] rounded-2xl p-5 text-left flex flex-col gap-3 hover:border-[#EA580C] hover:shadow-md transition-all duration-200 disabled:opacity-70 group">
-                    <div className="w-11 h-11 rounded-xl flex items-center justify-center text-2xl"
-                      style={{ backgroundColor: a.color + '33' }}>
-                      {a.emoji}
+                    <div className="w-11 h-11 rounded-xl flex items-center justify-center"
+                      style={{ backgroundColor: a.color + '40', border: `1.5px solid ${a.color}` }}>
+                      {a.icon}
                     </div>
                     <div>
                       <p className="text-sm font-extrabold text-[#111] group-hover:text-[#EA580C] transition-colors">{a.label}</p>
                       <p className="text-xs text-gray-400 mt-1 leading-snug">{a.sub}</p>
                     </div>
                     <div className="mt-auto pt-2 border-t border-[#F0EAE0] text-[11px] font-bold"
-                      style={{ color: isDone ? '#10B981' : isLaunching ? '#EA580C' : '#EA580C' }}>
+                      style={{ color: isDone ? '#10B981' : '#EA580C' }}>
                       {isDone ? '✓ Deployed — opening…' : isLaunching ? 'Deploying…' : 'Deploy now →'}
                     </div>
                   </button>
@@ -727,8 +804,9 @@ export default function HomePage() {
             </div>
           </div>
 
-          {/* ── Technical blueprints ── */}
-          <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">For developers &amp; teams — advanced blueprints</p>
+          {/* ── Advanced / agentic blueprints ── */}
+          <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">For developers &amp; teams — advanced systems</p>
+          <p className="text-xs text-gray-400 mb-4">Orchestration, swarms, bots and autonomous pipelines. Real backend — runs in prod.</p>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
             {TEMPLATES.map(t => {
               const isLaunching = launching === t.id
@@ -900,7 +978,7 @@ export default function HomePage() {
               Start for free <ChevronRightIcon className="w-4 h-4" />
             </button>
             <a href="#templates" className="px-7 py-3.5 border border-[#E8E0D0] hover:border-[#111111] text-[#111111] font-semibold rounded-xl text-sm transition-colors bg-[#F9F5EF]">
-              Browse templates
+              Explore features
             </a>
           </div>
         </div>
