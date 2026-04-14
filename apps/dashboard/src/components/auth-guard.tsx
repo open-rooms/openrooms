@@ -20,8 +20,9 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
       const raw = localStorage.getItem('or_workspace')
       if (raw) {
         const ws = JSON.parse(raw)
-        // Accept any token that starts with 'demo' (handles both 'demo' and 'demo_<timestamp>')
-        if (ws?.name && ws?.token && String(ws.token).startsWith('demo')) {
+        // Accept real tokens (or_ prefix), demo tokens, and any valid workspace
+        const tok = String(ws.token)
+        if (ws?.name && ws?.token && (tok.startsWith('or_') || tok.startsWith('demo'))) {
           setAuthed(true)
           setChecked(true)
           return

@@ -358,17 +358,30 @@ export default function LoginPage() {
     setError('')
     setLoading(true)
     setBootStep(0)
-    BOOT_STEPS.forEach((_, i) => {
-      setTimeout(() => {
-        setBootStep(i)
-        if (i === BOOT_STEPS.length - 1) {
-          setTimeout(() => {
-            localStorage.setItem('or_workspace', JSON.stringify({ name: workspace.trim(), email: email.trim(), token: `demo_${Date.now()}` }))
-            router.push('/home')
-          }, 600)
-        }
-      }, i * 750)
+
+    // Register workspace with backend — persists to PostgreSQL, falls back gracefully
+    fetch('/api/workspaces', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name: workspace.trim(), email: email.trim() }),
     })
+      .then(res => res.json())
+      .catch(() => ({ token: `demo_${Date.now()}`, name: workspace.trim() }))
+      .then(data => {
+        const token = data.token || `demo_${Date.now()}`
+        const wsName = data.name || workspace.trim()
+        BOOT_STEPS.forEach((_, i) => {
+          setTimeout(() => {
+            setBootStep(i)
+            if (i === BOOT_STEPS.length - 1) {
+              setTimeout(() => {
+                localStorage.setItem('or_workspace', JSON.stringify({ name: wsName, email: email.trim(), token, id: data.id || null }))
+                router.push('/home')
+              }, 600)
+            }
+          }, i * 750)
+        })
+      })
   }
 
   return (
