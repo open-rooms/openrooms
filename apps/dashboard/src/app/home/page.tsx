@@ -163,7 +163,7 @@ const WHO_FOR = [
     Icon: BuildIcon,
     title: 'Builders & PMs',
     description: 'Go from idea to a live autonomous system in under 5 minutes using a template. Customise agent goals, swap tools, and watch execution in real time — no code needed.',
-    cta: 'Browse Templates',
+    cta: 'Run a Live Action',
     href: '#templates',
   },
   {
@@ -659,13 +659,22 @@ export default function HomePage() {
         </div>
       </div>
 
-      {/* ── System Blueprints (formerly templates) ────────────────────────────── */}
+      {/* ── Live Actions ──────────────────────────────────────────────────────── */}
       <div id="templates" className="bg-[#F9F5EF] border-b border-[#E8E0D0] py-14">
         <div className="max-w-6xl mx-auto px-6">
-          <div className="mb-8">
-            <span className="text-xs font-bold tracking-widest text-gray-400 uppercase mb-2 inline-block">System Blueprints</span>
-            <h2 className="text-2xl md:text-3xl font-extrabold text-[#111111]">Deploy a live Room in one click</h2>
-            <p className="text-gray-400 text-sm mt-1">Each blueprint provisions a Room + Workflow + Agent runtime. Ready to customise.</p>
+          <div className="mb-8 flex items-end justify-between gap-4 flex-wrap">
+            <div>
+              <span className="text-xs font-bold tracking-widest text-gray-400 uppercase mb-2 inline-block">Live Actions</span>
+              <h2 className="text-2xl md:text-3xl font-extrabold text-[#111111]">Deploy a working system right now</h2>
+              <p className="text-gray-400 text-sm mt-1">
+                Each action calls your backend — creates a Room, provisions a Workflow, deploys an Agent with a goal.
+                Click and it runs. Real infrastructure, not a demo.
+              </p>
+            </div>
+            <div className="flex items-center gap-2 px-3 py-1.5 bg-white border border-[#E8E0D0] rounded-full text-xs text-gray-400 font-mono flex-shrink-0">
+              <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse inline-block" />
+              Backend connected
+            </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
@@ -701,13 +710,16 @@ export default function HomePage() {
                     onMouseLeave={e => { if (!isDone) e.currentTarget.style.backgroundColor = CTA }}
                   >
                     {isDone ? (
-                      <>✓ Launching room…</>
+                      <>&#10003; Opening room…</>
                     ) : isLaunching ? (
-                      <><div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" /> Creating…</>
+                      <><div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" /> Deploying to backend…</>
                     ) : (
-                      <><PlayIcon className="w-3.5 h-3.5" /> Deploy Blueprint</>
+                      <><PlayIcon className="w-3.5 h-3.5" /> Run this system</>
                     )}
                   </button>
+                  {!isDone && !isLaunching && (
+                    <p className="text-[10px] text-center text-gray-400 mt-2">Creates Room + Workflow + Agent via API</p>
+                  )}
                 </div>
               )
             })}
