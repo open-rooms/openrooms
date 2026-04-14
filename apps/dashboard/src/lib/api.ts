@@ -1,4 +1,8 @@
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'
+// Use relative paths so Next.js rewrites proxy to the backend.
+// Falls back to explicit URL only when running api.ts server-side (rare).
+const API_BASE = typeof window !== 'undefined'
+  ? ''  // browser: relative → hits Next.js rewrite → backend
+  : (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001')
 
 async function request<T>(path: string, options?: RequestInit): Promise<T> {
   const hasBody = options?.body !== undefined && options?.body !== null

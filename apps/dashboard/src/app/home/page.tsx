@@ -338,6 +338,7 @@ export default function HomePage() {
   const [showAllRooms, setShowAllRooms] = useState(false)
   const [launching, setLaunching]       = useState<string | null>(null)
   const [launched, setLaunched]         = useState<string | null>(null)
+  const [launchError, setLaunchError]   = useState<string | null>(null)
 
   const ROOMS_PAGE_SIZE = 6
   const visibleRooms = showAllRooms ? rooms : rooms.slice(0, ROOMS_PAGE_SIZE)
@@ -363,27 +364,29 @@ export default function HomePage() {
 
   async function useTemplate(t: typeof TEMPLATES[0]) {
     setLaunching(t.id)
+    setLaunchError(null)
     try {
+      // Step 1: create workflow (nodes auto-provisioned by backend self-heal)
       const wf = await createWorkflow({
         name: t.workflow.name,
         description: t.description,
-        nodes: [
-          { nodeId: 'start', type: 'START', name: 'Start', config: {} },
-          { nodeId: 'end',   type: 'END',   name: 'End',   config: {} },
-        ],
       })
+      // Step 2: create room bound to this workflow
       const room = await createRoom({ name: t.title, description: t.description, workflowId: wf.id })
+      // Step 3: deploy agent with goal into the room
       await createAgent({
         name: `${t.title} Agent`,
         goal: t.workflow.agentGoal,
         roomId: room.id,
         allowedTools: ['calculator', 'http_request', 'memory_query'],
-        policyConfig: { provider: 'simulation', model: 'gpt-4o', maxLoopIterations: 5 },
+        policyConfig: { provider: 'openai', model: 'gpt-4o', maxLoopIterations: 5 },
       })
       setLaunched(t.id)
+      // Navigate to the live room view
       setTimeout(() => router.push(`/rooms/${room.id}`), 1200)
-    } catch (e: any) {
-      alert(`Failed to launch template: ${e.message}`)
+    } catch (e: unknown) {
+      const msg = e instanceof Error ? e.message : String(e)
+      setLaunchError(`Could not deploy system: ${msg}. Make sure the API backend is running.`)
     } finally {
       setLaunching(null)
     }
@@ -662,21 +665,70 @@ export default function HomePage() {
       {/* ── Live Actions ──────────────────────────────────────────────────────── */}
       <div id="templates" className="bg-[#F9F5EF] border-b border-[#E8E0D0] py-14">
         <div className="max-w-6xl mx-auto px-6">
-          <div className="mb-8 flex items-end justify-between gap-4 flex-wrap">
-            <div>
-              <span className="text-xs font-bold tracking-widest text-gray-400 uppercase mb-2 inline-block">Live Actions</span>
-              <h2 className="text-2xl md:text-3xl font-extrabold text-[#111111]">Deploy a working system right now</h2>
-              <p className="text-gray-400 text-sm mt-1">
-                Each action calls your backend — creates a Room, provisions a Workflow, deploys an Agent with a goal.
-                Click and it runs. Real infrastructure, not a demo.
-              </p>
+          <div className="mb-8">
+            <span className="text-xs font-bold tracking-widest text-gray-400 uppercase mb-2 inline-block">Live Actions</span>
+            <h2 className="text-2xl md:text-3xl font-extrabold text-[#111111]">Deploy a working system right now</h2>
+            <p className="text-gray-400 text-sm mt-1">
+              One click creates a Room, provisions a Workflow, and deploys an Agent with a goal. Real infrastructure — not a demo.
+            </p>
+          </div>
+
+          {/* Inline error instead of alert() */}
+          {launchError && (
+            <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl flex items-start gap-3">
+              <svg viewBox="0 0 20 20" className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" fill="currentColor">
+                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd"/>
+              </svg>
+              <div className="flex-1">
+                <p className="text-sm font-semibold text-red-800">{launchError}</p>
+                <p className="text-xs text-red-600 mt-1">
+                  Start the backend: <code className="font-mono bg-red-100 px-1 rounded">pnpm dev --filter @openrooms/api</code>
+                </p>
+              </div>
+              <button onClick={() => setLaunchError(null)} className="text-red-400 hover:text-red-600 text-xs flex-shrink-0">✕</button>
             </div>
-            <div className="flex items-center gap-2 px-3 py-1.5 bg-white border border-[#E8E0D0] rounded-full text-xs text-gray-400 font-mono flex-shrink-0">
-              <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse inline-block" />
-              Backend connected
+          )}
+
+          {/* ── Non-tech quick actions (4 big simple cards) ── */}
+          <div className="mb-10">
+            <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">For everyone — no code needed</p>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              {[
+                { id: 'email-auto',   emoji: '✉️',  label: 'Auto-reply to emails',    sub: 'AI reads, classifies and replies to customer emails', color: '#6EE7B7',
+                  workflow: { name: 'Email Automation', agentGoal: 'Read incoming emails, classify each by intent (support, sales, billing, spam), draft and send an appropriate reply or forward to the right team. Prioritise urgent requests.' } },
+                { id: 'pay-alert',    emoji: '💳',  label: 'Payment failure alerts',   sub: 'Get notified instantly when a payment fails', color: '#FCA5A5',
+                  workflow: { name: 'Payment Monitor', agentGoal: 'Monitor payment events, detect failures or disputes, immediately notify the team via the configured connector, and log each event with amount, customer, and error code.' } },
+                { id: 'uptime',       emoji: '📡',  label: 'Website uptime monitor',   sub: 'Check your site every minute, alert on downtime', color: '#93C5FD',
+                  workflow: { name: 'Uptime Monitor', agentGoal: 'Periodically check the configured health endpoints, measure response times, detect any 4xx/5xx responses or timeouts, and immediately alert via the notification connector.' } },
+                { id: 'daily-brief',  emoji: '📊',  label: 'Daily business brief',     sub: 'AI summarises your key metrics and posts to Slack', color: '#C4B5FD',
+                  workflow: { name: 'Daily Briefing', agentGoal: 'Pull key business metrics from the configured API connectors, summarise trends, flag anomalies, and post a structured daily brief to the notification channel.' } },
+              ].map(a => {
+                const isLaunching = launching === a.id
+                const isDone = launched === a.id
+                return (
+                  <button key={a.id} onClick={() => useTemplate({ id: a.id, Icon: AgentIcon, title: a.label, tag: 'Quick Action', tagColor: '', accentColor: a.color, description: a.sub, what: [], trigger: 'On demand or scheduled', workflow: a.workflow })}
+                    disabled={isLaunching || isDone}
+                    className="bg-white border border-[#E8E0D0] rounded-2xl p-5 text-left flex flex-col gap-3 hover:border-[#EA580C] hover:shadow-md transition-all duration-200 disabled:opacity-70 group">
+                    <div className="w-11 h-11 rounded-xl flex items-center justify-center text-2xl"
+                      style={{ backgroundColor: a.color + '33' }}>
+                      {a.emoji}
+                    </div>
+                    <div>
+                      <p className="text-sm font-extrabold text-[#111] group-hover:text-[#EA580C] transition-colors">{a.label}</p>
+                      <p className="text-xs text-gray-400 mt-1 leading-snug">{a.sub}</p>
+                    </div>
+                    <div className="mt-auto pt-2 border-t border-[#F0EAE0] text-[11px] font-bold"
+                      style={{ color: isDone ? '#10B981' : isLaunching ? '#EA580C' : '#EA580C' }}>
+                      {isDone ? '✓ Deployed — opening…' : isLaunching ? 'Deploying…' : 'Deploy now →'}
+                    </div>
+                  </button>
+                )
+              })}
             </div>
           </div>
 
+          {/* ── Technical blueprints ── */}
+          <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">For developers &amp; teams — advanced blueprints</p>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
             {TEMPLATES.map(t => {
               const isLaunching = launching === t.id

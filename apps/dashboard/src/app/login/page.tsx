@@ -412,16 +412,57 @@ export default function LoginPage() {
                 Launch my workspace →
               </button>
 
-              <div className="pt-3 space-y-2.5">
+              <div className="pt-3 space-y-3">
                 <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Included on day one</p>
                 {[
-                  { icon: '🤖', t: 'Autonomous agents with memory and tool access' },
-                  { icon: '⚡', t: 'Real-time workflow execution + event bus' },
-                  { icon: '🔌', t: 'Register any REST API as an agent tool' },
-                  { icon: '📊', t: 'Full observability — every decision traced' },
-                ].map(item => (
-                  <div key={item.t} className="flex items-center gap-2.5">
-                    <span className="text-base">{item.icon}</span>
+                  {
+                    icon: (
+                      <svg viewBox="0 0 28 28" className="w-5 h-5" fill="none">
+                        <rect x="3" y="5" width="22" height="18" rx="5" fill="#F4A89A" stroke="#111" strokeWidth="1.5"/>
+                        <line x1="3" y1="11" x2="25" y2="11" stroke="#111" strokeWidth="1.2"/>
+                        <circle cx="8" cy="8" r="1.5" fill="#111" opacity="0.4"/>
+                        <circle cx="12" cy="8" r="1.5" fill="#111" opacity="0.4"/>
+                        <circle cx="16" cy="8" r="1.5" fill="#111" opacity="0.4"/>
+                        <rect x="7" y="15" width="14" height="2" rx="1" fill="#111" opacity="0.3"/>
+                        <rect x="7" y="19" width="9" height="2" rx="1" fill="#111" opacity="0.3"/>
+                      </svg>
+                    ),
+                    t: 'Autonomous agents with memory and tool access',
+                  },
+                  {
+                    icon: (
+                      <svg viewBox="0 0 28 28" className="w-5 h-5" fill="none">
+                        <path d="M7 4 L4 14 L12 14 L9 24 L24 10 L15 10 L19 4 Z" fill="#FBBF24" stroke="#111" strokeWidth="1.5" strokeLinejoin="round"/>
+                      </svg>
+                    ),
+                    t: 'Real-time workflow execution + event bus',
+                  },
+                  {
+                    icon: (
+                      <svg viewBox="0 0 28 28" className="w-5 h-5" fill="none">
+                        <circle cx="14" cy="14" r="10" fill="#7DD3FC" stroke="#111" strokeWidth="1.5"/>
+                        <path d="M9 14 C9 11 11 9 14 9 C17 9 19 11 19 14" stroke="#111" strokeWidth="1.5" fill="none" strokeLinecap="round"/>
+                        <circle cx="14" cy="19" r="2.5" fill="#111"/>
+                        <rect x="13" y="13" width="2" height="4" rx="1" fill="#111"/>
+                      </svg>
+                    ),
+                    t: 'Register any REST API as an agent tool',
+                  },
+                  {
+                    icon: (
+                      <svg viewBox="0 0 28 28" className="w-5 h-5" fill="none">
+                        <rect x="3" y="16" width="5" height="9" rx="2" fill="#6EE7B7" stroke="#111" strokeWidth="1.3"/>
+                        <rect x="11" y="10" width="5" height="15" rx="2" fill="#6EE7B7" stroke="#111" strokeWidth="1.3"/>
+                        <rect x="19" y="4" width="5" height="21" rx="2" fill="#6EE7B7" stroke="#111" strokeWidth="1.3"/>
+                      </svg>
+                    ),
+                    t: 'Full observability — every decision traced',
+                  },
+                ].map((item, i) => (
+                  <div key={i} className="flex items-center gap-3">
+                    <div className="w-8 h-8 flex items-center justify-center rounded-xl border border-[#E0D6CC] bg-white shadow-sm flex-shrink-0">
+                      {item.icon}
+                    </div>
                     <span className="text-[12px] text-gray-500">{item.t}</span>
                   </div>
                 ))}
