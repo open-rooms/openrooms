@@ -14,7 +14,7 @@ import {
   ReportsIcon,
   MemoryIcon,
   AutomationIcon,
-  ToolIcon,
+  WebhookIcon,
 } from '@/components/icons/system'
 import { formatDate } from '@/lib/utils'
 
@@ -31,7 +31,7 @@ const CAPABILITIES = [
   { id: 'logs' as Panel,       label: 'Live Activity',  Icon: LiveRunsIcon,   desc: 'Real-time feed' },
   { id: 'metrics' as Panel,    label: 'Metrics',        Icon: ReportsIcon,    desc: 'Run stats' },
   { id: 'storage' as Panel,    label: 'Memory',         Icon: MemoryIcon,     desc: 'Shared room state' },
-  { id: 'linked' as Panel,     label: 'Linked Rooms',   Icon: ToolIcon,       desc: 'Room-to-room wiring' },
+  { id: 'linked' as Panel,     label: 'Linked Rooms',   Icon: WebhookIcon,    desc: 'Room-to-room wiring' },
 ]
 
 // ─── Panel: Agents ─────────────────────────────────────────────────────────────
@@ -235,7 +235,7 @@ function ConnectorsPanel({ roomId }: { roomId: string }) {
               <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">Registered Connectors</p>
               {connectors.map(t => (
                 <div key={t.id} className="flex items-center gap-3 p-3 bg-white border border-[#D4C4A8] rounded-xl mb-2">
-                  <ToolIcon className="w-8 h-8 flex-shrink-0" />
+                  <APIIcon className="w-8 h-8 flex-shrink-0" />
                   <div><p className="text-xs font-bold text-[#111111]">{t.name}</p><p className="text-[10px] text-gray-500 truncate">{t.description}</p></div>
                   <span className={`ml-auto text-[10px] px-1.5 py-0.5 rounded font-bold ${t.category === 'BLOCKCHAIN' ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700'}`}>{t.category}</span>
                 </div>
@@ -246,13 +246,13 @@ function ConnectorsPanel({ roomId }: { roomId: string }) {
             <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">Built-in Tools</p>
             {builtins.map(t => (
               <div key={t.id} className="flex items-center gap-3 p-3 bg-white border border-[#D4C4A8] rounded-xl mb-2">
-                <ToolIcon className="w-8 h-8 flex-shrink-0" />
+                <APIIcon className="w-8 h-8 flex-shrink-0" />
                 <div><p className="text-xs font-bold text-[#111111]">{t.name}</p><p className="text-[10px] text-gray-500 truncate">{t.description}</p></div>
               </div>
             ))}
             {builtins.length === 0 && connectors.length === 0 && (
               <div className="text-center py-6">
-                <ToolIcon className="w-10 h-10 mx-auto mb-2 opacity-30" />
+                <APIIcon className="w-10 h-10 mx-auto mb-2 opacity-30" />
                 <p className="text-xs text-gray-500">No tools yet. <Link href="/connectors" className="text-[#EA580C] font-bold hover:underline">Add a connector →</Link></p>
               </div>
             )}

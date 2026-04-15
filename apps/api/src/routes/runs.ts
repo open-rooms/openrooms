@@ -66,6 +66,36 @@ export async function runsRoutes(
     }
   });
 
+  // ─── GET /api/runs/:id/trace ──────────────────────────────────────────────
+  // Returns the full agent_execution_traces for a run (every LLM call, tool
+  // invocation, and decision step with timing and token info).
+
+  fastify.get<{
+    Params: { id: string };
+  }>('/runs/:id/trace', async (request, reply) => {
+    const { id } = request.params;
+
+    try {
+      const run = await container.runManager.getRun(id);
+      if (!run) return reply.code(404).send({ error: 'Run not found' });
+
+      const traces = await (container.db as any)
+        .selectFrom('agent_execution_traces')
+        .selectAll()
+        .where('agentId', '=', run.targetId)
+        .orderBy('timestamp', 'asc')
+        .limit(200)
+        .execute();
+
+      return reply.send({ run, traces, count: traces.length });
+    } catch (error) {
+      return reply.code(500).send({
+        error: 'Failed to fetch trace',
+        message: (error as Error).message,
+      });
+    }
+  });
+
   // ─── GET /api/logs/:runId ─────────────────────────────────────────────────
   // Returns execution_logs associated with a run.
   // For agent runs  → logs where agentId = run.targetId

@@ -344,14 +344,20 @@ export default function RoomsPage() {
                 const isRunning = room.status === 'RUNNING'
                 return (
                   <Link key={room.id} href={`/rooms/${room.id}`} className="block group">
-                    <div className={`bg-white border-2 rounded-xl p-5 hover:shadow-lg transition-all duration-200 hover:-translate-y-0.5 ${isRunning ? 'border-blue-300 bg-blue-50/30' : 'border-[#D4C4A8] hover:border-[#EA580C]'}`}>
-                      <div className="flex items-center gap-4">
+                    <div className={`relative bg-white border-2 rounded-xl p-5 transition-all duration-300 overflow-hidden
+                      ${isRunning
+                        ? 'border-blue-300 bg-blue-50/30 hover:border-blue-400 hover:shadow-[0_4px_24px_rgba(59,130,246,0.15)]'
+                        : 'border-[#D4C4A8] hover:border-[#EA580C] hover:shadow-[0_4px_24px_rgba(234,88,12,0.12)] hover:-translate-y-0.5'
+                      }`}>
+                      {/* Orange glow sweep on hover */}
+                      <div className="absolute inset-0 bg-gradient-to-r from-[#EA580C]/0 via-[#EA580C]/5 to-[#EA580C]/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
+                      <div className="flex items-center gap-4 relative">
 
                         {/* Icon */}
-                        <div className={`w-12 h-12 rounded-xl border-2 flex items-center justify-center flex-shrink-0 transition-transform group-hover:scale-105 ${
+                        <div className={`w-12 h-12 rounded-xl border-2 flex items-center justify-center flex-shrink-0 transition-all duration-300 group-hover:scale-110 group-hover:border-[#EA580C]/40 group-hover:shadow-[0_2px_12px_rgba(234,88,12,0.18)] ${
                           isRunning ? 'border-blue-300 bg-blue-50' :
                           room.status === 'COMPLETED' ? 'border-emerald-300 bg-emerald-50' :
-                          room.status === 'FAILED' ? 'border-red-300 bg-red-50' : 'border-[#D4C4A8] bg-white'
+                          room.status === 'FAILED' ? 'border-red-300 bg-red-50' : 'border-[#D4C4A8] bg-[#FDF8F4]'
                         }`}>
                           <RoomsIcon className="w-9 h-9" />
                         </div>
@@ -420,6 +426,8 @@ export default function RoomsPage() {
                         </div>
 
                       </div>
+                      {/* Animated bottom accent bar */}
+                      <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-[#EA580C] to-[#F97316] scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left" />
                     </div>
                   </Link>
                 )

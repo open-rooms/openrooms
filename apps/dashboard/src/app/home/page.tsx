@@ -697,7 +697,10 @@ export default function HomePage() {
               <div className="flex-1">
                 <p className="text-sm font-semibold text-red-800">{launchError}</p>
                 <p className="text-xs text-red-600 mt-1">
-                  Start the backend: <code className="font-mono bg-red-100 px-1 rounded">pnpm dev --filter @openrooms/api</code>
+                  {typeof window !== 'undefined' && window.location.hostname !== 'localhost'
+                    ? <>Database not connected in production. In Railway, go to your API service → Variables → add <code className="font-mono bg-red-100 px-1 rounded">DATABASE_URL</code> pointing to your PostgreSQL plugin, then redeploy.</>
+                    : <>Start the backend: <code className="font-mono bg-red-100 px-1 rounded">pnpm dev --filter @openrooms/api</code></>
+                  }
                 </p>
               </div>
               <button onClick={() => setLaunchError(null)} className="text-red-400 hover:text-red-600 text-xs flex-shrink-0">✕</button>

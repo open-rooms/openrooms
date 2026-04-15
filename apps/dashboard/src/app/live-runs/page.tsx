@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { CheckCircleIcon, AlertCircleIcon, ClockIcon, PlayIcon } from '@/components/icons'
 import { LiveRunsIcon } from '@/components/icons/system'
@@ -17,6 +18,7 @@ interface SSEEvent {
 }
 
 export default function LiveRunsPage() {
+  const router = useRouter()
   const [runs, setRuns] = useState<Run[]>([])
   const [roomEvents, setRoomEvents] = useState<(ExecutionLog & { roomName?: string })[]>([])
   const [sseEvents, setSseEvents] = useState<SSEEvent[]>([])
@@ -301,6 +303,11 @@ export default function LiveRunsPage() {
                             {JSON.stringify(run.input).substring(0, 60)}
                           </div>
                         )}
+                        <div className="mt-2 text-right">
+                          <Link href={`/live-runs/${run.id}`} className="text-[10px] font-bold text-[#EA580C] hover:underline" onClick={e => e.stopPropagation()}>
+                            View trace →
+                          </Link>
+                        </div>
                       </button>
                     ))}
                   </CardContent>
@@ -334,24 +341,30 @@ export default function LiveRunsPage() {
                   {!loading && completedRuns.length > 0 && (
                     <div className="space-y-2">
                       {completedRuns.map(run => (
-                        <button
-                          key={run.id}
-                          onClick={() => loadRunLogs(run.id)}
-                          className={`w-full text-left p-3 rounded-lg border transition-all ${selectedRun === run.id ? 'border-[#EA580C] bg-white shadow-sm' : 'border-[#D4C4A8] bg-white hover:border-[#EA580C]'}`}
-                        >
-                          <div className="flex items-center justify-between mb-1.5">
-                            <div className="flex items-center gap-2">
-                              {getTypeBadge(run.type)}
-                              {getStatusBadge(run.status)}
+                        <div key={run.id} className={`p-3 rounded-lg border transition-all ${selectedRun === run.id ? 'border-[#EA580C] bg-white shadow-sm' : 'border-[#D4C4A8] bg-white hover:border-[#EA580C]'}`}>
+                          <button
+                            onClick={() => loadRunLogs(run.id)}
+                            className="w-full text-left"
+                          >
+                            <div className="flex items-center justify-between mb-1.5">
+                              <div className="flex items-center gap-2">
+                                {getTypeBadge(run.type)}
+                                {getStatusBadge(run.status)}
+                              </div>
+                              <span className="text-xs text-gray-400">{formatTime(run.createdAt)}</span>
                             </div>
-                            <span className="text-xs text-gray-400">{formatTime(run.createdAt)}</span>
+                            <div className="text-xs font-mono text-gray-400 truncate">{run.id.slice(0, 16)}…</div>
+                            <div className="flex justify-between text-xs text-gray-500 mt-1">
+                              <span>Duration: {formatDuration(run)}</span>
+                              {run.error && <span className="text-red-500 truncate max-w-[120px]">{run.error}</span>}
+                            </div>
+                          </button>
+                          <div className="mt-2 flex justify-end">
+                            <Link href={`/live-runs/${run.id}`} className="text-[10px] font-bold text-[#EA580C] hover:underline">
+                              View trace →
+                            </Link>
                           </div>
-                          <div className="text-xs font-mono text-gray-400 truncate">{run.id.slice(0, 16)}…</div>
-                          <div className="flex justify-between text-xs text-gray-500 mt-1">
-                            <span>Duration: {formatDuration(run)}</span>
-                            {run.error && <span className="text-red-500 truncate max-w-[120px]">{run.error}</span>}
-                          </div>
-                        </button>
+                        </div>
                       ))}
                     </div>
                   )}

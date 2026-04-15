@@ -94,6 +94,7 @@ export const getRuns = (params?: { type?: string; targetId?: string; status?: st
 }
 export const getRun = (id: string) => request<Run>(`/api/runs/${id}`)
 export const getLogsByRun = (runId: string) => request<{ logs: ExecutionLog[]; runId: string; count: number }>(`/api/logs/${runId}`)
+export const getRunTrace = (runId: string) => request<{ run: Run; traces: AgentTrace[]; count: number }>(`/api/runs/${runId}/trace`)
 
 export const runAgent = (agentId: string, data?: { roomId?: string; maxIterations?: number; goal?: string }) =>
   request<{ runId: string; agentId: string; status: string; message: string }>(
@@ -334,6 +335,7 @@ export const api = {
   getRuns,
   getRun,
   getLogsByRun,
+  getRunTrace,
   runAgent,
   runWorkflow,
   deployAgent,
