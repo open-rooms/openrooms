@@ -7,85 +7,127 @@ import { OpenRoomsLogo } from '@/components/openrooms-logo'
 const CTA = '#EA580C'
 const CTA_HOVER = '#C2410C'
 
-// ─── Contextual icons for chat messages ──────────────────────────────────────
-function IconPayment() {
+// ─── Per-message contextual icons ────────────────────────────────────────────
+// Agent action icons — shown inline with each agent message
+function IconEnvelope() {
   return (
-    <svg viewBox="0 0 22 22" className="w-4 h-4" fill="none">
-      <rect x="2" y="5" width="18" height="12" rx="3" fill="#FBBF24" stroke="#111" strokeWidth="1.3"/>
-      <rect x="2" y="9" width="18" height="3" fill="#111" opacity="0.2"/>
-      <rect x="5" y="13" width="4" height="1.5" rx="0.75" fill="#111" opacity="0.4"/>
+    <svg viewBox="0 0 18 18" className="w-3.5 h-3.5 flex-shrink-0" fill="none">
+      <rect x="1" y="4" width="16" height="10" rx="2.5" fill="#6EE7B7" stroke="#111" strokeWidth="1.1"/>
+      <path d="M1 7 L9 11.5 L17 7" stroke="#111" strokeWidth="1.1"/>
     </svg>
   )
 }
-function IconSupport() {
+function IconMemory() {
   return (
-    <svg viewBox="0 0 22 22" className="w-4 h-4" fill="none">
-      <circle cx="11" cy="11" r="9" fill="#93C5FD" stroke="#111" strokeWidth="1.3"/>
-      <path d="M7 10 Q7 7 11 7 Q15 7 15 10 Q15 13 11 13" stroke="#111" strokeWidth="1.3" fill="none" strokeLinecap="round"/>
-      <circle cx="11" cy="16" r="1.2" fill="#111"/>
+    <svg viewBox="0 0 18 18" className="w-3.5 h-3.5 flex-shrink-0" fill="none">
+      <rect x="2" y="3" width="14" height="12" rx="2.5" fill="#C4B5FD" stroke="#111" strokeWidth="1.1"/>
+      <path d="M5 7 L9 10 L13 7" stroke="#111" strokeWidth="1.1" strokeLinecap="round"/>
+      <line x1="5" y1="11" x2="13" y2="11" stroke="#111" strokeWidth="1" strokeLinecap="round" opacity="0.4"/>
     </svg>
   )
 }
-function IconPipeline() {
+function IconTrace() {
   return (
-    <svg viewBox="0 0 22 22" className="w-4 h-4" fill="none">
-      <rect x="2" y="3" width="5" height="5" rx="1.5" fill="#6EE7B7" stroke="#111" strokeWidth="1.2"/>
-      <rect x="8.5" y="3" width="5" height="5" rx="1.5" fill="#6EE7B7" stroke="#111" strokeWidth="1.2"/>
-      <rect x="15" y="3" width="5" height="5" rx="1.5" fill="#6EE7B7" stroke="#111" strokeWidth="1.2"/>
-      <line x1="7" y1="5.5" x2="8.5" y2="5.5" stroke="#111" strokeWidth="1"/>
-      <line x1="13.5" y1="5.5" x2="15" y2="5.5" stroke="#111" strokeWidth="1"/>
-      <rect x="5" y="13" width="12" height="5" rx="2" fill="#F4A89A" stroke="#111" strokeWidth="1.2"/>
-      <line x1="11" y1="8" x2="11" y2="13" stroke="#111" strokeWidth="1"/>
+    <svg viewBox="0 0 18 18" className="w-3.5 h-3.5 flex-shrink-0" fill="none">
+      <rect x="2" y="2" width="14" height="14" rx="2.5" fill="#FCA5A5" stroke="#111" strokeWidth="1.1"/>
+      <path d="M4 11 L6 8 L8 10 L11 5 L14 8" stroke="#111" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
     </svg>
   )
 }
-function IconMonitor() {
+function IconRoute() {
   return (
-    <svg viewBox="0 0 22 22" className="w-4 h-4" fill="none">
-      <rect x="2" y="3" width="18" height="13" rx="3" fill="#C4B5FD" stroke="#111" strokeWidth="1.3"/>
-      <path d="M5 12 L7 9 L9 11 L12 6 L15 10 L17 8" stroke="#111" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
-      <rect x="8" y="16" width="6" height="2" rx="1" fill="#111" opacity="0.3"/>
+    <svg viewBox="0 0 18 18" className="w-3.5 h-3.5 flex-shrink-0" fill="none">
+      <circle cx="9" cy="9" r="7.5" fill="#FDE68A" stroke="#111" strokeWidth="1.1"/>
+      <path d="M6 7 L9 5 L12 7" stroke="#111" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/>
+      <path d="M6 11 L9 13 L12 11" stroke="#111" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/>
+      <line x1="9" y1="5" x2="9" y2="13" stroke="#111" strokeWidth="1" strokeLinecap="round" opacity="0.35"/>
+    </svg>
+  )
+}
+function IconCheck() {
+  return (
+    <svg viewBox="0 0 18 18" className="w-3.5 h-3.5 flex-shrink-0" fill="none">
+      <circle cx="9" cy="9" r="7.5" fill="#6EE7B7" stroke="#111" strokeWidth="1.1"/>
+      <path d="M5.5 9 L8 11.5 L12.5 6.5" stroke="#111" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
+    </svg>
+  )
+}
+function IconAlert() {
+  return (
+    <svg viewBox="0 0 18 18" className="w-3.5 h-3.5 flex-shrink-0" fill="none">
+      <rect x="2" y="5" width="14" height="10" rx="2.5" fill="#FCA5A5" stroke="#111" strokeWidth="1.1"/>
+      <rect x="2" y="9" width="14" height="2.5" fill="#111" opacity="0.12"/>
+      <circle cx="13.5" cy="5" r="3" fill="#FBBF24" stroke="#111" strokeWidth="1"/>
+      <line x1="13.5" y1="3.5" x2="13.5" y2="6" stroke="#111" strokeWidth="1" strokeLinecap="round"/>
+    </svg>
+  )
+}
+// User-side contextual icons (per conversation tab)
+function IconUserMsg() {
+  return (
+    <svg viewBox="0 0 18 18" className="w-3.5 h-3.5 flex-shrink-0" fill="none">
+      <circle cx="9" cy="7" r="4" fill="#FCA5A5" stroke="#111" strokeWidth="1.1"/>
+      <path d="M3 15.5 C3 12 15 12 15 15.5" stroke="#111" strokeWidth="1.1" strokeLinecap="round" fill="none"/>
+    </svg>
+  )
+}
+function IconUserDev() {
+  return (
+    <svg viewBox="0 0 18 18" className="w-3.5 h-3.5 flex-shrink-0" fill="none">
+      <rect x="2" y="3" width="14" height="12" rx="2.5" fill="#93C5FD" stroke="#111" strokeWidth="1.1"/>
+      <path d="M6 9 L4.5 10.5 L6 12" stroke="#111" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/>
+      <path d="M12 9 L13.5 10.5 L12 12" stroke="#111" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/>
+      <line x1="9.5" y1="8" x2="8.5" y2="13" stroke="#111" strokeWidth="1" strokeLinecap="round" opacity="0.5"/>
     </svg>
   )
 }
 
-// Per-conversation user icon
-const CONV_ICONS = [<IconPayment key="p"/>, <IconSupport key="s"/>, <IconPipeline key="pi"/>]
+// Per-message agent icon — maps each line index to a platform icon
+type AgentIconMap = Record<number, React.ReactNode>
+const AGENT_ICONS: AgentIconMap[] = [
+  // Conv 0: Automation / Memory
+  { 2: <IconEnvelope />, 4: <IconMemory />, 6: <IconCheck /> },
+  // Conv 1: Support AI / Trace
+  { 2: <IconTrace />, 3: <IconTrace />, 6: <IconCheck /> },
+  // Conv 2: Dev Pipeline / Cost Routing
+  { 2: <IconRoute />, 3: <IconRoute />, 5: <IconAlert />, 7: <IconCheck /> },
+]
+// User icons per tab
+const USER_ICONS = [<IconUserMsg key="u0"/>, <IconEnvelope key="u1"/>, <IconUserDev key="u2"/>]
 
-// ─── Chat conversation data ───────────────────────────────────────────────────
+// ─── Chat conversation data — written as live production output ───────────────
 interface ChatLine { from: 'user' | 'agent' | 'sys'; text: string; delay: number }
 
 const CHATS: ChatLine[][] = [
   [
-    { from: 'user',  text: 'Alert my team when a payment fails', delay: 0 },
-    { from: 'sys',   text: '→ spawning payment-monitor agent…', delay: 850 },
-    { from: 'agent', text: 'Connected to Stripe webhook. Watching for failures.', delay: 1700 },
-    { from: 'sys',   text: '→ Workflow: failure → Slack + email. ✓ Active', delay: 2500 },
-    { from: 'agent', text: 'First test run passed in 143ms. Your team is covered.', delay: 3300 },
-    { from: 'user',  text: 'Can it auto-retry the charge?', delay: 4200 },
-    { from: 'agent', text: 'Retry node added — max 3×, 1h delay. Already live.', delay: 5000 },
+    { from: 'user',  text: 'My support agent needs to remember each customer', delay: 0 },
+    { from: 'sys',   text: '→ loading workspace memory · 1,247 vectors indexed', delay: 800 },
+    { from: 'agent', text: 'Ready. I already know Sarah opened 3 tickets this week.', delay: 1700 },
+    { from: 'sys',   text: '→ memory.recall: 12ms · confidence 0.94', delay: 2400 },
+    { from: 'agent', text: 'Escalation patterns from yesterday — stored. Won\'t repeat.', delay: 3200 },
+    { from: 'user',  text: 'Can it auto-draft replies using that context?', delay: 4100 },
+    { from: 'agent', text: 'Draft sent. Personalised from memory. Resolved in 900ms.', delay: 5000 },
   ],
   [
-    { from: 'user',  text: 'Auto-reply to Zendesk tickets when possible', delay: 0 },
-    { from: 'sys',   text: '→ deploying support-triage Room…', delay: 750 },
-    { from: 'agent', text: 'Connector: Zendesk registered. Reading ticket queue.', delay: 1600 },
-    { from: 'agent', text: 'Ticket #4821 "Reset password?" → reply drafted + sent.', delay: 2400 },
-    { from: 'sys',   text: '→ CSAT predicted 4.7★. Resolved in 1.1s', delay: 3100 },
-    { from: 'user',  text: 'What about complex tickets?', delay: 4000 },
-    { from: 'agent', text: 'Flagged + routed with full context. 91 resolved today.', delay: 4800 },
+    { from: 'user',  text: 'Why did the agent decline that refund request?', delay: 0 },
+    { from: 'sys',   text: '→ fetching trace run-7a2c · 8 steps logged', delay: 750 },
+    { from: 'agent', text: 'Step 3: policy check returned "over 30-day window". Declined.', delay: 1600 },
+    { from: 'agent', text: 'Replaying with updated refund policy now…', delay: 2350 },
+    { from: 'sys',   text: '→ replay complete · 1 decision changed · diff saved', delay: 3050 },
+    { from: 'user',  text: 'Apply the new policy to all future runs', delay: 3900 },
+    { from: 'agent', text: 'Policy v2 live. Every run replayable from this point.', delay: 4750 },
   ],
   [
-    { from: 'user',  text: 'Set up ingest → classify → route pipeline', delay: 0 },
-    { from: 'sys',   text: '→ provisioning data-pipeline Room…', delay: 700 },
-    { from: 'agent', text: 'Agent 1 (ingest) live on /webhook/data.', delay: 1500 },
-    { from: 'agent', text: 'Agent 2 (classify) loaded GPT-4o. Awaiting events.', delay: 2300 },
-    { from: 'agent', text: 'Agent 3 (router) — 4 downstream connectors configured.', delay: 3000 },
-    { from: 'sys',   text: '→ Test event: classified in 890ms. Pipeline live ✓', delay: 3700 },
-    { from: 'user',  text: 'Log every decision for audit trail', delay: 4600 },
-    { from: 'agent', text: 'Trace logger on. Every step replayable forever.', delay: 5400 },
+    { from: 'user',  text: 'Keep costs under $50/month across all rooms', delay: 0 },
+    { from: 'sys',   text: '→ applying spend policy to 8 rooms…', delay: 700 },
+    { from: 'agent', text: 'Routing to gpt-4o-mini where quality holds. 78% cheaper.', delay: 1550 },
+    { from: 'agent', text: 'Projected this month: $11.20. Well inside budget.', delay: 2300 },
+    { from: 'sys',   text: '→ 6 rooms re-routed · cheapest-pass policy active', delay: 3000 },
+    { from: 'user',  text: 'Pause any room that spikes above $8', delay: 3850 },
+    { from: 'agent', text: 'Spend alerts armed. Auto-pause on cap breach. Done.', delay: 4700 },
   ],
 ]
-const TAB_LABELS = ['Automation', 'Support AI', 'Dev Pipeline']
+const TAB_LABELS = ['Memory', 'Trace Replay', 'Cost Routing']
 
 // ─── Bot face avatar ──────────────────────────────────────────────────────────
 function BotAvatar() {
@@ -141,8 +183,9 @@ function AgentTerminal() {
   }, [tabIdx])
 
   const conv = CHATS[tabIdx]!
-  const slug = ['payment-monitor', 'support-triage', 'data-pipeline'][tabIdx]!
-  const UserIcon = CONV_ICONS[tabIdx]!
+  const slug = ['memory-room', 'trace-replay', 'cost-router'][tabIdx]!
+  const UserIcon = USER_ICONS[tabIdx]!
+  const agentIconMap = AGENT_ICONS[tabIdx]!
 
   return (
     <div className="rounded-2xl overflow-hidden border border-white/10 shadow-xl" style={{ background: '#0D0F1A' }}>
@@ -185,7 +228,6 @@ function AgentTerminal() {
                   style={{ background: '#1E2240', border: '1px solid rgba(255,255,255,0.07)' }}>
                   <p className="text-[11.5px] font-mono leading-snug text-white/80">{line.text}</p>
                 </div>
-                {/* Contextual user icon */}
                 <div className="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0"
                   style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)' }}>
                   {UserIcon}
@@ -193,12 +235,22 @@ function AgentTerminal() {
               </div>
             )
           }
+          // Agent message — show contextual platform icon badge alongside bot avatar
+          const actionIcon = agentIconMap[i]
           return (
             <div key={i} className="flex items-end gap-1.5">
               <BotAvatar />
-              <div className="max-w-[76%] px-3 py-2 rounded-2xl rounded-tl-none"
-                style={{ background: 'rgba(234,88,12,0.12)', border: '1px solid rgba(234,88,12,0.22)' }}>
-                <p className="text-[11.5px] font-mono leading-snug text-[#FCA882]">{line.text}</p>
+              <div className="max-w-[76%] flex flex-col gap-1">
+                <div className="px-3 py-2 rounded-2xl rounded-tl-none"
+                  style={{ background: 'rgba(234,88,12,0.12)', border: '1px solid rgba(234,88,12,0.22)' }}>
+                  <p className="text-[11.5px] font-mono leading-snug text-[#FCA882]">{line.text}</p>
+                </div>
+                {actionIcon && (
+                  <div className="flex items-center gap-1.5 px-1">
+                    {actionIcon}
+                    <span className="text-[9px] font-mono text-white/20">action complete</span>
+                  </div>
+                )}
               </div>
             </div>
           )
@@ -452,29 +504,28 @@ export default function LoginPage() {
           ))}
         </div>
 
-        {/* ── Next-phase preview terminals ─────────────────────────────────── */}
+        {/* ── Three live-feature terminal previews ────────────────────────── */}
         <div className="relative z-10 mt-8">
-          <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-3">Coming next — what we&apos;re building</p>
           <div className="grid grid-cols-3 gap-2">
 
             {/* Terminal 1: Persistent Memory */}
             <div className="rounded-xl overflow-hidden border border-[#2A2D3E] select-none pointer-events-none">
               <div className="flex items-center justify-between px-2.5 py-1.5 bg-[#0D0F1A]">
-                <span className="text-[8px] font-mono text-white/20 tracking-widest truncate">persistent-memory</span>
+                <span className="text-[8px] font-mono text-white/20 tracking-widest truncate">memory-room</span>
                 <div className="flex gap-0.5 flex-shrink-0">
                   <span className="w-1.5 h-1.5 rounded-full bg-red-400/40"/><span className="w-1.5 h-1.5 rounded-full bg-yellow-400/40"/><span className="w-1.5 h-1.5 rounded-full bg-green-400/40"/>
                 </div>
               </div>
               <div className="bg-[#0D0F1A] px-2.5 py-2.5 font-mono text-[8.5px] leading-[1.7] space-y-0.5">
-                <div className="text-white/25">// shared workspace memory</div>
-                <div className="text-[#6EE7B7]">memory.write(<span className="text-[#FCA882]">&quot;user-prefs&quot;</span>)</div>
-                <div className="text-[#6EE7B7]">memory.query(<span className="text-[#FCA882]">&quot;resolve ticket&quot;</span>)</div>
-                <div className="text-white/25">// ← 12ms · 94% match</div>
-                <div className="text-white/40">status: <span className="text-[#6EE7B7]">indexed</span> · 1.2k vectors</div>
+                <div className="text-white/25">// workspace memory · live</div>
+                <div className="text-[#6EE7B7]">room.memory.write(<span className="text-[#FCA882]">&quot;sarah&quot;</span>, ctx)</div>
+                <div className="text-[#6EE7B7]">room.memory.recall(<span className="text-[#FCA882]">&quot;vip churn&quot;</span>)</div>
+                <div className="text-white/40">→ 12ms · <span className="text-[#6EE7B7]">0.94</span> confidence</div>
+                <div className="text-white/25">// 1,247 vectors · always on</div>
               </div>
             </div>
 
-            {/* Terminal 2: Trace Viewer */}
+            {/* Terminal 2: Trace Replay */}
             <div className="rounded-xl overflow-hidden border border-[#2A2D3E] select-none pointer-events-none">
               <div className="flex items-center justify-between px-2.5 py-1.5 bg-[#0D0F1A]">
                 <span className="text-[8px] font-mono text-white/20 tracking-widest truncate">trace-replay</span>
@@ -483,28 +534,28 @@ export default function LoginPage() {
                 </div>
               </div>
               <div className="bg-[#0D0F1A] px-2.5 py-2.5 font-mono text-[8.5px] leading-[1.7] space-y-0.5">
-                <div className="text-white/25">// execution trace</div>
-                <div className="text-[#C4B5FD]">step 1 <span className="text-white/30">llm_call</span> 312ms</div>
-                <div className="text-[#C4B5FD]">step 2 <span className="text-white/30">tool:http</span> 88ms</div>
-                <div className="text-[#C4B5FD]">step 3 <span className="text-white/30">decision</span> 44ms</div>
-                <div className="text-white/40">replay: <span className="text-[#FCA882]">gpt-4o-mini</span> ↗</div>
+                <div className="text-white/25">// every decision replayable</div>
+                <div className="text-[#C4B5FD]">runs.trace(<span className="text-[#FCA882]">&quot;run-7a2c&quot;</span>)</div>
+                <div className="text-white/40">step 3 → <span className="text-[#FCA882]">declined</span> · policy v1</div>
+                <div className="text-[#C4B5FD]">trace.replay(<span className="text-[#FCA882]">&#123; policy: <span className="text-[#6EE7B7]">&quot;v2&quot;</span> &#125;</span>)</div>
+                <div className="text-white/40">→ <span className="text-[#6EE7B7]">approved ✓</span> · diff saved</div>
               </div>
             </div>
 
-            {/* Terminal 3: Model Routing */}
+            {/* Terminal 3: Cost Routing */}
             <div className="rounded-xl overflow-hidden border border-[#2A2D3E] select-none pointer-events-none">
               <div className="flex items-center justify-between px-2.5 py-1.5 bg-[#0D0F1A]">
-                <span className="text-[8px] font-mono text-white/20 tracking-widest truncate">model-router</span>
+                <span className="text-[8px] font-mono text-white/20 tracking-widest truncate">cost-router</span>
                 <div className="flex gap-0.5 flex-shrink-0">
                   <span className="w-1.5 h-1.5 rounded-full bg-red-400/40"/><span className="w-1.5 h-1.5 rounded-full bg-yellow-400/40"/><span className="w-1.5 h-1.5 rounded-full bg-green-400/40"/>
                 </div>
               </div>
               <div className="bg-[#0D0F1A] px-2.5 py-2.5 font-mono text-[8.5px] leading-[1.7] space-y-0.5">
-                <div className="text-white/25">// routing policy</div>
-                <div className="text-[#FCA882]">policy: <span className="text-[#6EE7B7]">&quot;cheapest-pass&quot;</span></div>
-                <div className="text-white/40">route → <span className="text-[#C4B5FD]">gpt-4o-mini</span></div>
-                <div className="text-white/40">cost: <span className="text-[#6EE7B7]">$0.003</span> / run</div>
-                <div className="text-white/25">// cap: $0.10 · auto-pause</div>
+                <div className="text-white/25">// model routing · active</div>
+                <div className="text-[#FCA882]">room.policy(<span className="text-[#6EE7B7]">&quot;cheapest-pass&quot;</span>)</div>
+                <div className="text-white/40">→ <span className="text-[#C4B5FD]">gpt-4o-mini</span> · $0.0018/run</div>
+                <div className="text-[#FCA882]">room.alerts.cap(<span className="text-[#6EE7B7]">8.00</span>)</div>
+                <div className="text-white/25">// auto-pause on breach ✓</div>
               </div>
             </div>
 
