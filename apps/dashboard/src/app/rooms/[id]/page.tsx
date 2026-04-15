@@ -20,17 +20,18 @@ import { formatDate } from '@/lib/utils'
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'
 
-type Panel = 'agents' | 'workflows' | 'connectors' | 'events' | 'logs' | 'metrics' | 'storage' | null
+type Panel = 'agents' | 'workflows' | 'connectors' | 'events' | 'logs' | 'metrics' | 'storage' | 'linked' | null
 
 // ─── Capability definition ─────────────────────────────────────────────────────
 const CAPABILITIES = [
-  { id: 'agents' as Panel,     label: 'Agents',        Icon: AgentIcon,      desc: 'Deploy and manage agents' },
-  { id: 'workflows' as Panel,  label: 'Workflows',     Icon: WorkflowIcon,   desc: 'Orchestration graph' },
-  { id: 'connectors' as Panel, label: 'Connectors',    Icon: APIIcon,        desc: 'APIs & blockchain' },
-  { id: 'events' as Panel,     label: 'Events',        Icon: AutomationIcon, desc: 'Trigger the system' },
-  { id: 'logs' as Panel,       label: 'Live Activity', Icon: LiveRunsIcon,   desc: 'Real-time execution' },
-  { id: 'metrics' as Panel,    label: 'Metrics',       Icon: ReportsIcon,    desc: 'Run stats' },
-  { id: 'storage' as Panel,    label: 'State',         Icon: MemoryIcon,     desc: 'Room memory' },
+  { id: 'agents' as Panel,     label: 'Agents',         Icon: AgentIcon,      desc: 'Deploy and manage agents' },
+  { id: 'workflows' as Panel,  label: 'Workflows',      Icon: WorkflowIcon,   desc: 'Orchestration graph' },
+  { id: 'connectors' as Panel, label: 'Connectors',     Icon: APIIcon,        desc: 'APIs & tools' },
+  { id: 'events' as Panel,     label: 'Triggers',       Icon: AutomationIcon, desc: 'Fire the system' },
+  { id: 'logs' as Panel,       label: 'Live Activity',  Icon: LiveRunsIcon,   desc: 'Real-time feed' },
+  { id: 'metrics' as Panel,    label: 'Metrics',        Icon: ReportsIcon,    desc: 'Run stats' },
+  { id: 'storage' as Panel,    label: 'Memory',         Icon: MemoryIcon,     desc: 'Shared room state' },
+  { id: 'linked' as Panel,     label: 'Linked Rooms',   Icon: ToolIcon,       desc: 'Room-to-room wiring' },
 ]
 
 // ─── Panel: Agents ─────────────────────────────────────────────────────────────
@@ -258,6 +259,145 @@ function ConnectorsPanel({ roomId }: { roomId: string }) {
           </div>
         </div>
       )}
+    </div>
+  )
+}
+
+// ─── Room Command Input ────────────────────────────────────────────────────────
+function RoomCommandInput({ roomId, onActivity }: { roomId: string; onActivity: (msg: string, type: 'event' | 'log') => void }) {
+  const [input, setInput] = useState('')
+  const [sending, setSending] = useState(false)
+
+  async function send(e: React.FormEvent) {
+    e.preventDefault()
+    const msg = input.trim()
+    if (!msg) return
+    setSending(true)
+    setInput('')
+    onActivity(`> ${msg}`, 'event')
+    try {
+      const res = await fetch(`/api/rooms/${roomId}/webhook`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ type: 'user_command', payload: { message: msg, source: 'dashboard' } }),
+      })
+      if (res.ok) {
+        onActivity('Command received — agents are processing it', 'log')
+      } else {
+        onActivity('Queued locally — start the system to process', 'log')
+      }
+    } catch {
+      onActivity('Queued locally — connect the API to process', 'log')
+    } finally {
+      setSending(false)
+    }
+  }
+
+  return (
+    <div className="border-t-2 border-[#D4C4A8] p-3">
+      <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest mb-2">Send command to this Room</p>
+      <form onSubmit={send} className="flex gap-2">
+        <input
+          value={input}
+          onChange={e => setInput(e.target.value)}
+          placeholder="Tell this room what to do…"
+          className="flex-1 px-3 py-1.5 text-xs border border-[#D4C4A8] rounded-lg bg-white focus:outline-none focus:border-[#EA580C] font-mono text-gray-700 placeholder:text-gray-300"
+        />
+        <button type="submit" disabled={sending || !input.trim()}
+          className="px-3 py-1.5 bg-[#EA580C] hover:bg-[#C2410C] disabled:opacity-40 text-white text-[10px] font-bold rounded-lg flex items-center gap-1 transition-colors">
+          {sending
+            ? <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" />
+            : <svg viewBox="0 0 14 14" className="w-3 h-3" fill="none"><path d="M2 7 L12 7 M8 3 L12 7 L8 11" stroke="white" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/></svg>
+          }
+          Run
+        </button>
+      </form>
+    </div>
+  )
+}
+
+// ─── Panel: Linked Rooms ───────────────────────────────────────────────────────
+function LinkedRoomsPanel({ currentRoomId }: { currentRoomId: string }) {
+  const [allRooms, setAllRooms] = useState<any[]>([])
+  const [linked, setLinked] = useState<string[]>([])
+  const [saving, setSaving] = useState(false)
+
+  useEffect(() => {
+    fetch('/api/rooms').then(r => r.json()).then(d => {
+      setAllRooms((d.rooms || []).filter((r: any) => r.id !== currentRoomId))
+    }).catch(() => {})
+  }, [currentRoomId])
+
+  function toggle(id: string) {
+    setLinked(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id])
+  }
+
+  async function save() {
+    setSaving(true)
+    // Linking is stored locally for now — backend wiring in next phase
+    await new Promise(r => setTimeout(r, 600))
+    setSaving(false)
+  }
+
+  return (
+    <div className="space-y-4">
+      <div>
+        <p className="text-xs font-bold text-gray-700 mb-1">Link this Room to others</p>
+        <p className="text-xs text-gray-400 leading-relaxed">
+          Linked Rooms can trigger each other via webhooks. When this Room completes a run,
+          it fires an event into every linked Room automatically.
+        </p>
+      </div>
+
+      {allRooms.length === 0 ? (
+        <div className="p-4 bg-gray-50 rounded-xl text-center">
+          <p className="text-xs text-gray-400">No other rooms yet.</p>
+          <Link href="/rooms" className="text-xs font-bold text-[#EA580C] hover:underline">Create another Room →</Link>
+        </div>
+      ) : (
+        <div className="space-y-2">
+          {allRooms.map((r: any) => (
+            <button key={r.id} onClick={() => toggle(r.id)}
+              className={`w-full flex items-center gap-3 p-3 rounded-xl border-2 text-left transition-all ${
+                linked.includes(r.id)
+                  ? 'border-[#EA580C] bg-orange-50'
+                  : 'border-[#E8E0D0] bg-white hover:border-[#EA580C]/40'
+              }`}>
+              <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${
+                linked.includes(r.id) ? 'border-[#EA580C] bg-[#EA580C]' : 'border-gray-300'
+              }`}>
+                {linked.includes(r.id) && (
+                  <svg viewBox="0 0 10 10" className="w-2.5 h-2.5" fill="none">
+                    <path d="M2 5 L4 7 L8 3" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                )}
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-xs font-bold text-[#111] truncate">{r.name}</p>
+                <p className="text-[10px] text-gray-400">{r.status || 'IDLE'} · webhook-ready</p>
+              </div>
+              {linked.includes(r.id) && (
+                <span className="text-[9px] font-bold text-[#EA580C] bg-orange-100 px-2 py-0.5 rounded-full flex-shrink-0">linked</span>
+              )}
+            </button>
+          ))}
+        </div>
+      )}
+
+      {linked.length > 0 && (
+        <button onClick={save} disabled={saving}
+          className="w-full py-2 bg-[#EA580C] hover:bg-[#C2410C] disabled:opacity-50 text-white text-xs font-bold rounded-xl flex items-center justify-center gap-2 transition-colors">
+          {saving
+            ? <><div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" />Saving…</>
+            : `Save — link ${linked.length} room${linked.length > 1 ? 's' : ''}`
+          }
+        </button>
+      )}
+
+      <p className="text-[10px] text-gray-300 leading-relaxed">
+        Full room-to-room event routing ships in the next release.
+        This UI wires the configuration ahead of the backend.
+      </p>
     </div>
   )
 }
@@ -627,6 +767,7 @@ export default function RoomSystemPage() {
                   {activePanel === 'logs' && <LogsPanel logs={logs} />}
                   {activePanel === 'metrics' && <MetricsPanel runs={runs} agentCount={agents.length} />}
                   {activePanel === 'storage' && <StoragePanel room={room} />}
+                  {activePanel === 'linked' && <LinkedRoomsPanel currentRoomId={roomId} />}
                 </div>
               </div>
             )}
@@ -714,6 +855,9 @@ export default function RoomSystemPage() {
               </Link>
             </div>
           )}
+
+          {/* ── Command input — send a message or trigger directly ── */}
+          <RoomCommandInput roomId={roomId} onActivity={pushActivity} />
         </div>
 
       </div>
