@@ -437,10 +437,10 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col md:flex-row" style={{ background: '#F9F5EF' }}>
+    <div className="min-h-screen flex flex-col-reverse md:flex-row" style={{ background: '#F9F5EF' }}>
 
       {/* ── LEFT: hero + chat terminal + pitch ──────────────────────────────── */}
-      <div className="hidden md:flex flex-col flex-1 px-10 py-10 max-w-[54%] relative overflow-hidden">
+      <div className="flex flex-col flex-1 px-6 md:px-10 py-8 md:py-10 md:max-w-[54%] relative overflow-hidden">
         {/* grid texture */}
         <div className="absolute inset-0 pointer-events-none"
           style={{ backgroundImage: 'linear-gradient(rgba(0,0,0,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(0,0,0,0.03) 1px,transparent 1px)', backgroundSize: '28px 28px' }} />
@@ -505,7 +505,7 @@ export default function LoginPage() {
         </div>
 
         {/* ── Three live-feature terminal previews ────────────────────────── */}
-        <div className="relative z-10 mt-8">
+        <div className="relative z-10 mt-8 hidden md:block">
           <div className="grid grid-cols-3 gap-2">
 
             {/* Terminal 1: Persistent Memory */}
@@ -564,7 +564,7 @@ export default function LoginPage() {
       </div>
 
       {/* ── RIGHT: form ──────────────────────────────────────────────────────── */}
-      <div className="flex flex-1 flex-col items-center justify-center px-8 py-12 md:max-w-[46%]">
+      <div className="flex flex-1 flex-col items-center justify-center px-6 md:px-8 py-10 md:py-12 md:max-w-[46%]">
         <div className="w-full max-w-sm">
           <div className="md:hidden mb-8"><OpenRoomsLogo size={42} textSize="text-xl" /></div>
 

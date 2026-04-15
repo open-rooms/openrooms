@@ -15,23 +15,25 @@ import {
   MemoryIcon,
   AutomationIcon,
   WebhookIcon,
+  StorageIcon,
 } from '@/components/icons/system'
 import { formatDate } from '@/lib/utils'
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'
 
-type Panel = 'agents' | 'workflows' | 'connectors' | 'events' | 'logs' | 'metrics' | 'storage' | 'linked' | null
+type Panel = 'agents' | 'workflows' | 'connectors' | 'events' | 'logs' | 'metrics' | 'storage' | 'linked' | 'snapshot' | null
 
 // ─── Capability definition ─────────────────────────────────────────────────────
 const CAPABILITIES = [
-  { id: 'agents' as Panel,     label: 'Agents',         Icon: AgentIcon,      desc: 'Deploy and manage agents' },
-  { id: 'workflows' as Panel,  label: 'Workflows',      Icon: WorkflowIcon,   desc: 'Orchestration graph' },
-  { id: 'connectors' as Panel, label: 'Connectors',     Icon: APIIcon,        desc: 'APIs & tools' },
-  { id: 'events' as Panel,     label: 'Triggers',       Icon: AutomationIcon, desc: 'Fire the system' },
-  { id: 'logs' as Panel,       label: 'Live Activity',  Icon: LiveRunsIcon,   desc: 'Real-time feed' },
-  { id: 'metrics' as Panel,    label: 'Metrics',        Icon: ReportsIcon,    desc: 'Run stats' },
-  { id: 'storage' as Panel,    label: 'Memory',         Icon: MemoryIcon,     desc: 'Shared room state' },
-  { id: 'linked' as Panel,     label: 'Linked Rooms',   Icon: WebhookIcon,    desc: 'Room-to-room wiring' },
+  { id: 'agents' as Panel,    label: 'Agents',        Icon: AgentIcon,      desc: 'Deploy and manage agents' },
+  { id: 'workflows' as Panel, label: 'Workflows',     Icon: WorkflowIcon,   desc: 'Orchestration graph' },
+  { id: 'connectors' as Panel,label: 'Connectors',    Icon: APIIcon,        desc: 'APIs & tools' },
+  { id: 'events' as Panel,    label: 'Triggers',      Icon: AutomationIcon, desc: 'Fire the system' },
+  { id: 'logs' as Panel,      label: 'Live Activity', Icon: LiveRunsIcon,   desc: 'Real-time feed' },
+  { id: 'metrics' as Panel,   label: 'Metrics',       Icon: ReportsIcon,    desc: 'Run stats' },
+  { id: 'storage' as Panel,   label: 'Memory',        Icon: MemoryIcon,     desc: 'Shared room state' },
+  { id: 'linked' as Panel,    label: 'Linked Rooms',  Icon: WebhookIcon,    desc: 'Room-to-room wiring' },
+  { id: 'snapshot' as Panel,  label: 'Snapshots',     Icon: StorageIcon,    desc: 'Save & restore room state' },
 ]
 
 // ─── Panel: Agents ─────────────────────────────────────────────────────────────
@@ -402,6 +404,187 @@ function LinkedRoomsPanel({ currentRoomId }: { currentRoomId: string }) {
   )
 }
 
+// ─── Panel: Snapshots ─────────────────────────────────────────────────────────
+interface RoomSnapshot {
+  id: string
+  label: string
+  timestamp: string
+  status: string
+  agents: { name: string; goal: string; allowedTools: string[]; policyConfig: Record<string, unknown> }[]
+  roomName: string
+  roomDescription?: string
+}
+
+function SnapshotPanel({ room, agents }: { room: any; agents: Agent[] }) {
+  const key = `openrooms_snapshots_${room.id}`
+  const [snapshots, setSnapshots] = useState<RoomSnapshot[]>([])
+  const [saving, setSaving] = useState(false)
+  const [restoring, setRestoring] = useState<string | null>(null)
+  const [label, setLabel] = useState('')
+  const [notice, setNotice] = useState<string | null>(null)
+
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem(key)
+      if (stored) setSnapshots(JSON.parse(stored))
+    } catch { /* ignore */ }
+  }, [key])
+
+  function persist(list: RoomSnapshot[]) {
+    setSnapshots(list)
+    localStorage.setItem(key, JSON.stringify(list))
+  }
+
+  async function takeSnapshot() {
+    if (!label.trim()) return
+    setSaving(true)
+    const snap: RoomSnapshot = {
+      id: `snap_${Date.now()}`,
+      label: label.trim(),
+      timestamp: new Date().toISOString(),
+      status: room.status || 'IDLE',
+      roomName: room.name,
+      roomDescription: room.description,
+      agents: agents.map(a => ({
+        name: a.name,
+        goal: a.goal || '',
+        allowedTools: (a as any).allowedTools || [],
+        policyConfig: (a as any).policyConfig || {},
+      })),
+    }
+    persist([snap, ...snapshots])
+    setLabel('')
+    setSaving(false)
+    setNotice(`Snapshot "${snap.label}" saved — ${agents.length} agent${agents.length !== 1 ? 's' : ''} captured`)
+    setTimeout(() => setNotice(null), 3000)
+  }
+
+  async function restore(snap: RoomSnapshot) {
+    setRestoring(snap.id)
+    setNotice(`Restoring "${snap.label}"…`)
+    try {
+      for (const a of snap.agents) {
+        await createAgent({
+          name: `${a.name} (restored)`,
+          goal: a.goal,
+          roomId: room.id,
+          allowedTools: a.allowedTools,
+          policyConfig: a.policyConfig as any,
+        })
+      }
+      setNotice(`✓ ${snap.agents.length} agent${snap.agents.length !== 1 ? 's' : ''} restored from "${snap.label}"`)
+    } catch {
+      setNotice('Restore failed — make sure the API is running')
+    } finally {
+      setRestoring(null)
+      setTimeout(() => setNotice(null), 4000)
+    }
+  }
+
+  function share(snap: RoomSnapshot) {
+    const payload = encodeURIComponent(JSON.stringify(snap))
+    const url = `${window.location.origin}/rooms?snapshot=${payload}`
+    navigator.clipboard.writeText(url).then(() => {
+      setNotice('Snapshot URL copied to clipboard')
+      setTimeout(() => setNotice(null), 3000)
+    })
+  }
+
+  function remove(id: string) {
+    persist(snapshots.filter(s => s.id !== id))
+  }
+
+  return (
+    <div className="space-y-4">
+      {/* Notice */}
+      {notice && (
+        <div className="px-3 py-2 bg-emerald-50 border border-emerald-200 rounded-xl text-xs font-semibold text-emerald-700">
+          {notice}
+        </div>
+      )}
+
+      {/* Take snapshot */}
+      <div>
+        <p className="text-xs font-bold text-gray-700 mb-1">Take a snapshot</p>
+        <p className="text-[11px] text-gray-400 mb-3 leading-relaxed">
+          Capture this room's agents, goals, tools, and config right now. Restore or share it any time.
+        </p>
+        <div className="flex gap-2">
+          <input
+            value={label}
+            onChange={e => setLabel(e.target.value)}
+            onKeyDown={e => e.key === 'Enter' && takeSnapshot()}
+            placeholder={`e.g. "working v1" or "before refactor"`}
+            className="flex-1 px-3 py-2 text-xs border border-[#D4C4A8] rounded-xl focus:outline-none focus:border-[#EA580C] bg-white"
+          />
+          <button onClick={takeSnapshot} disabled={saving || !label.trim()}
+            className="px-4 py-2 bg-[#EA580C] hover:bg-[#C2410C] disabled:opacity-40 text-white text-xs font-bold rounded-xl flex items-center gap-1.5 transition-colors">
+            {saving
+              ? <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" />
+              : <svg viewBox="0 0 14 14" className="w-3 h-3" fill="none"><circle cx="7" cy="7" r="5.5" stroke="white" strokeWidth="1.5"/><circle cx="7" cy="7" r="2.5" fill="white"/></svg>
+            }
+            Save
+          </button>
+        </div>
+        <p className="text-[10px] text-gray-300 mt-1.5">
+          Captures: {agents.length} agent{agents.length !== 1 ? 's' : ''}, room config, status at this moment
+        </p>
+      </div>
+
+      {/* Snapshot list */}
+      {snapshots.length > 0 && (
+        <div className="space-y-2">
+          <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Saved Snapshots</p>
+          {snapshots.map(snap => (
+            <div key={snap.id} className="border border-[#E8E0D0] rounded-xl bg-white overflow-hidden">
+              <div className="flex items-center gap-3 px-4 py-3">
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs font-bold text-[#111] truncate">{snap.label}</p>
+                  <p className="text-[10px] text-gray-400">
+                    {new Date(snap.timestamp).toLocaleDateString()} · {snap.agents.length} agent{snap.agents.length !== 1 ? 's' : ''} · {snap.status}
+                  </p>
+                </div>
+                <div className="flex items-center gap-1.5 flex-shrink-0">
+                  <button onClick={() => restore(snap)} disabled={restoring === snap.id}
+                    className="px-2.5 py-1 bg-[#EA580C] hover:bg-[#C2410C] disabled:opacity-40 text-white text-[10px] font-bold rounded-lg transition-colors flex items-center gap-1">
+                    {restoring === snap.id
+                      ? <div className="w-2.5 h-2.5 border border-white border-t-transparent rounded-full animate-spin" />
+                      : null}
+                    Restore
+                  </button>
+                  <button onClick={() => share(snap)} title="Copy shareable URL"
+                    className="px-2.5 py-1 border border-[#D4C4A8] hover:border-[#EA580C] text-gray-500 hover:text-[#EA580C] text-[10px] font-bold rounded-lg transition-colors">
+                    Share
+                  </button>
+                  <button onClick={() => remove(snap.id)} title="Delete snapshot"
+                    className="px-2 py-1 border border-gray-200 hover:border-red-300 hover:text-red-500 text-gray-300 text-[10px] font-bold rounded-lg transition-colors">
+                    ✕
+                  </button>
+                </div>
+              </div>
+              {/* Agent pills */}
+              {snap.agents.length > 0 && (
+                <div className="px-4 pb-3 flex flex-wrap gap-1">
+                  {snap.agents.map((a, i) => (
+                    <span key={i} className="text-[9px] px-2 py-0.5 bg-orange-50 text-orange-600 border border-orange-100 rounded-full font-medium">{a.name}</span>
+                  ))}
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+
+      {snapshots.length === 0 && (
+        <div className="text-center py-8 border-2 border-dashed border-[#E8E0D0] rounded-xl">
+          <p className="text-xs text-gray-400">No snapshots yet.</p>
+          <p className="text-[10px] text-gray-300 mt-1">Save your first snapshot above to preserve this room's state.</p>
+        </div>
+      )}
+    </div>
+  )
+}
+
 // ─── Panel: Metrics ────────────────────────────────────────────────────────────
 function MetricsPanel({ runs, agentCount }: { runs: Run[]; agentCount: number }) {
   const total = runs.length
@@ -658,24 +841,24 @@ export default function RoomSystemPage() {
               <p className="text-xs text-gray-500 mt-1">{room.description || `Room · ${roomId.slice(0, 8)}…`}</p>
             </div>
             {/* Action buttons */}
-            <div className="flex items-center gap-2 flex-shrink-0">
+            <div className="flex items-center gap-2 flex-wrap">
               {lastNotice && (
-                <span className="text-xs font-semibold text-gray-600 bg-white border border-gray-200 px-3 py-1.5 rounded-lg">
+                <span className="hidden sm:inline text-xs font-semibold text-gray-600 bg-white border border-gray-200 px-3 py-1.5 rounded-lg">
                   {lastNotice}
                 </span>
               )}
               <button onClick={handleStart} disabled={!!runningAction || systemStatus === 'RUNNING'}
-                className="px-4 py-2 bg-[#EA580C] hover:bg-[#C2410C] disabled:opacity-50 text-white text-sm font-bold rounded-lg flex items-center gap-2 transition-all">
+                className="px-3 md:px-4 py-2 bg-[#EA580C] hover:bg-[#C2410C] disabled:opacity-50 text-white text-xs md:text-sm font-bold rounded-lg flex items-center gap-1.5 transition-all">
                 {runningAction === 'start' ? <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" /> : <PlayIcon className="w-4 h-4" />}
-                Start System
+                <span className="hidden sm:inline">Start</span> System
               </button>
               <button onClick={handleStop} disabled={!!runningAction || systemStatus === 'IDLE'}
-                className="px-4 py-2 border border-[#DDD5C8] hover:bg-[#111111] hover:text-white disabled:opacity-40 text-sm font-bold rounded-lg transition-all">
+                className="px-3 md:px-4 py-2 border border-[#DDD5C8] hover:bg-[#111111] hover:text-white disabled:opacity-40 text-xs md:text-sm font-bold rounded-lg transition-all">
                 Stop
               </button>
               <button onClick={() => togglePanel('events')}
-                className={`px-4 py-2 text-sm font-bold rounded-lg border-2 transition-all ${activePanel === 'events' ? 'bg-[#111111] text-white border-[#111111]' : 'border-black hover:bg-[#111111] hover:text-white'}`}>
-                Trigger Event
+                className={`hidden sm:inline-flex px-3 md:px-4 py-2 text-xs md:text-sm font-bold rounded-lg border-2 transition-all ${activePanel === 'events' ? 'bg-[#111111] text-white border-[#111111]' : 'border-black hover:bg-[#111111] hover:text-white'}`}>
+                Trigger
               </button>
               <button onClick={load} className="p-2 border border-gray-200 hover:border-gray-400 rounded-lg transition-colors" title="Refresh">
                 <RefreshIcon className="w-4 h-4" />
@@ -686,16 +869,16 @@ export default function RoomSystemPage() {
       </div>
 
       {/* ── BODY ─────────────────────────────────────────────────────────────── */}
-      <div className="flex-1 flex overflow-hidden">
+      <div className="flex-1 flex flex-col lg:flex-row overflow-auto lg:overflow-hidden">
 
         {/* ── Left: Capability Grid + panel ──────────────────────────── */}
-        <div className="flex-1 overflow-y-auto">
+        <div className="flex-1 overflow-y-auto min-w-0">
           <div className="p-6 md:p-8 space-y-6">
 
             {/* Capability Grid */}
             <div>
               <p className="text-[10px] font-bold tracking-widest text-gray-400 uppercase mb-3">Capabilities</p>
-              <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-7 gap-3">
+              <div className="flex gap-3 overflow-x-auto pb-1 sm:grid sm:grid-cols-4 lg:grid-cols-8 sm:overflow-visible">
                 {CAPABILITIES.map(({ id, label, Icon, desc }) => {
                   const isActive = activePanel === id
                   // Dot indicators
@@ -709,7 +892,7 @@ export default function RoomSystemPage() {
                       key={id}
                       onClick={() => togglePanel(id)}
                       title={desc}
-                      className={`relative group flex flex-col items-center gap-2 p-4 rounded-2xl border-2 transition-all duration-200 ${
+                      className={`relative group flex flex-col items-center gap-2 p-3 sm:p-4 rounded-2xl border-2 transition-all duration-200 flex-shrink-0 w-20 sm:w-auto ${
                         isActive
                           ? 'border-[#EA580C] bg-white shadow-[0_0_0_4px_rgba(245,78,0,0.12)]'
                           : 'border-[#D4C4A8] bg-white hover:border-[#EA580C] hover:bg-white hover:shadow-md hover:-translate-y-0.5'
@@ -768,6 +951,7 @@ export default function RoomSystemPage() {
                   {activePanel === 'metrics' && <MetricsPanel runs={runs} agentCount={agents.length} />}
                   {activePanel === 'storage' && <StoragePanel room={room} />}
                   {activePanel === 'linked' && <LinkedRoomsPanel currentRoomId={roomId} />}
+                  {activePanel === 'snapshot' && <SnapshotPanel room={room} agents={agents} />}
                 </div>
               </div>
             )}
@@ -776,7 +960,7 @@ export default function RoomSystemPage() {
         </div>
 
         {/* ── Right: Live Activity Panel ──────────────────────────────── */}
-        <div className="hidden lg:flex flex-col w-72 xl:w-80 border-l-2 border-[#D4C4A8] bg-white">
+        <div className="lg:flex flex-col w-full lg:w-72 xl:w-80 border-t-2 lg:border-t-0 lg:border-l-2 border-[#D4C4A8] bg-white hidden lg:flex">
           <div className="flex items-center justify-between px-5 py-3 border-b-2 border-[#D4C4A8]">
             <div className="flex items-center gap-2">
               <span className={`w-2 h-2 rounded-full ${systemStatus === 'RUNNING' ? 'bg-blue-500 animate-pulse' : 'bg-gray-300'}`} />
