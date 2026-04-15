@@ -451,6 +451,65 @@ export default function LoginPage() {
             </span>
           ))}
         </div>
+
+        {/* ── Next-phase preview terminals ─────────────────────────────────── */}
+        <div className="relative z-10 mt-8">
+          <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-3">Coming next — what we&apos;re building</p>
+          <div className="grid grid-cols-3 gap-2">
+
+            {/* Terminal 1: Persistent Memory */}
+            <div className="rounded-xl overflow-hidden border border-[#2A2D3E] select-none pointer-events-none">
+              <div className="flex items-center justify-between px-2.5 py-1.5 bg-[#0D0F1A]">
+                <span className="text-[8px] font-mono text-white/20 tracking-widest truncate">persistent-memory</span>
+                <div className="flex gap-0.5 flex-shrink-0">
+                  <span className="w-1.5 h-1.5 rounded-full bg-red-400/40"/><span className="w-1.5 h-1.5 rounded-full bg-yellow-400/40"/><span className="w-1.5 h-1.5 rounded-full bg-green-400/40"/>
+                </div>
+              </div>
+              <div className="bg-[#0D0F1A] px-2.5 py-2.5 font-mono text-[8.5px] leading-[1.7] space-y-0.5">
+                <div className="text-white/25">// shared workspace memory</div>
+                <div className="text-[#6EE7B7]">memory.write(<span className="text-[#FCA882]">&quot;user-prefs&quot;</span>)</div>
+                <div className="text-[#6EE7B7]">memory.query(<span className="text-[#FCA882]">&quot;resolve ticket&quot;</span>)</div>
+                <div className="text-white/25">// ← 12ms · 94% match</div>
+                <div className="text-white/40">status: <span className="text-[#6EE7B7]">indexed</span> · 1.2k vectors</div>
+              </div>
+            </div>
+
+            {/* Terminal 2: Trace Viewer */}
+            <div className="rounded-xl overflow-hidden border border-[#2A2D3E] select-none pointer-events-none">
+              <div className="flex items-center justify-between px-2.5 py-1.5 bg-[#0D0F1A]">
+                <span className="text-[8px] font-mono text-white/20 tracking-widest truncate">trace-replay</span>
+                <div className="flex gap-0.5 flex-shrink-0">
+                  <span className="w-1.5 h-1.5 rounded-full bg-red-400/40"/><span className="w-1.5 h-1.5 rounded-full bg-yellow-400/40"/><span className="w-1.5 h-1.5 rounded-full bg-green-400/40"/>
+                </div>
+              </div>
+              <div className="bg-[#0D0F1A] px-2.5 py-2.5 font-mono text-[8.5px] leading-[1.7] space-y-0.5">
+                <div className="text-white/25">// execution trace</div>
+                <div className="text-[#C4B5FD]">step 1 <span className="text-white/30">llm_call</span> 312ms</div>
+                <div className="text-[#C4B5FD]">step 2 <span className="text-white/30">tool:http</span> 88ms</div>
+                <div className="text-[#C4B5FD]">step 3 <span className="text-white/30">decision</span> 44ms</div>
+                <div className="text-white/40">replay: <span className="text-[#FCA882]">gpt-4o-mini</span> ↗</div>
+              </div>
+            </div>
+
+            {/* Terminal 3: Model Routing */}
+            <div className="rounded-xl overflow-hidden border border-[#2A2D3E] select-none pointer-events-none">
+              <div className="flex items-center justify-between px-2.5 py-1.5 bg-[#0D0F1A]">
+                <span className="text-[8px] font-mono text-white/20 tracking-widest truncate">model-router</span>
+                <div className="flex gap-0.5 flex-shrink-0">
+                  <span className="w-1.5 h-1.5 rounded-full bg-red-400/40"/><span className="w-1.5 h-1.5 rounded-full bg-yellow-400/40"/><span className="w-1.5 h-1.5 rounded-full bg-green-400/40"/>
+                </div>
+              </div>
+              <div className="bg-[#0D0F1A] px-2.5 py-2.5 font-mono text-[8.5px] leading-[1.7] space-y-0.5">
+                <div className="text-white/25">// routing policy</div>
+                <div className="text-[#FCA882]">policy: <span className="text-[#6EE7B7]">&quot;cheapest-pass&quot;</span></div>
+                <div className="text-white/40">route → <span className="text-[#C4B5FD]">gpt-4o-mini</span></div>
+                <div className="text-white/40">cost: <span className="text-[#6EE7B7]">$0.003</span> / run</div>
+                <div className="text-white/25">// cap: $0.10 · auto-pause</div>
+              </div>
+            </div>
+
+          </div>
+        </div>
       </div>
 
       {/* ── RIGHT: form ──────────────────────────────────────────────────────── */}

@@ -141,10 +141,11 @@ function TemplateModal({ onClose, onLaunched }: { onClose: () => void; onLaunche
 
   async function launch(t: typeof TEMPLATES[0]) {
     setLaunching(t.id); setError(null)
+    const uid = Date.now().toString(36).slice(-5)
     try {
-      const wf = await createWorkflow({ name: t.title + ' Flow', description: t.description, nodes: [{ nodeId: 'start', type: 'START', name: 'Start', config: {} }, { nodeId: 'end', type: 'END', name: 'End', config: {} }] })
-      const room = await createRoom({ name: t.title, description: t.description, workflowId: wf.id })
-      await createAgent({ name: t.title + ' Agent', goal: t.agentGoal, roomId: room.id, allowedTools: ['calculator', 'http_request', 'memory_query'], policyConfig: { provider: 'simulation', model: 'gpt-4o', maxLoopIterations: 5 } })
+      const wf = await createWorkflow({ name: t.title + ' Flow ' + uid, description: t.description, nodes: [{ nodeId: 'start', type: 'START', name: 'Start', config: {} }, { nodeId: 'end', type: 'END', name: 'End', config: {} }] })
+      const room = await createRoom({ name: t.title + ' ' + uid, description: t.description, workflowId: wf.id })
+      await createAgent({ name: t.title + ' Agent ' + uid, goal: t.agentGoal, roomId: room.id, allowedTools: ['calculator', 'http_request', 'memory_query'], policyConfig: { provider: 'simulation', model: 'gpt-4o', maxLoopIterations: 5 } })
       onLaunched(room.id)
     } catch (e: any) { setError(e.message) }
     finally { setLaunching(null) }

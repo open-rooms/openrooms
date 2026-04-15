@@ -164,7 +164,7 @@ const WHO_FOR = [
     title: 'Builders & PMs',
     description: 'Go from idea to a live autonomous system in under 5 minutes using a template. Customise agent goals, swap tools, and watch execution in real time — no code needed.',
     cta: 'Run a Live Action',
-    href: '#templates',
+    href: '#features',
   },
   {
     Icon: SDKIcon,
@@ -365,17 +365,19 @@ export default function HomePage() {
   async function useTemplate(t: typeof TEMPLATES[0]) {
     setLaunching(t.id)
     setLaunchError(null)
+    // Short unique suffix to avoid name collisions on repeated deploys
+    const uid = Date.now().toString(36).slice(-5)
     try {
       // Step 1: create workflow (nodes auto-provisioned by backend self-heal)
       const wf = await createWorkflow({
-        name: t.workflow.name,
+        name: `${t.workflow.name} ${uid}`,
         description: t.description,
       })
       // Step 2: create room bound to this workflow
-      const room = await createRoom({ name: t.title, description: t.description, workflowId: wf.id })
+      const room = await createRoom({ name: `${t.title} ${uid}`, description: t.description, workflowId: wf.id })
       // Step 3: deploy agent with goal into the room
       await createAgent({
-        name: `${t.title} Agent`,
+        name: `${t.title} Agent ${uid}`,
         goal: t.workflow.agentGoal,
         roomId: room.id,
         allowedTools: ['calculator', 'http_request', 'memory_query'],
@@ -411,7 +413,9 @@ export default function HomePage() {
       {/* ── Top nav ──────────────────────────────────────────────────────────── */}
       <nav className="bg-[#F9F5EF] border-b border-[#E8E0D0] sticky top-0 z-40">
         <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
-          <OpenRoomsLogo size={36} textSize="text-lg" />
+          <Link href="/home" className="hover:opacity-80 transition-opacity">
+            <OpenRoomsLogo size={36} textSize="text-lg" />
+          </Link>
           <div className="flex items-center gap-5">
             <Link href="/rooms"      className="text-sm font-medium text-gray-500 hover:text-[#111] transition-colors hidden sm:block">Rooms</Link>
             <Link href="/agents"     className="text-sm font-medium text-gray-500 hover:text-[#111] transition-colors hidden md:block">Agents</Link>
@@ -433,17 +437,20 @@ export default function HomePage() {
       <div className="bg-[#F9F5EF] border-b border-[#E8E0D0]">
         <div className="max-w-6xl mx-auto px-6 py-16 md:py-24">
           <div className="max-w-2xl">
-            <span className="inline-block mb-5 text-xs font-bold tracking-widest text-[#888] uppercase bg-[#EDE8DF] px-3 py-1 rounded-full">
+            <span className="inline-block mb-5 text-xs font-bold tracking-widest text-[#888] uppercase bg-[#EDE8DF] px-3 py-1 rounded-full animate-fadeSlideDown"
+              style={{ animationDelay: '0ms' }}>
               Autonomous AI Control Plane
             </span>
-            <h1 className="text-4xl md:text-5xl font-extrabold text-[#111111] mb-5 leading-tight tracking-tight">
+            <h1 className="text-4xl md:text-5xl font-extrabold text-[#111111] mb-5 leading-tight tracking-tight animate-fadeSlideUp"
+              style={{ animationDelay: '60ms' }}>
               Run intelligent systems<br />that act for you.
             </h1>
-            <p className="text-base md:text-lg text-gray-500 mb-8 leading-relaxed">
+            <p className="text-base md:text-lg text-gray-500 mb-8 leading-relaxed animate-fadeSlideUp"
+              style={{ animationDelay: '130ms' }}>
               OpenRooms is a control plane for AI agents, workflows, and real-time automation —
               across models, APIs, and blockchain.
             </p>
-            <div className="flex flex-col sm:flex-row gap-3">
+            <div className="flex flex-col sm:flex-row gap-3 animate-fadeSlideUp" style={{ animationDelay: '200ms' }}>
               <button
                 onClick={handleStartFree}
                 className="px-6 py-3 text-white font-bold rounded-lg text-sm transition-all inline-flex items-center gap-2"
@@ -461,7 +468,7 @@ export default function HomePage() {
             </div>
 
             {/* Live stats chips */}
-            <div className="flex items-center gap-3 mt-8 flex-wrap">
+            <div className="flex items-center gap-3 mt-8 flex-wrap animate-fadeSlideUp" style={{ animationDelay: '280ms' }}>
               {[
                 { label: `${stats.rooms} Rooms`, dot: 'bg-emerald-400' },
                 { label: `${stats.agents} Agents`, dot: 'bg-blue-400' },
@@ -506,12 +513,20 @@ export default function HomePage() {
             </div>
 
             {roomsLoading ? (
-              <div className="flex items-center justify-center py-16 gap-3">
-                <div className="w-6 h-6 border-2 border-[#F5A623] border-t-transparent rounded-full animate-spin" />
-                <span className="text-sm text-gray-500">Loading your rooms…</span>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {Array.from({ length: 3 }).map((_, i) => (
+                  <div key={i} className="rounded-2xl overflow-hidden border border-[#E8E0D0] animate-pulse"
+                    style={{ animationDelay: `${i * 80}ms` }}>
+                    <div className="h-28 bg-[#0D0F1A]/90" />
+                    <div className="p-4 bg-white space-y-2">
+                      <div className="h-3.5 bg-gray-100 rounded-full w-2/3" />
+                      <div className="h-3 bg-gray-100 rounded-full w-1/3" />
+                    </div>
+                  </div>
+                ))}
               </div>
             ) : rooms.length === 0 ? (
-              <div className="text-center py-16 bg-white border border-[#E8E0D0] rounded-2xl">
+              <div className="text-center py-16 bg-white border border-[#E8E0D0] rounded-2xl animate-fadeSlideUp">
                 <RoomsIcon className="w-16 h-16 mx-auto mb-4 opacity-40" />
                 <p className="text-gray-600 font-semibold mb-1">No rooms found</p>
                 <p className="text-sm text-gray-400 mb-6">
@@ -529,7 +544,7 @@ export default function HomePage() {
                     Open Rooms Dashboard
                     <ChevronRightIcon className="w-4 h-4" />
                   </Link>
-                  <a href="#templates"
+                  <a href="#features"
                     className="inline-flex items-center gap-2 px-5 py-2.5 border border-[#D4C9B8] hover:border-[#111] text-[#111] text-sm font-semibold rounded-lg transition-colors bg-white">
                     Use a template
                   </a>
@@ -719,15 +734,15 @@ export default function HomePage() {
                   sub: 'Any two systems, always in sync',
                   icon: (<svg viewBox="0 0 28 28" className="w-7 h-7" fill="none"><rect x="2" y="4" width="10" height="10" rx="3" fill="#A7F3D0" stroke="#111" strokeWidth="1.4"/><rect x="16" y="14" width="10" height="10" rx="3" fill="#A7F3D0" stroke="#111" strokeWidth="1.4"/><path d="M12 9 Q20 9 20 14" stroke="#111" strokeWidth="1.3" fill="none" strokeLinecap="round"/><path d="M18 12 L20 14 L22 12" stroke="#111" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/><path d="M16 19 Q8 19 8 14" stroke="#111" strokeWidth="1.3" fill="none" strokeLinecap="round"/><path d="M6 16 L8 14 L10 16" stroke="#111" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/></svg>),
                   workflow: { name: 'Data Sync Agent', agentGoal: 'Fetch records from the source API connector, transform and map fields to the destination schema, push updates to the destination connector, and log all sync operations with timestamps and change counts.' } },
-              ].map(a => {
+              ].map((a, idx) => {
                 const isLaunching = launching === a.id
                 const isDone = launched === a.id
                 return (
                   <button key={a.id}
                     onClick={() => useTemplate({ id: a.id, Icon: AgentIcon, title: a.label, tag: 'Quick Action', tagColor: '', accentColor: a.color, description: a.sub, what: [], trigger: 'On demand or scheduled', workflow: a.workflow })}
                     disabled={isLaunching || isDone}
-                    className="relative bg-white border border-[#E8E0D0] rounded-2xl p-5 text-left flex flex-col items-start gap-3 hover:shadow-lg transition-all duration-200 disabled:opacity-70 group overflow-hidden"
-                    style={{ '--tile-color': a.color } as React.CSSProperties}>
+                    className="relative bg-white border border-[#E8E0D0] rounded-2xl p-5 text-left flex flex-col items-start gap-3 hover:shadow-lg transition-all duration-200 disabled:opacity-70 group overflow-hidden animate-fadeSlideUp"
+                    style={{ '--tile-color': a.color, animationDelay: `${idx * 60}ms` } as React.CSSProperties}>
                     {/* icon tile */}
                     <div className="w-12 h-12 rounded-xl flex items-center justify-center transition-transform duration-200 group-hover:scale-110"
                       style={{ background: a.color + '25', border: `1.5px solid ${a.color}` }}>
@@ -764,12 +779,13 @@ export default function HomePage() {
           <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">For developers &amp; teams — advanced systems</p>
           <p className="text-xs text-gray-400 mb-4">Orchestration, swarms, bots and autonomous pipelines. Real backend — runs in prod.</p>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-            {TEMPLATES.map(t => {
+            {TEMPLATES.map((t, tIdx) => {
               const isLaunching = launching === t.id
               const isDone      = launched === t.id
               const TIcon       = t.Icon
               return (
-                <div key={t.id} className="bg-[#F9F5EF] border border-[#E8E0D0] rounded-2xl p-6 flex flex-col hover:border-[#F5A623] hover:shadow-md transition-all duration-200">
+                <div key={t.id} className="bg-[#F9F5EF] border border-[#E8E0D0] rounded-2xl p-6 flex flex-col hover:border-[#F5A623] hover:shadow-md transition-all duration-200 animate-fadeSlideUp"
+                  style={{ animationDelay: `${tIdx * 70}ms` }}>
                   <div className="flex items-start justify-between mb-3">
                     <TIcon className="w-10 h-10" />
                     <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${t.tagColor}`}>{t.tag}</span>
