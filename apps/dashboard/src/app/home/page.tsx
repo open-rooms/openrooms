@@ -689,35 +689,35 @@ export default function HomePage() {
             </div>
           )}
 
-          {/* ── Non-tech quick actions (6 cards with SVG icons) ── */}
+          {/* ── Non-tech quick actions — icon-forward tile grid ── */}
           <div className="mb-10">
             <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">For everyone — no code needed</p>
-            <p className="text-xs text-gray-400 mb-5">Click to deploy a real Room + Workflow + Agent. Live in seconds.</p>
-            <div className="space-y-2.5">
+            <p className="text-xs text-gray-400 mb-5">One click creates a Room, deploys an agent, runs it live. No setup.</p>
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
               {[
-                { id: 'email-auto', num: '01', color: '#6EE7B7', badge: 'Messaging', label: 'Auto-reply to emails',
-                  sub: 'AI reads, classifies and replies to customer emails around the clock.',
-                  icon: (<svg viewBox="0 0 28 28" className="w-6 h-6" fill="none"><rect x="2" y="6" width="24" height="16" rx="4" fill="#6EE7B7" stroke="#111" strokeWidth="1.4"/><path d="M2 10 L14 17 L26 10" stroke="#111" strokeWidth="1.4"/><circle cx="21" cy="8" r="3.5" fill="#F87171" stroke="#111" strokeWidth="1"/><path d="M19.5 8 L20.5 9 L22.5 7" stroke="white" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round"/></svg>),
+                { id: 'email-auto', color: '#6EE7B7', badge: 'Messaging', label: 'Auto-reply to emails',
+                  sub: 'AI classifies and replies 24/7',
+                  icon: (<svg viewBox="0 0 28 28" className="w-7 h-7" fill="none"><rect x="2" y="6" width="24" height="16" rx="4" fill="#6EE7B7" stroke="#111" strokeWidth="1.4"/><path d="M2 10 L14 17 L26 10" stroke="#111" strokeWidth="1.4"/><circle cx="21" cy="8" r="3.5" fill="#F87171" stroke="#111" strokeWidth="1"/><path d="M19.5 8 L20.5 9 L22.5 7" stroke="white" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round"/></svg>),
                   workflow: { name: 'Email Automation', agentGoal: 'Read incoming emails, classify each by intent (support, sales, billing, spam), draft and send an appropriate reply or forward to the right team. Prioritise urgent requests.' } },
-                { id: 'pay-alert', num: '02', color: '#FCA5A5', badge: 'Finance', label: 'Payment failure alerts',
-                  sub: 'Agents watch Stripe events and notify your team the moment something fails.',
-                  icon: (<svg viewBox="0 0 28 28" className="w-6 h-6" fill="none"><rect x="2" y="7" width="24" height="14" rx="4" fill="#FCA5A5" stroke="#111" strokeWidth="1.4"/><rect x="2" y="11" width="24" height="3.5" fill="#111" opacity="0.15"/><circle cx="21" cy="8" r="4" fill="#FBBF24" stroke="#111" strokeWidth="1"/><path d="M21 6 L21 9" stroke="#111" strokeWidth="1.3" strokeLinecap="round"/><circle cx="21" cy="10.5" r="0.6" fill="#111"/></svg>),
+                { id: 'pay-alert', color: '#FCA5A5', badge: 'Finance', label: 'Payment failure alerts',
+                  sub: 'Watch Stripe events instantly',
+                  icon: (<svg viewBox="0 0 28 28" className="w-7 h-7" fill="none"><rect x="2" y="7" width="24" height="14" rx="4" fill="#FCA5A5" stroke="#111" strokeWidth="1.4"/><rect x="2" y="11" width="24" height="3.5" fill="#111" opacity="0.15"/><circle cx="21" cy="8" r="4" fill="#FBBF24" stroke="#111" strokeWidth="1"/><path d="M21 6 L21 9" stroke="#111" strokeWidth="1.3" strokeLinecap="round"/><circle cx="21" cy="10.5" r="0.6" fill="#111"/></svg>),
                   workflow: { name: 'Payment Monitor', agentGoal: 'Monitor payment events, detect failures or disputes, immediately notify the team via the configured connector, and log each event with amount, customer, and error code.' } },
-                { id: 'uptime', num: '03', color: '#93C5FD', badge: 'Ops', label: 'Uptime monitor',
-                  sub: 'Know when your website is down before your customers do. Alerts in 60s.',
-                  icon: (<svg viewBox="0 0 28 28" className="w-6 h-6" fill="none"><circle cx="14" cy="14" r="11" fill="#93C5FD" stroke="#111" strokeWidth="1.4"/><circle cx="14" cy="14" r="6" fill="none" stroke="#111" strokeWidth="1" opacity="0.3"/><circle cx="14" cy="14" r="2.5" fill="#111"/><path d="M14 14 L18 9" stroke="#111" strokeWidth="1.4" strokeLinecap="round"/></svg>),
+                { id: 'uptime', color: '#93C5FD', badge: 'Ops', label: 'Uptime monitor',
+                  sub: 'Alerts before your users notice',
+                  icon: (<svg viewBox="0 0 28 28" className="w-7 h-7" fill="none"><circle cx="14" cy="14" r="11" fill="#93C5FD" stroke="#111" strokeWidth="1.4"/><circle cx="14" cy="14" r="6" fill="none" stroke="#111" strokeWidth="1" opacity="0.3"/><circle cx="14" cy="14" r="2.5" fill="#111"/><path d="M14 14 L18 9" stroke="#111" strokeWidth="1.4" strokeLinecap="round"/></svg>),
                   workflow: { name: 'Uptime Monitor', agentGoal: 'Periodically check the configured health endpoints, measure response times, detect any 4xx/5xx responses or timeouts, and immediately alert via the notification connector.' } },
-                { id: 'daily-brief', num: '04', color: '#C4B5FD', badge: 'Analytics', label: 'Daily business brief',
-                  sub: 'AI pulls metrics, spots trends, posts a summary to Slack every morning.',
-                  icon: (<svg viewBox="0 0 28 28" className="w-6 h-6" fill="none"><rect x="3" y="3" width="22" height="22" rx="5" fill="#C4B5FD" stroke="#111" strokeWidth="1.4"/><rect x="6" y="18" width="4" height="4" rx="1" fill="#111" opacity="0.35"/><rect x="12" y="13" width="4" height="9" rx="1" fill="#111" opacity="0.35"/><rect x="18" y="7" width="4" height="15" rx="1" fill="#111" opacity="0.5"/></svg>),
+                { id: 'daily-brief', color: '#C4B5FD', badge: 'Analytics', label: 'Daily business brief',
+                  sub: 'Metrics to Slack every morning',
+                  icon: (<svg viewBox="0 0 28 28" className="w-7 h-7" fill="none"><rect x="3" y="3" width="22" height="22" rx="5" fill="#C4B5FD" stroke="#111" strokeWidth="1.4"/><rect x="6" y="18" width="4" height="4" rx="1" fill="#111" opacity="0.35"/><rect x="12" y="13" width="4" height="9" rx="1" fill="#111" opacity="0.35"/><rect x="18" y="7" width="4" height="15" rx="1" fill="#111" opacity="0.5"/></svg>),
                   workflow: { name: 'Daily Briefing', agentGoal: 'Pull key business metrics from the configured API connectors, summarise trends, flag anomalies, and post a structured daily brief to the notification channel.' } },
-                { id: 'lead-qualify', num: '05', color: '#FDE68A', badge: 'Sales', label: 'Qualify leads automatically',
-                  sub: 'Scores inbound leads and routes hot ones to your CRM or sales channel.',
-                  icon: (<svg viewBox="0 0 28 28" className="w-6 h-6" fill="none"><circle cx="10" cy="9" r="5" fill="#FDE68A" stroke="#111" strokeWidth="1.4"/><path d="M4 22 C4 17 16 17 16 22" stroke="#111" strokeWidth="1.4" strokeLinecap="round" fill="none"/><path d="M18 12 L20 14 L24 10" stroke="#111" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/></svg>),
+                { id: 'lead-qualify', color: '#FDE68A', badge: 'Sales', label: 'Qualify leads',
+                  sub: 'Score and route hot leads fast',
+                  icon: (<svg viewBox="0 0 28 28" className="w-7 h-7" fill="none"><circle cx="10" cy="9" r="5" fill="#FDE68A" stroke="#111" strokeWidth="1.4"/><path d="M4 22 C4 17 16 17 16 22" stroke="#111" strokeWidth="1.4" strokeLinecap="round" fill="none"/><path d="M18 12 L20 14 L24 10" stroke="#111" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/></svg>),
                   workflow: { name: 'Lead Qualification', agentGoal: 'Receive inbound lead data, score each lead based on company size, intent signals and fit criteria, route high-score leads to CRM via API connector, and send a qualification summary to the sales channel.' } },
-                { id: 'data-sync', num: '06', color: '#A7F3D0', badge: 'Data', label: 'Sync data across apps',
-                  sub: 'Connect any two systems and let AI keep them in sync — no ETL scripts.',
-                  icon: (<svg viewBox="0 0 28 28" className="w-6 h-6" fill="none"><rect x="2" y="4" width="10" height="10" rx="3" fill="#A7F3D0" stroke="#111" strokeWidth="1.4"/><rect x="16" y="14" width="10" height="10" rx="3" fill="#A7F3D0" stroke="#111" strokeWidth="1.4"/><path d="M12 9 Q20 9 20 14" stroke="#111" strokeWidth="1.3" fill="none" strokeLinecap="round"/><path d="M18 12 L20 14 L22 12" stroke="#111" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/><path d="M16 19 Q8 19 8 14" stroke="#111" strokeWidth="1.3" fill="none" strokeLinecap="round"/><path d="M6 16 L8 14 L10 16" stroke="#111" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/></svg>),
+                { id: 'data-sync', color: '#A7F3D0', badge: 'Data', label: 'Sync data across apps',
+                  sub: 'Any two systems, always in sync',
+                  icon: (<svg viewBox="0 0 28 28" className="w-7 h-7" fill="none"><rect x="2" y="4" width="10" height="10" rx="3" fill="#A7F3D0" stroke="#111" strokeWidth="1.4"/><rect x="16" y="14" width="10" height="10" rx="3" fill="#A7F3D0" stroke="#111" strokeWidth="1.4"/><path d="M12 9 Q20 9 20 14" stroke="#111" strokeWidth="1.3" fill="none" strokeLinecap="round"/><path d="M18 12 L20 14 L22 12" stroke="#111" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/><path d="M16 19 Q8 19 8 14" stroke="#111" strokeWidth="1.3" fill="none" strokeLinecap="round"/><path d="M6 16 L8 14 L10 16" stroke="#111" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/></svg>),
                   workflow: { name: 'Data Sync Agent', agentGoal: 'Fetch records from the source API connector, transform and map fields to the destination schema, push updates to the destination connector, and log all sync operations with timestamps and change counts.' } },
               ].map(a => {
                 const isLaunching = launching === a.id
@@ -726,25 +726,34 @@ export default function HomePage() {
                   <button key={a.id}
                     onClick={() => useTemplate({ id: a.id, Icon: AgentIcon, title: a.label, tag: 'Quick Action', tagColor: '', accentColor: a.color, description: a.sub, what: [], trigger: 'On demand or scheduled', workflow: a.workflow })}
                     disabled={isLaunching || isDone}
-                    className="w-full bg-white border border-[#E8E0D0] rounded-2xl p-4 text-left flex items-center gap-4 hover:border-[#EA580C] hover:shadow-md transition-all duration-200 disabled:opacity-70 group">
-                    <span className="text-[11px] font-black font-mono w-7 flex-shrink-0 text-gray-200 group-hover:text-[#EA580C]/30 transition-colors">{a.num}</span>
-                    <div className="w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0 transition-transform duration-200 group-hover:scale-110"
-                      style={{ background: a.color + '30', border: `1.5px solid ${a.color}` }}>
+                    className="relative bg-white border border-[#E8E0D0] rounded-2xl p-5 text-left flex flex-col items-start gap-3 hover:shadow-lg transition-all duration-200 disabled:opacity-70 group overflow-hidden"
+                    style={{ '--tile-color': a.color } as React.CSSProperties}>
+                    {/* icon tile */}
+                    <div className="w-12 h-12 rounded-xl flex items-center justify-center transition-transform duration-200 group-hover:scale-110"
+                      style={{ background: a.color + '25', border: `1.5px solid ${a.color}` }}>
                       {a.icon}
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-0.5">
-                        <p className="text-sm font-extrabold text-[#111] group-hover:text-[#EA580C] transition-colors">{a.label}</p>
-                        <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-[#F0EAE0] text-gray-500">{a.badge}</span>
+                    {/* label + badge */}
+                    <div className="flex-1">
+                      <div className="flex items-center gap-1.5 mb-1 flex-wrap">
+                        <p className="text-[13px] font-extrabold text-[#111] leading-snug">{a.label}</p>
+                        <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-[#F0EAE0] text-gray-400">{a.badge}</span>
                       </div>
-                      <p className="text-xs text-gray-400 leading-snug">{a.sub}</p>
+                      <p className="text-[11px] text-gray-400 leading-relaxed">{a.sub}</p>
                     </div>
-                    <div className="flex-shrink-0 text-[11px] font-bold flex items-center gap-1 transition-colors"
-                      style={{ color: isDone ? '#10B981' : '#EA580C' }}>
-                      {isDone ? '✓ Live' : isLaunching
-                        ? <div className="w-3.5 h-3.5 border-2 border-[#EA580C] border-t-transparent rounded-full animate-spin" />
-                        : <>Deploy<svg viewBox="0 0 12 12" className="w-3 h-3 ml-0.5" fill="none"><path d="M2 6 L10 6 M7 3 L10 6 L7 9" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg></>}
+                    {/* deploy footer */}
+                    <div className="w-full flex items-center justify-between pt-2 border-t border-[#F0EAE0]">
+                      <span className="text-[10px] font-mono text-gray-300">1-click deploy</span>
+                      <span className="text-[11px] font-bold flex items-center gap-1 transition-colors"
+                        style={{ color: isDone ? '#10B981' : '#EA580C' }}>
+                        {isDone ? '✓ Live' : isLaunching
+                          ? <div className="w-3.5 h-3.5 border-2 border-[#EA580C] border-t-transparent rounded-full animate-spin" />
+                          : <>Deploy<svg viewBox="0 0 12 12" className="w-3 h-3 ml-0.5" fill="none"><path d="M2 6 L10 6 M7 3 L10 6 L7 9" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg></>}
+                      </span>
                     </div>
+                    {/* color accent bottom strip on hover */}
+                    <div className="absolute bottom-0 left-0 right-0 h-[3px] rounded-b-2xl scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"
+                      style={{ backgroundColor: a.color }} />
                   </button>
                 )
               })}

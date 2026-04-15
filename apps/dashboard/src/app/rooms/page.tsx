@@ -20,25 +20,46 @@ import {
 // ─── Templates ────────────────────────────────────────────────────────────────
 const TEMPLATES = [
   {
-    id: 'crypto-monitor',
-    Icon: ReportsIcon,         // purple bar chart with trend line
-    title: 'Crypto Market Monitor',
-    description: 'Agent fetches live prices, detects anomalies, outputs a sentiment report.',
-    agentGoal: 'Fetch live BTC and ETH prices from CoinGecko, compute 24h percentage change, flag any move greater than 5%, and output a structured market sentiment report with a score from 1 to 10.',
+    id: 'incident-responder',
+    Icon: SecurityIcon,
+    title: 'Incident Responder',
+    description: 'Multi-agent swarm monitors health, classifies severity, pages on-call — all in parallel.',
+    agentGoal: 'Check the health status of all registered services, classify any degraded service by severity and likely root cause, create an incident ticket via the API connector, and output a structured incident report with recommended next steps.',
   },
   {
-    id: 'onchain-alert',
-    Icon: SecurityIcon,        // green shield with lock
-    title: 'On-Chain Alert',
-    description: 'Triggered by blockchain event. Agent reads contract state and decides action.',
-    agentGoal: 'Receive on-chain event data from the webhook payload, read the relevant contract state, evaluate whether the event requires action, and output a structured decision with reasoning.',
+    id: 'support-bot',
+    Icon: AgentIcon,
+    title: 'Autonomous Support Bot',
+    description: 'Classifies intent, queries shared memory for known solutions, replies or escalates.',
+    agentGoal: 'Receive an incoming support request from the webhook payload, classify its intent and urgency, search the knowledge base for matching resolutions, then either draft a complete response or escalate to the appropriate human queue with a detailed context summary.',
   },
   {
     id: 'api-pipeline',
-    Icon: APIIcon,             // two connected blue blocks
-    title: 'Multi-API Pipeline',
-    description: 'Agent chains multiple REST calls and synthesises a unified report.',
-    agentGoal: 'Make sequential HTTP requests to gather data from multiple sources, cross-reference the results, and synthesise a unified structured JSON report highlighting the key findings.',
+    Icon: APIIcon,
+    title: 'Multi-API Data Pipeline',
+    description: 'Chains calls across N REST APIs, merges the results, pushes unified record downstream.',
+    agentGoal: 'Make sequential HTTP requests to all configured API connectors, cross-reference and enrich the results, resolve any field conflicts using business logic rules, and synthesise a unified structured JSON record highlighting key findings and data gaps.',
+  },
+  {
+    id: 'research-swarm',
+    Icon: ReportsIcon,
+    title: 'Research Swarm',
+    description: '5 agents fan out across sources, each owns a sub-topic, converge into one report.',
+    agentGoal: 'Decompose the research topic into sub-topics, fan out parallel research threads, fetch and summarise evidence from configured sources for each sub-topic, store findings in shared Room memory, then synthesise all findings into a structured research report with citations.',
+  },
+  {
+    id: 'compliance-audit',
+    Icon: WorkflowIcon,
+    title: 'Compliance & Audit Agent',
+    description: 'Scans outputs against a policy ruleset stored in Room memory, scores conformance.',
+    agentGoal: 'Receive the content or log payload from the webhook, evaluate it against the stored compliance policy rules, score overall conformance from 0-100, identify and quote specific rule violations, and generate a structured audit report with recommended remediation steps.',
+  },
+  {
+    id: 'llm-pipeline',
+    Icon: LiveRunsIcon,
+    title: 'LLM Orchestration Chain',
+    description: 'Chain GPT-4o and Claude in one Room — each agent handles the step it\'s best at.',
+    agentGoal: 'Fetch content from the configured source, have Agent 1 extract structured data, Agent 2 reason and fact-check the extraction, then synthesise a final structured output and deliver it via the configured output connector.',
   },
 ]
 
@@ -131,34 +152,41 @@ function TemplateModal({ onClose, onLaunched }: { onClose: () => void; onLaunche
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-black/60" onClick={onClose} />
-      <div className="relative bg-white border border-[#DDD5C8] rounded-2xl w-full max-w-lg shadow-[8px_8px_0_0_rgba(0,0,0,1)]">
-        <div className="flex items-center justify-between p-5 border-b-2 border-black">
-          <h2 className="text-lg font-bold">Start from Template</h2>
-          <button onClick={onClose} className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-100 font-bold text-lg">×</button>
+      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
+      <div className="relative bg-[#FAF7F4] border border-[#DDD5C8] rounded-2xl w-full max-w-2xl shadow-[6px_6px_0_0_rgba(0,0,0,0.85)] flex flex-col max-h-[90vh]">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-[#E8E0D0]">
+          <div>
+            <h2 className="text-base font-extrabold text-[#111]">System Blueprints</h2>
+            <p className="text-[11px] text-gray-400 mt-0.5">Pick a pre-built Room — creates workflow + agent automatically</p>
+          </div>
+          <button onClick={onClose} className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-[#E8E0D0] font-bold text-lg text-gray-500">×</button>
         </div>
-        <div className="p-5 space-y-3">
-          {error && <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">{error}</div>}
-          {TEMPLATES.map(t => {
-            const TIcon = t.Icon
-            return (
-            <button key={t.id} onClick={() => launch(t)} disabled={!!launching}
-              className="w-full text-left p-4 border-2 border-[#D4C4A8] hover:border-[#EA580C] rounded-xl transition-all disabled:opacity-60 bg-white hover:bg-white group">
-              <div className="flex items-start justify-between gap-3">
-                <div className="flex items-start gap-3">
-                  <TIcon className="w-9 h-9 flex-shrink-0 mt-0.5 transition-transform group-hover:scale-110" />
-                  <div>
-                    <div className="font-bold text-[#111111] text-sm mb-0.5">{t.title}</div>
-                    <div className="text-xs text-gray-500">{t.description}</div>
+        <div className="p-5 overflow-y-auto">
+          {error && <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-xl text-sm text-red-700">{error}</div>}
+          <div className="grid grid-cols-2 gap-3">
+            {TEMPLATES.map(t => {
+              const TIcon = t.Icon
+              const isLaunching = launching === t.id
+              return (
+                <button key={t.id} onClick={() => launch(t)} disabled={!!launching}
+                  className="text-left p-4 bg-white border border-[#E8E0D0] hover:border-[#EA580C] rounded-xl transition-all duration-200 disabled:opacity-60 group hover:shadow-md relative overflow-hidden">
+                  <div className="mb-3">
+                    <TIcon className="w-10 h-10 transition-transform duration-200 group-hover:scale-110" />
                   </div>
-                </div>
-                {launching === t.id
-                  ? <div className="w-5 h-5 border-2 border-[#EA580C] border-t-transparent rounded-full animate-spin flex-shrink-0 mt-0.5" />
-                  : <span className="text-xs font-bold text-[#EA580C] opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0 mt-0.5">Use →</span>
-                }
-              </div>
-            </button>
-          )})}
+                  <div className="font-bold text-[#111] text-[13px] mb-1 leading-snug">{t.title}</div>
+                  <div className="text-[11px] text-gray-400 leading-relaxed line-clamp-2">{t.description}</div>
+                  <div className="mt-3 flex items-center justify-between">
+                    {isLaunching
+                      ? <div className="w-4 h-4 border-2 border-[#EA580C] border-t-transparent rounded-full animate-spin" />
+                      : <span className="text-[11px] font-bold text-[#EA580C] opacity-0 group-hover:opacity-100 transition-opacity">Deploy →</span>
+                    }
+                  </div>
+                  {/* hover accent strip */}
+                  <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#EA580C] scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left" />
+                </button>
+              )
+            })}
+          </div>
         </div>
       </div>
     </div>
