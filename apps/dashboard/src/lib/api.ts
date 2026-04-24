@@ -96,6 +96,12 @@ export const getRun = (id: string) => request<Run>(`/api/runs/${id}`)
 export const getLogsByRun = (runId: string) => request<{ logs: ExecutionLog[]; runId: string; count: number }>(`/api/logs/${runId}`)
 export const getRunTrace = (runId: string) => request<{ run: Run; traces: AgentTrace[]; count: number }>(`/api/runs/${runId}/trace`)
 
+// ─── Room Memory ──────────────────────────────────────────────────────────────
+export interface MemoryEntry { id: string; key: string; value: unknown; updatedAt: string; createdAt?: string }
+export const getRoomMemory   = (roomId: string) => request<{ entries: MemoryEntry[]; count: number; memoryId: string }>(`/api/rooms/${roomId}/memory`)
+export const writeRoomMemory = (roomId: string, key: string, value: unknown) => request<{ key: string; value: unknown }>(`/api/rooms/${roomId}/memory`, { method: 'POST', body: JSON.stringify({ key, value }) })
+export const deleteRoomMemory = (roomId: string, key: string) => request<void>(`/api/rooms/${roomId}/memory/${encodeURIComponent(key)}`, { method: 'DELETE' })
+
 export const runAgent = (agentId: string, data?: { roomId?: string; maxIterations?: number; goal?: string }) =>
   request<{ runId: string; agentId: string; status: string; message: string }>(
     `/api/agents/${agentId}/run`,

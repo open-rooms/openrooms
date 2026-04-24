@@ -8,6 +8,26 @@ import type { AgentTrace, ExecutionLog, Run } from '@/lib/api'
 import { LiveRunsIcon, MemoryIcon, WorkflowIcon, AgentIcon } from '@/components/icons/system'
 import { CheckCircleIcon, AlertCircleIcon, ClockIcon } from '@/components/icons'
 
+// Rough token cost per 1K tokens (input+output blended) by model name fragment
+const MODEL_COST_PER_1K: Record<string, number> = {
+  'gpt-4o-mini': 0.00015,
+  'gpt-4o':      0.005,
+  'gpt-4-turbo': 0.01,
+  'gpt-4':       0.03,
+  'gpt-3.5':     0.0005,
+  'claude-3-haiku': 0.00025,
+  'claude-3-sonnet': 0.003,
+  'claude-3-opus':   0.015,
+}
+
+function estimateCost(modelName?: string, tokens?: number): string | null {
+  if (!modelName || !tokens) return null
+  const key = Object.keys(MODEL_COST_PER_1K).find(k => modelName.toLowerCase().includes(k))
+  if (!key) return null
+  const cost = (tokens / 1000) * MODEL_COST_PER_1K[key]
+  return cost < 0.01 ? `$${cost.toFixed(5)}` : `$${cost.toFixed(4)}`
+}
+
 function formatMs(ms?: number) {
   if (!ms) return '—'
   if (ms < 1000) return `${ms}ms`
@@ -69,7 +89,15 @@ function StepCard({ trace, index }: { trace: AgentTrace; index: number }) {
           <p className="text-[10px] text-gray-400">{formatTime(trace.timestamp)}</p>
         </div>
 
-        <div className="flex items-center gap-3 flex-shrink-0">
+        <div className="flex items-center gap-2 flex-shrink-0">
+          {(trace as any).modelName && (
+            <span className="text-[9px] font-mono text-gray-300 hidden sm:inline">{(trace as any).modelName}</span>
+          )}
+          {estimateCost((trace as any).modelName, (trace as any).totalTokens) && (
+            <span className="text-[9px] font-bold text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded-full">
+              {estimateCost((trace as any).modelName, (trace as any).totalTokens)}
+            </span>
+          )}
           {trace.durationMs !== undefined && (
             <span className="text-[10px] font-mono text-gray-400">{formatMs(trace.durationMs)}</span>
           )}
@@ -200,6 +228,18 @@ export default function RunTracePage() {
             </span>
             {totalDuration !== null && (
               <span className="text-xs text-gray-500 font-mono">{formatMs(totalDuration)}</span>
+            )}
+            {traces.length > 0 && (
+              <button
+                onClick={() => {
+                  const blob = new Blob([JSON.stringify({ run, traces, logs }, null, 2)], { type: 'application/json' })
+                  const a = document.createElement('a'); a.href = URL.createObjectURL(blob)
+                  a.download = `trace-${id?.slice(0,8)}.json`; a.click()
+                }}
+                className="px-3 py-1 border border-[#D4C4A8] hover:border-[#EA580C] text-xs font-bold text-gray-500 hover:text-[#EA580C] rounded-full transition-colors"
+              >
+                Export JSON
+              </button>
             )}
           </div>
         )}

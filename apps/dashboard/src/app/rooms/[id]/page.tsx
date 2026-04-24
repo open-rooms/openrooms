@@ -647,20 +647,114 @@ function LogsPanel({ logs }: { logs: any[] }) {
   )
 }
 
-// ─── Panel: State/Storage ─────────────────────────────────────────────────────
+// ─── Panel: Memory (live persistent key-value store) ──────────────────────────
 function StoragePanel({ room }: { room: any }) {
-  const state = room?.memoryState || room?.config || {}
+  const [entries, setEntries] = useState<{ id: string; key: string; value: unknown; updatedAt: string }[]>([])
+  const [loading, setLoading] = useState(true)
+  const [writing, setWriting] = useState(false)
+  const [newKey, setNewKey] = useState('')
+  const [newVal, setNewVal] = useState('')
+  const [notice, setNotice] = useState<string | null>(null)
+
+  async function load() {
+    setLoading(true)
+    try {
+      const res = await fetch(`/api/rooms/${room.id}/memory`)
+      const data = await res.json()
+      setEntries(data.entries || [])
+    } catch { /* offline */ }
+    finally { setLoading(false) }
+  }
+
+  useEffect(() => { load() }, [room.id])
+
+  async function write(e: React.FormEvent) {
+    e.preventDefault()
+    if (!newKey.trim()) return
+    setWriting(true)
+    try {
+      let val: unknown = newVal
+      try { val = JSON.parse(newVal) } catch { /* keep as string */ }
+      await fetch(`/api/rooms/${room.id}/memory`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ key: newKey.trim(), value: val }),
+      })
+      setNewKey(''); setNewVal('')
+      setNotice(`Key "${newKey.trim()}" saved`)
+      setTimeout(() => setNotice(null), 2500)
+      load()
+    } finally { setWriting(false) }
+  }
+
+  async function del(key: string) {
+    await fetch(`/api/rooms/${room.id}/memory/${encodeURIComponent(key)}`, { method: 'DELETE' })
+    setNotice(`Key "${key}" deleted`)
+    setTimeout(() => setNotice(null), 2000)
+    load()
+  }
+
   return (
-    <div className="space-y-3">
-      <p className="text-xs text-gray-500">Room memory state — shared across all agents in this room.</p>
-      <div className="bg-[#111111] rounded-xl p-4 font-mono text-xs text-emerald-300 min-h-[200px]">
-        <pre className="whitespace-pre-wrap break-words">
-          {Object.keys(state).length > 0
-            ? JSON.stringify(state, null, 2)
-            : '// No state captured yet.\n// Run an agent to populate room memory.'}
-        </pre>
+    <div className="space-y-4">
+      <div>
+        <p className="text-xs font-bold text-gray-700 mb-1">Persistent Memory</p>
+        <p className="text-[11px] text-gray-400 leading-relaxed">
+          Key-value pairs shared across every agent in this room. Values survive between runs.
+          Agents can read and write here during execution.
+        </p>
       </div>
-      <div className="text-[10px] text-gray-400">Room ID: <code className="font-mono">{room?.id}</code></div>
+
+      {notice && (
+        <div className="px-3 py-1.5 bg-emerald-50 border border-emerald-200 rounded-lg text-xs font-semibold text-emerald-700">{notice}</div>
+      )}
+
+      {/* Write form */}
+      <form onSubmit={write} className="flex gap-2 items-end">
+        <div className="flex-1">
+          <label className="text-[9px] font-bold text-gray-400 uppercase tracking-widest block mb-1">Key</label>
+          <input value={newKey} onChange={e => setNewKey(e.target.value)} placeholder="e.g. user_context"
+            className="w-full px-3 py-1.5 text-xs border border-[#D4C4A8] rounded-lg focus:outline-none focus:border-[#EA580C] font-mono" />
+        </div>
+        <div className="flex-1">
+          <label className="text-[9px] font-bold text-gray-400 uppercase tracking-widest block mb-1">Value (JSON or text)</label>
+          <input value={newVal} onChange={e => setNewVal(e.target.value)} placeholder={`"hello" or {"id":1}`}
+            className="w-full px-3 py-1.5 text-xs border border-[#D4C4A8] rounded-lg focus:outline-none focus:border-[#EA580C] font-mono" />
+        </div>
+        <button type="submit" disabled={writing || !newKey.trim()}
+          className="px-3 py-1.5 bg-[#EA580C] hover:bg-[#C2410C] disabled:opacity-40 text-white text-[10px] font-bold rounded-lg flex-shrink-0 transition-colors">
+          {writing ? '…' : 'Write'}
+        </button>
+      </form>
+
+      {/* Entry list */}
+      {loading ? (
+        <div className="text-center py-6"><div className="w-5 h-5 border-2 border-[#D4C4A8] border-t-[#EA580C] rounded-full animate-spin mx-auto" /></div>
+      ) : entries.length === 0 ? (
+        <div className="bg-[#0D0F1A] rounded-xl p-4 font-mono text-xs text-emerald-300/50">
+          <div>{'// No memory yet'}</div>
+          <div>{'// Run an agent or write a key above'}</div>
+          <div>{'// Agents can read this during execution'}</div>
+        </div>
+      ) : (
+        <div className="space-y-1.5 max-h-72 overflow-y-auto">
+          {entries.map(e => (
+            <div key={e.id} className="flex items-start gap-3 p-3 bg-white border border-[#E8E0D0] rounded-xl group">
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2 mb-0.5">
+                  <span className="text-[11px] font-bold text-[#111] font-mono truncate">{e.key}</span>
+                  <span className="text-[9px] text-gray-400">{new Date(e.updatedAt).toLocaleTimeString()}</span>
+                </div>
+                <pre className="text-[10px] text-gray-500 font-mono truncate">
+                  {typeof e.value === 'string' ? `"${e.value}"` : JSON.stringify(e.value)}
+                </pre>
+              </div>
+              <button onClick={() => del(e.key)} title="Delete key"
+                className="text-gray-200 hover:text-red-500 text-sm opacity-0 group-hover:opacity-100 transition-all flex-shrink-0">✕</button>
+            </div>
+          ))}
+        </div>
+      )}
+      <div className="text-[10px] text-gray-300">{entries.length} key{entries.length !== 1 ? 's' : ''} stored · room <code className="font-mono">{room?.id?.slice(0,8)}…</code></div>
     </div>
   )
 }
