@@ -313,32 +313,99 @@ export default function RoomsPage() {
               <div className="w-8 h-8 border-2 border-[#D4C4A8] border-t-[#EA580C] rounded-full animate-spin mx-auto mb-3" />
               <span className="text-gray-500 text-sm">Loading rooms…</span>
             </div>
+          ) : filteredRooms.length === 0 && filter !== 'all' ? (
+            <div className="text-center py-16">
+              <RoomsIcon className="w-16 h-16 mx-auto mb-4 opacity-20" />
+              <p className="text-sm text-gray-500">No {filter.toLowerCase()} rooms</p>
+            </div>
           ) : filteredRooms.length === 0 ? (
-            /* Empty state */
-            <div className="text-center py-20">
-              <RoomsIcon className="w-20 h-20 mx-auto mb-5 opacity-20" />
-              <h3 className="text-lg font-bold text-[#111111] mb-2">
-                {filter === 'all' ? 'No rooms yet' : `No ${filter.toLowerCase()} rooms`}
-              </h3>
-              <p className="text-sm text-gray-500 mb-6 max-w-sm mx-auto">
-                A Room is an isolated execution environment. Create one and assign agents, workflows, and connectors to it.
-              </p>
-              {filter === 'all' && (
-                <div className="flex justify-center gap-3">
-                  <button onClick={() => setShowCreate(true)}
-                    className="px-6 py-3 bg-[#EA580C] hover:bg-[#C2410C] text-white font-bold rounded-xl text-sm transition-colors flex items-center gap-2">
-                    <PlusIcon className="w-4 h-4" /> Create Room
-                  </button>
-                  <button onClick={() => setShowTemplate(true)}
-                    className="px-6 py-3 border border-[#DDD5C8] hover:bg-[#111111] hover:text-white font-bold rounded-xl text-sm transition-colors">
-                    Start from Template
-                  </button>
+            /* ── First-run onboarding ── */
+            <div className="py-8 space-y-6">
+
+              {/* Hero row */}
+              <div className="bg-[#111111] rounded-2xl p-8 flex flex-col md:flex-row items-center gap-8 shadow-[6px_6px_0_0_rgba(0,0,0,1)]">
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs font-bold tracking-widest text-[#EA580C] uppercase mb-3">Your workspace is empty</p>
+                  <h2 className="text-2xl md:text-3xl font-black text-white mb-3 leading-tight">
+                    Create your first Room.<br />
+                    <span className="text-[#EA580C]">Watch it run.</span>
+                  </h2>
+                  <p className="text-gray-400 text-sm leading-relaxed mb-6 max-w-md">
+                    Rooms are isolated execution environments. Deploy agents into them, bind workflows, connect APIs —
+                    then trigger the whole thing with a single webhook.
+                  </p>
+                  <div className="flex flex-wrap gap-3">
+                    <button onClick={() => setShowTemplate(true)}
+                      className="px-6 py-3 bg-[#EA580C] hover:bg-[#C2410C] text-white font-black rounded-xl text-sm transition-colors flex items-center gap-2">
+                      <WorkflowIcon className="w-4 h-4" />
+                      Launch from Template
+                    </button>
+                    <button onClick={() => setShowCreate(true)}
+                      className="px-6 py-3 border border-white/20 hover:border-white/50 text-white font-bold rounded-xl text-sm transition-colors flex items-center gap-2">
+                      <PlusIcon className="w-4 h-4" />
+                      Start blank
+                    </button>
+                  </div>
                 </div>
-              )}
+                <div className="flex-shrink-0 hidden md:block">
+                  <div className="w-40 h-40 flex items-center justify-center opacity-60">
+                    <RoomsIcon className="w-36 h-36" />
+                  </div>
+                </div>
+              </div>
+
+              {/* Step guide */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {[
+                  {
+                    step: '01',
+                    icon: <RoomsIcon className="w-10 h-10" />,
+                    title: 'Create a Room',
+                    desc: 'Give it a name and bind a workflow. The Room becomes the brain — agents, memory, and tools all live here.',
+                  },
+                  {
+                    step: '02',
+                    icon: <AgentIcon className="w-10 h-10" />,
+                    title: 'Deploy Agents',
+                    desc: 'Set a goal, pick tools, configure cost and iteration limits. Agents reason, act, and write back to shared memory.',
+                  },
+                  {
+                    step: '03',
+                    icon: <AutomationIcon className="w-10 h-10" />,
+                    title: 'Trigger & Observe',
+                    desc: 'Fire the Room via webhook or manually. Watch real-time execution, trace every decision, and monitor cost.',
+                  },
+                ].map(({ step, icon, title, desc }) => (
+                  <div key={step} className="bg-white border-2 border-[#D4C4A8] rounded-2xl p-6 hover:border-[#EA580C] hover:shadow-[0_4px_20px_rgba(234,88,12,0.10)] transition-all duration-200">
+                    <div className="flex items-center gap-3 mb-4">
+                      {icon}
+                      <span className="text-3xl font-black text-[#EA580C]/20 font-mono">{step}</span>
+                    </div>
+                    <p className="text-sm font-black text-[#111] mb-1.5">{title}</p>
+                    <p className="text-xs text-gray-500 leading-relaxed">{desc}</p>
+                  </div>
+                ))}
+              </div>
+
+              {/* Quick template cards */}
+              <div>
+                <p className="text-xs font-bold tracking-widest text-gray-400 uppercase mb-3">Or launch in one click</p>
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                  {TEMPLATES.slice(0, 3).map(t => (
+                    <button key={t.id} onClick={() => setShowTemplate(true)}
+                      className="group p-4 bg-white border border-[#D4C4A8] rounded-xl text-left hover:border-[#EA580C] hover:shadow-md transition-all duration-200">
+                      <t.Icon className="w-9 h-9 mb-3 group-hover:scale-110 transition-transform duration-200" />
+                      <p className="text-xs font-black text-[#111] mb-1">{t.title}</p>
+                      <p className="text-[11px] text-gray-400 leading-tight line-clamp-2">{t.description}</p>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
             </div>
           ) : (
             /* Room cards */
-            <div className="grid grid-cols-1 gap-3">
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
               {filteredRooms.map(room => {
                 const agentCount = agentCounts[room.id] || 0
                 const isRunning = room.status === 'RUNNING'
