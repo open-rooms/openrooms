@@ -11,7 +11,37 @@ export async function roomRoutes(
   fastify: FastifyInstance,
   container: Container
 ): Promise<void> {
-  // Create Room
+
+  // ─── GET /api/rooms/:id/events — room-scoped SSE stream ─────────────────
+  fastify.get<{ Params: { id: string } }>('/rooms/:id/events', async (request, reply) => {
+    const { id } = request.params;
+    reply.raw.writeHead(200, {
+      'Content-Type': 'text/event-stream',
+      'Cache-Control': 'no-cache',
+      'Connection': 'keep-alive',
+      'X-Accel-Buffering': 'no',
+    });
+    // Send a heartbeat immediately so the client knows it's connected
+    reply.raw.write(`data: ${JSON.stringify({ event: 'connected', roomId: id, timestamp: new Date().toISOString() })}\n\n`);
+
+    const subscriber = container.redis.duplicate();
+    const channel = `openrooms:room:${id}`;
+    await subscriber.subscribe(channel);
+
+    const heartbeat = setInterval(() => {
+      try { reply.raw.write(': heartbeat\n\n'); } catch { clearInterval(heartbeat); }
+    }, 20000);
+
+    subscriber.on('message', (_ch: string, message: string) => {
+      try { reply.raw.write(`data: ${message}\n\n`); } catch { /* client disconnected */ }
+    });
+
+    request.raw.on('close', () => {
+      clearInterval(heartbeat);
+      subscriber.unsubscribe(channel).catch(() => {});
+      subscriber.disconnect();
+    });
+  });
   fastify.post<{
     Body: {
       name: string;

@@ -298,14 +298,14 @@ function RoomCommandInput({ roomId, onActivity }: { roomId: string; onActivity: 
   }
 
   return (
-    <div className="border-t-2 border-[#D4C4A8] p-3">
-      <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest mb-2">Send command to this Room</p>
+    <div className="border-t border-white/10 p-3">
+      <p className="text-[9px] font-bold text-gray-600 uppercase tracking-widest mb-2">Send command</p>
       <form onSubmit={send} className="flex gap-2">
         <input
           value={input}
           onChange={e => setInput(e.target.value)}
           placeholder="Tell this room what to do…"
-          className="flex-1 px-3 py-1.5 text-xs border border-[#D4C4A8] rounded-lg bg-white focus:outline-none focus:border-[#EA580C] font-mono text-gray-700 placeholder:text-gray-300"
+          className="flex-1 px-3 py-1.5 text-xs border border-white/10 rounded-lg bg-white/5 focus:outline-none focus:border-[#EA580C] font-mono text-gray-300 placeholder:text-gray-600"
         />
         <button type="submit" disabled={sending || !input.trim()}
           className="px-3 py-1.5 bg-[#EA580C] hover:bg-[#C2410C] disabled:opacity-40 text-white text-[10px] font-bold rounded-lg flex items-center gap-1 transition-colors">
@@ -912,14 +912,93 @@ export default function RoomSystemPage() {
   const [logs, setLogs] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [activePanel, setActivePanel] = useState<Panel>(null)
-  const [activityFeed, setActivityFeed] = useState<{ time: string; msg: string; type: 'run' | 'agent' | 'event' | 'log' }[]>([])
+  const [activityFeed, setActivityFeed] = useState<{ time: string; msg: string; type: 'run' | 'agent' | 'event' | 'log' | 'reason' | 'tool' }[]>([])
   const [systemStatus, setSystemStatus] = useState<'IDLE' | 'RUNNING' | 'PROCESSING'>('IDLE')
   const [runningAction, setRunningAction] = useState<'start' | 'stop' | null>(null)
   const [lastNotice, setLastNotice] = useState<string | null>(null)
+  const [sseConnected, setSseConnected] = useState(false)
+  const [lastCompletedRunId, setLastCompletedRunId] = useState<string | null>(null)
 
-  const pushActivity = useCallback((msg: string, type: 'run' | 'agent' | 'event' | 'log' = 'log') => {
-    setActivityFeed(prev => [{ time: new Date().toLocaleTimeString(), msg, type }, ...prev].slice(0, 40))
+  const pushActivity = useCallback((msg: string, type: 'run' | 'agent' | 'event' | 'log' | 'reason' | 'tool' = 'log') => {
+    setActivityFeed(prev => [{ time: new Date().toLocaleTimeString(), msg, type }, ...prev].slice(0, 60))
   }, [])
+
+  // ── SSE: subscribe to room-specific event stream ─────────────────────────────
+  useEffect(() => {
+    let es: EventSource | null = null
+    let retryTimer: ReturnType<typeof setTimeout> | null = null
+
+    function connect() {
+      es = new EventSource(`/api/rooms/${roomId}/events`)
+
+      es.onopen = () => setSseConnected(true)
+
+      es.onmessage = (e) => {
+        try {
+          const payload = JSON.parse(e.data)
+          if (payload.event === 'connected') return
+
+          const { event, data } = payload
+
+          if (event === 'agent.step') {
+            const phase = data?.phase
+            const iter = data?.iteration
+            const max = data?.maxIter
+            if (phase === 'perceive') {
+              setSystemStatus('RUNNING')
+              pushActivity(`[${iter}/${max}] Perceiving — loading memory and room state`, 'agent')
+            } else if (phase === 'reason') {
+              const reasoning = data?.reasoning as string || ''
+              pushActivity(`[${iter}/${max}] ${reasoning.slice(0, 120)}${reasoning.length > 120 ? '…' : ''}`, 'reason')
+            } else if (phase === 'memory_update') {
+              pushActivity(`[${iter}/${max}] Memory updated with new observations`, 'log')
+            }
+          } else if (event === 'agent.tool_call') {
+            const tool = data?.tool as string
+            const input = data?.input as Record<string, unknown>
+            const inputStr = input ? ' ' + JSON.stringify(input).slice(0, 60) : ''
+            pushActivity(`→ Tool call: ${tool}${inputStr}`, 'tool')
+          } else if (event === 'agent.tool_result') {
+            const tool = data?.tool as string
+            const result = data?.result as Record<string, unknown>
+            const resultStr = result ? JSON.stringify(result).slice(0, 80) : ''
+            pushActivity(`← ${tool} returned: ${resultStr}`, 'tool')
+          } else if (event === 'agent.completed') {
+            setSystemStatus('IDLE')
+            pushActivity('Agent completed successfully', 'run')
+            setTimeout(load, 500)
+          } else if (event === 'agent.failed') {
+            setSystemStatus('IDLE')
+            pushActivity(`Agent failed: ${data?.error || 'Unknown error'}`, 'event')
+            setTimeout(load, 500)
+          } else if (event === 'run.completed') {
+            const runId = payload.runId as string
+            if (runId) setLastCompletedRunId(runId)
+            pushActivity(`Run ${runId?.slice(0, 8) || '?'}… completed`, 'run')
+            setTimeout(load, 800)
+          } else if (event === 'workflow.step') {
+            pushActivity(`Workflow: ${data?.step || 'step'}`, 'log')
+          } else if (event === 'workflow.completed') {
+            pushActivity('Workflow completed', 'run')
+          }
+        } catch { /* ignore parse errors */ }
+      }
+
+      es.onerror = () => {
+        setSseConnected(false)
+        es?.close()
+        // Retry after 5 seconds
+        retryTimer = setTimeout(connect, 5000)
+      }
+    }
+
+    connect()
+    return () => {
+      es?.close()
+      if (retryTimer) clearTimeout(retryTimer)
+      setSseConnected(false)
+    }
+  }, [roomId, pushActivity])
 
   const load = useCallback(async () => {
     try {
@@ -1179,77 +1258,91 @@ export default function RoomSystemPage() {
         </div>
 
         {/* ── Right: Live Activity Panel ──────────────────────────────── */}
-        <div className="lg:flex flex-col w-full lg:w-72 xl:w-80 border-t-2 lg:border-t-0 lg:border-l-2 border-[#D4C4A8] bg-white hidden lg:flex">
-          <div className="flex items-center justify-between px-5 py-3 border-b-2 border-[#D4C4A8]">
+        <div className="lg:flex flex-col w-full lg:w-72 xl:w-80 border-t-2 lg:border-t-0 lg:border-l-2 border-[#D4C4A8] bg-[#0D0F1A] hidden lg:flex">
+          <div className="flex items-center justify-between px-5 py-3 border-b border-white/10">
             <div className="flex items-center gap-2">
-              <span className={`w-2 h-2 rounded-full ${systemStatus === 'RUNNING' ? 'bg-blue-500 animate-pulse' : 'bg-gray-300'}`} />
-              <span className="text-xs font-bold text-[#111111]">Live Activity</span>
+              <span className={`w-2 h-2 rounded-full ${systemStatus === 'RUNNING' ? 'bg-blue-500 animate-pulse' : 'bg-gray-600'}`} />
+              <span className="text-xs font-bold text-white/70">Live Activity</span>
             </div>
-            <span className="text-[10px] text-gray-400">3s refresh</span>
+            <div className="flex items-center gap-1.5">
+              <span className={`w-1.5 h-1.5 rounded-full ${sseConnected ? 'bg-emerald-500 animate-pulse' : 'bg-gray-600'}`} />
+              <span className="text-[10px] text-gray-500 font-bold">{sseConnected ? 'LIVE' : 'connecting…'}</span>
+            </div>
           </div>
 
           {/* Stats strip */}
-          <div className="grid grid-cols-3 divide-x divide-[#D4C4A8] border-b-2 border-[#D4C4A8]">
+          <div className="grid grid-cols-3 divide-x divide-white/10 border-b border-white/10">
             {[
               { label: 'Agents', value: agents.length },
               { label: 'Runs', value: runs.length },
               { label: 'Active', value: activeRuns.length },
             ].map(s => (
               <div key={s.label} className="px-3 py-2.5 text-center">
-                <p className="text-base font-black text-[#111111]">{s.value}</p>
-                <p className="text-[10px] text-gray-400">{s.label}</p>
+                <p className="text-base font-black text-white">{s.value}</p>
+                <p className="text-[10px] text-gray-500">{s.label}</p>
               </div>
             ))}
           </div>
 
           {/* Feed */}
-          <div className="flex-1 overflow-y-auto p-3 space-y-1.5">
-            {/* Logs as live feed */}
-            {logs.slice(0, 15).map((log, i) => (
-              <div key={`log-${i}`} className="flex items-start gap-2 text-xs py-1.5 px-2 rounded-lg hover:bg-white transition-colors">
-                <span className="text-gray-400 flex-shrink-0 font-mono">{new Date(log.timestamp || log.createdAt).toLocaleTimeString()}</span>
-                <span className={`flex-1 leading-snug ${log.level === 'ERROR' ? 'text-red-600' : log.level === 'WARN' ? 'text-yellow-600' : 'text-gray-700'}`}>{log.message}</span>
+          <div className="flex-1 overflow-y-auto p-3 space-y-0.5 font-mono text-[11px]">
+            {/* SSE live events (newest first) */}
+            {activityFeed.map((ev, i) => (
+              <div key={`feed-${i}`} className={`flex items-start gap-2 py-1.5 px-2 rounded ${
+                ev.type === 'reason'  ? 'bg-purple-950/5' :
+                ev.type === 'tool'   ? 'bg-orange-950/5' :
+                ev.type === 'run'    ? 'bg-blue-950/5' :
+                ev.type === 'agent'  ? 'bg-emerald-950/5' :
+                ev.type === 'event'  ? 'bg-red-950/5' : ''
+              }`}>
+                <span className="text-gray-400 flex-shrink-0 select-none">{ev.time}</span>
+                <span className={`flex-1 leading-relaxed break-all ${
+                  ev.type === 'reason' ? 'text-purple-300' :
+                  ev.type === 'tool'   ? 'text-orange-300' :
+                  ev.type === 'run'    ? 'text-blue-300' :
+                  ev.type === 'agent'  ? 'text-emerald-300' :
+                  ev.type === 'event'  ? 'text-red-300' : 'text-gray-400'
+                }`}>
+                  {ev.type === 'reason'  ? <><span className="text-purple-500 select-none">💭 </span>{ev.msg}</> :
+                   ev.type === 'tool'    ? <><span className="text-orange-500 select-none">⚡ </span>{ev.msg}</> :
+                   ev.type === 'run'     ? <><span className="text-blue-500 select-none">✓ </span>{ev.msg}</> :
+                   ev.type === 'agent'   ? <><span className="text-emerald-500 select-none">→ </span>{ev.msg}</> :
+                   <>{ev.msg}</>
+                  }
+                </span>
               </div>
             ))}
-            {/* Manual activity pushes */}
-            {activityFeed.map((ev, i) => (
-              <div key={`feed-${i}`} className={`flex items-start gap-2 text-xs py-1.5 px-2 rounded-lg ${
-                ev.type === 'event' ? 'bg-orange-50' :
-                ev.type === 'run' ? 'bg-blue-50' :
-                ev.type === 'agent' ? 'bg-purple-50' : 'bg-white'
-              }`}>
-                <span className="text-gray-400 flex-shrink-0 font-mono">{ev.time}</span>
-                <span className={`flex-1 leading-snug font-medium ${
-                  ev.type === 'event' ? 'text-orange-700' :
-                  ev.type === 'run' ? 'text-blue-700' :
-                  ev.type === 'agent' ? 'text-purple-700' : 'text-gray-700'
-                }`}>{ev.msg}</span>
+            {/* Execution logs fallback */}
+            {activityFeed.length === 0 && logs.slice(0, 15).map((log, i) => (
+              <div key={`log-${i}`} className="flex items-start gap-2 py-1.5 px-2">
+                <span className="text-gray-600 flex-shrink-0">{new Date(log.timestamp || log.createdAt).toLocaleTimeString()}</span>
+                <span className={`flex-1 leading-snug ${log.level === 'ERROR' ? 'text-red-400' : log.level === 'WARN' ? 'text-yellow-400' : 'text-gray-400'}`}>{log.message}</span>
               </div>
             ))}
             {logs.length === 0 && activityFeed.length === 0 && (
               <div className="text-center py-10">
-                <LiveRunsIcon className="w-10 h-10 mx-auto mb-2 opacity-20" />
-                <p className="text-xs text-gray-400">No activity yet.<br/>Start the system to see live events.</p>
+                <p className="text-emerald-500/50 mb-2">{'// waiting for activity…'}</p>
+                <p className="text-gray-600 text-[10px]">Start the system or trigger a run</p>
               </div>
             )}
           </div>
 
           {/* Recent runs */}
           {runs.length > 0 && (
-            <div className="border-t-2 border-[#D4C4A8] p-3 space-y-1.5">
-              <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">Recent Runs</p>
+            <div className="border-t border-white/10 p-3 space-y-1.5">
+              <p className="text-[10px] font-bold text-gray-600 uppercase tracking-widest mb-2">Recent Runs</p>
               {runs.slice(0, 4).map(run => (
-                <div key={run.id} className="flex items-center gap-2 text-[10px] py-1">
+                <div key={run.id} className="flex items-center gap-2 text-[10px] py-1 font-mono">
                   <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${
                     run.status === 'completed' ? 'bg-emerald-500' :
                     run.status === 'failed' ? 'bg-red-500' :
-                    run.status === 'running' ? 'bg-blue-500 animate-pulse' : 'bg-gray-400'
+                    run.status === 'running' ? 'bg-blue-500 animate-pulse' : 'bg-gray-600'
                   }`} />
-                  <span className="font-mono text-gray-500 flex-1 truncate">{run.id.slice(0, 12)}…</span>
+                  <span className="text-gray-600 flex-1 truncate">{run.id.slice(0, 12)}…</span>
                   <span className={`font-bold ${
-                    run.status === 'completed' ? 'text-emerald-600' :
-                    run.status === 'failed' ? 'text-red-500' :
-                    run.status === 'running' ? 'text-blue-600' : 'text-gray-400'
+                    run.status === 'completed' ? 'text-emerald-500' :
+                    run.status === 'failed' ? 'text-red-400' :
+                    run.status === 'running' ? 'text-blue-400' : 'text-gray-600'
                   }`}>{run.status}</span>
                 </div>
               ))}

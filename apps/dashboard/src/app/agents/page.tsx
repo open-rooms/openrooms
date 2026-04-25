@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
-import { AgentIcon, LiveRunsIcon } from '@/components/icons/system'
+import { AgentIcon, LiveRunsIcon, RoomsIcon } from '@/components/icons/system'
 import { getAgents, runAgent } from '@/lib/api'
 
 interface Agent {
@@ -208,7 +208,16 @@ export default function AgentsPage() {
                     </p>
                     <div className="flex flex-wrap gap-4 text-xs text-gray-400">
                       <span>{agent.allowedTools.length} tools</span>
-                      {agent.roomId && <span>Room: <code className="font-mono">{agent.roomId.slice(0, 8)}</code></span>}
+                      {agent.roomId && (
+                        <Link href={`/rooms/${agent.roomId}`}
+                          className="flex items-center gap-1 text-[#EA580C] hover:underline font-semibold">
+                          <RoomsIcon className="w-3 h-3" />
+                          In Room →
+                        </Link>
+                      )}
+                      {!agent.roomId && (
+                        <span className="text-gray-300 italic">No room assigned</span>
+                      )}
                       {agent.lastExecutedAt && (
                         <span>Last run: {new Date(agent.lastExecutedAt).toLocaleString()}</span>
                       )}

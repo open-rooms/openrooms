@@ -82,11 +82,18 @@ async function simulateAgentLoop(
 ) {
   const useOpenAI = !!process.env.OPENAI_API_KEY;
 
+  // Room-scoped emit: publishes to the global channels AND the room-specific channel
+  const emitRoom = async (event: string, data: Record<string, unknown> = {}) => {
+    const payload = { event, runId, data: { ...data, roomId, agentId }, timestamp: new Date().toISOString() };
+    await eventBus.emit(event as any, runId, { ...data, roomId, agentId });
+    await redis.publish(`openrooms:room:${roomId}`, JSON.stringify(payload));
+  };
+
   for (let iter = 1; iter <= maxIter; iter++) {
     // ── PERCEIVE ──────────────────────────────────────────────────────────
     await logEvent(db, roomId, workflowId, agentId, 'AGENT_LOOP_ITERATION',
       `[${iter}/${maxIter}] Perceiving — loading memory context and room state`);
-    await eventBus.emit('agent.step', runId, { phase: 'perceive', iteration: iter });
+    await emitRoom('agent.step', { phase: 'perceive', iteration: iter, maxIter, goal: goal.slice(0, 80) });
     await sleep(300 + Math.random() * 400);
 
     // ── REASON ────────────────────────────────────────────────────────────
@@ -135,14 +142,14 @@ async function simulateAgentLoop(
 
     await logEvent(db, roomId, workflowId, agentId, 'AGENT_REASONING_TRACE',
       `[${iter}/${maxIter}] Reasoning: ${reasoning}`);
-    await eventBus.emit('agent.step', runId, { phase: 'reason', iteration: iter, reasoning });
+    await emitRoom('agent.step', { phase: 'reason', iteration: iter, maxIter, reasoning });
     await sleep(200 + Math.random() * 300);
 
     // ── TOOL EXECUTION ────────────────────────────────────────────────────
     if (selectedTool) {
       await logEvent(db, roomId, workflowId, agentId, 'AGENT_TOOL_SELECTED',
         `[${iter}/${maxIter}] Calling tool: ${selectedTool}`, { toolInput });
-      await eventBus.emit('agent.tool_call', runId, { tool: selectedTool, input: toolInput });
+      await emitRoom('agent.tool_call', { tool: selectedTool, input: toolInput });
       await sleep(400 + Math.random() * 600);
 
       let toolResult: unknown = null;
@@ -192,12 +199,14 @@ async function simulateAgentLoop(
       await logEvent(db, roomId, workflowId, agentId, 'TOOL_COMPLETED',
         `[${iter}/${maxIter}] Tool "${selectedTool}" result received`,
         { result: toolResult as Record<string, unknown> });
+      await emitRoom('agent.tool_result', { tool: selectedTool, result: toolResult });
       await sleep(200);
     }
 
     // ── MEMORY UPDATE ─────────────────────────────────────────────────────
     await logEvent(db, roomId, workflowId, agentId, 'AGENT_MEMORY_UPDATED',
       `[${iter}/${maxIter}] Memory updated with iteration ${iter} observations`);
+    await emitRoom('agent.step', { phase: 'memory_update', iteration: iter, maxIter });
     await sleep(150);
 
     if (!shouldContinue) break;
@@ -355,7 +364,10 @@ export function createRunnerWorkers(redis: Redis, connection: ConnectionOpts) {
         });
 
         await eventBus.emit('agent.completed', runId, { agentId, roomId });
-        await eventBus.emit('run.completed', runId, { type: 'agent', agentId });
+        await eventBus.emit('run.completed', runId, { type: 'agent', agentId, roomId });
+        await redis.publish(`openrooms:room:${roomId}`, JSON.stringify({
+          event: 'run.completed', runId, data: { type: 'agent', agentId, roomId }, timestamp: new Date().toISOString(),
+        }));
 
         console.log(`[RunnerWorker] Agent run ${runId} completed ✓`);
       } catch (error) {

@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
+import { useEffect, useState } from 'react'
 import { cn } from '@/lib/utils'
 import { OpenRoomsLogo } from './openrooms-logo'
 import {
@@ -27,9 +28,8 @@ import {
   SDKIcon,
   DeveloperIcon,
   ClientsIcon,
+  BuildIcon,
 } from './icons/system'
-
-type NavItem = { name: string; href: string; Icon: React.ComponentType<{ className?: string }> }
 
 // Core platform — only routes with real pages
 const platformNav: NavItem[] = [
@@ -38,6 +38,7 @@ const platformNav: NavItem[] = [
   { name: 'Workflows',    href: '/workflows',    Icon: WorkflowIcon },
   { name: 'Connectors',   href: '/connectors',   Icon: APIIcon },
   { name: 'Live Runs',    href: '/live-runs',    Icon: LiveRunsIcon },
+  { name: 'Playground',   href: '/playground',   Icon: BuildIcon },
   { name: 'Tools',        href: '/tools',        Icon: ToolIcon },
   { name: 'Runtime',      href: '/runtime',      Icon: ObservabilityIcon },
   { name: 'Control Plane',href: '/control-plane',Icon: DashboardIcon },
@@ -85,6 +86,8 @@ const enterpriseNav: NavItem[] = [
   { name: 'Architecture',         href: '/enterprise/architecture', Icon: EnterpriseArchitectureIcon },
 ]
 
+type NavItem = { name: string; href: string; Icon: React.ComponentType<{ className?: string }>; badge?: number }
+
 function NavSection({ label, items, pathname, accentColor }: { label: string; items: NavItem[]; pathname: string; accentColor?: string }) {
   return (
     <div>
@@ -106,7 +109,12 @@ function NavSection({ label, items, pathname, accentColor }: { label: string; it
                 <span className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-5 rounded-full" style={{ backgroundColor: accentColor }} />
               )}
               <Icon className="w-5 h-5 flex-shrink-0 transition-transform duration-150 group-hover:scale-110" />
-              <span>{item.name}</span>
+              <span className="flex-1">{item.name}</span>
+              {item.badge != null && item.badge > 0 && (
+                <span className="min-w-[18px] h-[18px] flex items-center justify-center px-1 bg-[#EA580C] text-white text-[9px] font-black rounded-full animate-pulse">
+                  {item.badge}
+                </span>
+              )}
             </Link>
           )
         })}
@@ -122,6 +130,25 @@ export function Sidebar() {
   const isDevelopers = pathname?.startsWith('/developers')
   const isEnterprise = pathname?.startsWith('/enterprise')
   const isPlatform   = !isClients && !isDevelopers && !isEnterprise
+
+  const [activeRunCount, setActiveRunCount] = useState(0)
+
+  // Poll active run count for the badge
+  useEffect(() => {
+    let mounted = true
+    async function fetchCount() {
+      try {
+        const res = await fetch('/api/runs?limit=50')
+        if (!res.ok) return
+        const data = await res.json()
+        const active = (data.runs || []).filter((r: any) => r.status === 'running' || r.status === 'pending').length
+        if (mounted) setActiveRunCount(active)
+      } catch { /* ignore */ }
+    }
+    fetchCount()
+    const i = setInterval(fetchCount, 5000)
+    return () => { mounted = false; clearInterval(i) }
+  }, [])
 
   function handleSignOut() {
     localStorage.removeItem('or_workspace')
@@ -155,7 +182,9 @@ export function Sidebar() {
 
         {/* Default platform nav */}
         {isPlatform && (
-          <NavSection label="Platform" items={platformNav} pathname={pathname} accentColor="#F5A623" />
+          <NavSection label="Platform" items={platformNav.map(item =>
+            item.href === '/live-runs' ? { ...item, badge: activeRunCount } : item
+          )} pathname={pathname} accentColor="#F5A623" />
         )}
       </nav>
 
