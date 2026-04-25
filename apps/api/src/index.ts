@@ -20,6 +20,7 @@ import { runtimeRoutes } from './routes/runtime';
 import { settingsRoutes } from './routes/settings';
 import { workspacesRoutes } from './routes/workspaces';
 import { memoryRoutes } from './routes/memory';
+import { integrationRoutes } from './routes/integrations';
 import { createAPIKeyMiddleware } from './middleware/api-key-auth';
 import { createAgentWorker } from './workers/agent-worker';
 import { createRunnerWorkers } from './workers/runner-worker';
@@ -86,6 +87,7 @@ async function main() {
   await fastify.register((instance) => settingsRoutes(instance, container), { prefix: '/api' });
   await fastify.register((instance) => workspacesRoutes(instance, container), { prefix: '/api' });
   await fastify.register((instance) => memoryRoutes(instance, container), { prefix: '/api' });
+  await fastify.register((instance) => integrationRoutes(instance, container), { prefix: '/api' });
 
   // Root endpoint
   fastify.get('/', async () => {

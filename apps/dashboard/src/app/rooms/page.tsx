@@ -208,6 +208,7 @@ export default function RoomsPage() {
   const [showTemplate, setShowTemplate] = useState(false)
   const [runningId, setRunningId] = useState<string | null>(null)
   const [apiError, setApiError] = useState(false)
+  const [runError, setRunError] = useState<string | null>(null)
 
   async function loadRooms() {
     try {
@@ -240,8 +241,9 @@ export default function RoomsPage() {
   async function handleRun(e: React.MouseEvent, roomId: string) {
     e.preventDefault(); e.stopPropagation()
     setRunningId(roomId)
+    setRunError(null)
     try { await api.runRoom(roomId); setTimeout(loadRooms, 800) }
-    catch (err: any) { alert(`Failed: ${err.message}`) }
+    catch (err: any) { setRunError(`Run failed: ${err.message}`) }
     finally { setRunningId(null) }
   }
 
@@ -249,7 +251,7 @@ export default function RoomsPage() {
     e.preventDefault(); e.stopPropagation()
     if (!confirm(`Delete "${name}"?`)) return
     try { await api.deleteRoom(roomId); loadRooms() }
-    catch (err: any) { alert(err.message) }
+    catch (err: any) { setRunError(err.message) }
   }
 
   const filteredRooms = rooms.filter(r => filter === 'all' || r.status === filter)
@@ -293,6 +295,15 @@ export default function RoomsPage() {
             <div className="flex items-center gap-3 p-4 bg-red-50 border-2 border-red-200 rounded-xl">
               <AlertCircleIcon className="w-5 h-5 text-red-500 flex-shrink-0" />
               <span className="text-sm text-red-700 font-medium">API unreachable — start the backend with <code className="bg-red-100 px-1 rounded">pnpm dev --filter @openrooms/api</code></span>
+            </div>
+          )}
+
+          {/* Run error */}
+          {runError && (
+            <div className="flex items-center gap-3 p-4 bg-red-50 border border-red-200 rounded-xl">
+              <AlertCircleIcon className="w-5 h-5 text-red-500 flex-shrink-0" />
+              <span className="text-sm text-red-700 font-medium flex-1">{runError}</span>
+              <button onClick={() => setRunError(null)} className="text-red-400 hover:text-red-600 text-sm font-bold">✕</button>
             </div>
           )}
 

@@ -79,8 +79,10 @@ async function simulateAgentLoop(
   maxIter: number,
   goal: string,
   toolDefs: { name: string; description: string }[]
-) {
+): Promise<{ summary: string; toolResults: { tool: string; result: unknown }[] }> {
   const useOpenAI = !!process.env.OPENAI_API_KEY;
+  const collectedResults: { tool: string; result: unknown }[] = [];
+  let finalReasoning = '';
 
   // Room-scoped emit: publishes to the global channels AND the room-specific channel
   const emitRoom = async (event: string, data: Record<string, unknown> = {}) => {
@@ -143,6 +145,7 @@ async function simulateAgentLoop(
     await logEvent(db, roomId, workflowId, agentId, 'AGENT_REASONING_TRACE',
       `[${iter}/${maxIter}] Reasoning: ${reasoning}`);
     await emitRoom('agent.step', { phase: 'reason', iteration: iter, maxIter, reasoning });
+    finalReasoning = reasoning;
     await sleep(200 + Math.random() * 300);
 
     // ── TOOL EXECUTION ────────────────────────────────────────────────────
@@ -200,6 +203,7 @@ async function simulateAgentLoop(
         `[${iter}/${maxIter}] Tool "${selectedTool}" result received`,
         { result: toolResult as Record<string, unknown> });
       await emitRoom('agent.tool_result', { tool: selectedTool, result: toolResult });
+      collectedResults.push({ tool: selectedTool, result: toolResult });
       await sleep(200);
     }
 
@@ -211,6 +215,9 @@ async function simulateAgentLoop(
 
     if (!shouldContinue) break;
   }
+
+  const summary = finalReasoning || `Completed goal: "${goal}"`;
+  return { summary, toolResults: collectedResults };
 }
 
 // ─── Workers ─────────────────────────────────────────────────────────────────
@@ -347,7 +354,7 @@ export function createRunnerWorkers(redis: Redis, connection: ConnectionOpts) {
           { agentId, goal, tools: toolDefs.map((t: any) => t.name) });
 
         // Run the agent loop
-        await simulateAgentLoop(db, redis, eventBus, runId, agentId, roomId, agentWorkflowId,
+        const loopResult = await simulateAgentLoop(db, redis, eventBus, runId, agentId, roomId, agentWorkflowId,
           maxIterations ?? 3, goal, toolDefs.map((t: any) => ({ name: t.name, description: t.description })));
 
         await logEvent(db, roomId, agentWorkflowId, agentId, 'AGENT_LOOP_COMPLETED',
@@ -358,15 +365,46 @@ export function createRunnerWorkers(redis: Redis, connection: ConnectionOpts) {
           .set({ loopState: 'IDLE' as any, lastExecutedAt: new Date().toISOString(), updatedAt: new Date().toISOString() })
           .where('id', '=', agentId).execute();
 
+        // Persist final output to run record and to room memory
+        const outputPayload = {
+          goal,
+          summary: loopResult.summary,
+          toolResults: loopResult.toolResults,
+          iterations: maxIterations ?? 3,
+          roomId,
+          completedAt: new Date().toISOString(),
+        };
+
         await runManager.updateRunStatus(runId, 'completed', {
           endedAt: new Date().toISOString(),
-          output: { goal, iterations: maxIterations ?? 3, roomId },
+          output: outputPayload,
         });
+
+        // Write last-run output to room memory so UI can surface it
+        try {
+          const memoryId = await db.selectFrom('memories').select(['id'])
+            .where('roomId', '=', roomId).executeTakeFirst();
+          if (memoryId) {
+            const now = new Date().toISOString();
+            await db.insertInto('memory_entries').values({
+              id: crypto.randomUUID(),
+              memoryId: memoryId.id,
+              key: `__last_run_output`,
+              value: JSON.stringify(outputPayload),
+              createdAt: now,
+              updatedAt: now,
+            }).onConflict((oc: any) => oc.column('key').doUpdateSet({ value: JSON.stringify(outputPayload), updatedAt: now }))
+            .execute();
+          }
+        } catch { /* non-fatal */ }
 
         await eventBus.emit('agent.completed', runId, { agentId, roomId });
         await eventBus.emit('run.completed', runId, { type: 'agent', agentId, roomId });
         await redis.publish(`openrooms:room:${roomId}`, JSON.stringify({
-          event: 'run.completed', runId, data: { type: 'agent', agentId, roomId }, timestamp: new Date().toISOString(),
+          event: 'run.completed',
+          runId,
+          data: { type: 'agent', agentId, roomId, output: outputPayload },
+          timestamp: new Date().toISOString(),
         }));
 
         console.log(`[RunnerWorker] Agent run ${runId} completed ✓`);

@@ -22,7 +22,7 @@ import { formatDate } from '@/lib/utils'
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'
 
-type Panel = 'agents' | 'workflows' | 'connectors' | 'events' | 'logs' | 'metrics' | 'storage' | 'linked' | 'snapshot' | 'policy' | null
+type Panel = 'agents' | 'workflows' | 'connectors' | 'events' | 'logs' | 'metrics' | 'storage' | 'linked' | 'snapshot' | 'policy' | 'outputs' | null
 
 // ─── Capability definition ─────────────────────────────────────────────────────
 const CAPABILITIES = [
@@ -30,7 +30,8 @@ const CAPABILITIES = [
   { id: 'workflows' as Panel, label: 'Workflows',     Icon: WorkflowIcon,    desc: 'Orchestration graph' },
   { id: 'connectors' as Panel,label: 'Connectors',    Icon: APIIcon,         desc: 'APIs & tools' },
   { id: 'events' as Panel,    label: 'Triggers',      Icon: AutomationIcon,  desc: 'Fire the system' },
-  { id: 'logs' as Panel,      label: 'Live Activity', Icon: LiveRunsIcon,    desc: 'Real-time feed' },
+  { id: 'outputs' as Panel,   label: 'Outputs',       Icon: ReportsIcon,     desc: 'What the agent produced' },
+  { id: 'logs' as Panel,      label: 'Logs',          Icon: LiveRunsIcon,    desc: 'Execution log' },
   { id: 'metrics' as Panel,   label: 'Metrics',       Icon: ReportsIcon,     desc: 'Run stats' },
   { id: 'storage' as Panel,   label: 'Memory',        Icon: MemoryIcon,      desc: 'Shared room state' },
   { id: 'linked' as Panel,    label: 'Linked Rooms',  Icon: WebhookIcon,     desc: 'Room-to-room wiring' },
@@ -215,51 +216,232 @@ function EventsPanel({ roomId, onEvent }: { roomId: string; onEvent: (msg: strin
 
 // ─── Panel: Connectors ────────────────────────────────────────────────────────
 function ConnectorsPanel({ roomId }: { roomId: string }) {
+  const [tab, setTab] = useState<'tools' | 'slack' | 'webhook' | 'schedule'>('tools')
   const [tools, setTools] = useState<any[]>([])
-  const [loading, setLoading] = useState(true)
+  const [toolsLoading, setToolsLoading] = useState(true)
+
+  // Slack state
+  const [slackUrl, setSlackUrl] = useState('')
+  const [slackSaving, setSlackSaving] = useState(false)
+  const [slackStatus, setSlackStatus] = useState<string | null>(null)
+
+  // Webhook output state
+  const [webhookUrl, setWebhookUrl] = useState('')
+  const [webhookSecret, setWebhookSecret] = useState('')
+  const [webhookSaving, setWebhookSaving] = useState(false)
+  const [webhookStatus, setWebhookStatus] = useState<string | null>(null)
+
+  // Schedule state
+  const [cronExpr, setCronExpr] = useState('')
+  const [cronEnabled, setCronEnabled] = useState(false)
+  const [cronSaving, setCronSaving] = useState(false)
+  const [cronStatus, setCronStatus] = useState<string | null>(null)
 
   useEffect(() => {
-    getTools().then(d => setTools(d.tools || [])).catch(() => {}).finally(() => setLoading(false))
-  }, [])
+    getTools().then(d => setTools(d.tools || [])).catch(() => {}).finally(() => setToolsLoading(false))
+    // Load existing schedule
+    fetch(`/api/rooms/${roomId}/schedule`).then(r => r.json()).then(d => {
+      if (d.schedule) {
+        setCronExpr(d.schedule.expression ?? '')
+        setCronEnabled(d.schedule.enabled ?? false)
+      }
+    }).catch(() => {})
+  }, [roomId])
 
-  const connectors = tools.filter(t => ['API', 'BLOCKCHAIN', 'EXTERNAL_API'].includes(t.category))
-  const builtins = tools.filter(t => !['API', 'BLOCKCHAIN', 'EXTERNAL_API'].includes(t.category))
+  async function testSlack() {
+    if (!slackUrl) return
+    setSlackSaving(true); setSlackStatus(null)
+    try {
+      const r = await fetch('/api/integrations/slack/test', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ webhookUrl: slackUrl, message: `✅ Room "${roomId.slice(0,8)}" connected to Slack!` }),
+      })
+      const d = await r.json()
+      setSlackStatus(d.ok ? '✓ Message sent to Slack!' : `✗ ${d.error}`)
+    } catch (e: any) { setSlackStatus(`✗ ${e.message}`) }
+    setSlackSaving(false)
+  }
+
+  async function testWebhook() {
+    if (!webhookUrl) return
+    setWebhookSaving(true); setWebhookStatus(null)
+    try {
+      const r = await fetch('/api/integrations/webhook/send', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url: webhookUrl, secret: webhookSecret || undefined, payload: { source: 'openrooms', roomId, test: true, message: 'OpenRooms webhook test' } }),
+      })
+      const d = await r.json()
+      setWebhookStatus(d.ok ? '✓ Webhook delivered!' : `✗ HTTP ${d.status}`)
+    } catch (e: any) { setWebhookStatus(`✗ ${e.message}`) }
+    setWebhookSaving(false)
+  }
+
+  async function saveSchedule() {
+    setCronSaving(true); setCronStatus(null)
+    try {
+      const r = await fetch(`/api/rooms/${roomId}/schedule`, {
+        method: 'PUT', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ expression: cronExpr, enabled: cronEnabled }),
+      })
+      const d = await r.json()
+      setCronStatus(d.ok ? '✓ Schedule saved!' : `✗ ${d.error}`)
+    } catch (e: any) { setCronStatus(`✗ ${e.message}`) }
+    setCronSaving(false)
+  }
+
+  const CRON_PRESETS = [
+    { label: 'Every morning 8am', expr: '0 8 * * *' },
+    { label: 'Every hour',        expr: '0 * * * *' },
+    { label: 'Every Monday 9am',  expr: '0 9 * * 1' },
+    { label: 'First of month',    expr: '0 9 1 * *' },
+  ]
+
+  const TABS = [
+    { id: 'tools',    label: 'Tools' },
+    { id: 'slack',    label: '💬 Slack' },
+    { id: 'webhook',  label: '🔗 Webhook Out' },
+    { id: 'schedule', label: '⏰ Schedule' },
+  ] as const
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <p className="text-xs text-gray-500">Tools agents in this room can call by name.</p>
-        <Link href="/connectors" className="px-3 py-1.5 border border-[#D4C4A8] hover:border-[#EA580C] text-xs font-bold rounded-lg transition-colors">+ Add Connector</Link>
+      {/* Tab bar */}
+      <div className="flex gap-1 p-1 bg-[#F9F5EF] rounded-xl border border-[#E8E0D0]">
+        {TABS.map(t => (
+          <button key={t.id} onClick={() => setTab(t.id)}
+            className={`flex-1 py-1.5 text-[10px] font-bold rounded-lg transition-all ${tab === t.id ? 'bg-white shadow-sm text-[#EA580C] border border-[#E8E0D0]' : 'text-gray-500 hover:text-gray-700'}`}>
+            {t.label}
+          </button>
+        ))}
       </div>
 
-      {loading ? <div className="text-center py-6"><div className="w-5 h-5 border-2 border-[#D4C4A8] border-t-[#EA580C] rounded-full animate-spin mx-auto" /></div> : (
+      {/* Tools tab */}
+      {tab === 'tools' && (
         <div className="space-y-3">
-          {connectors.length > 0 && (
-            <div>
-              <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">Registered Connectors</p>
-              {connectors.map(t => (
-                <div key={t.id} className="flex items-center gap-3 p-3 bg-white border border-[#D4C4A8] rounded-xl mb-2">
-                  <APIIcon className="w-8 h-8 flex-shrink-0" />
-                  <div><p className="text-xs font-bold text-[#111111]">{t.name}</p><p className="text-[10px] text-gray-500 truncate">{t.description}</p></div>
-                  <span className={`ml-auto text-[10px] px-1.5 py-0.5 rounded font-bold ${t.category === 'BLOCKCHAIN' ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700'}`}>{t.category}</span>
+          <div className="flex items-center justify-between">
+            <p className="text-xs text-gray-500">Tools agents in this room can call by name.</p>
+            <Link href="/connectors" className="px-3 py-1.5 border border-[#D4C4A8] hover:border-[#EA580C] text-xs font-bold rounded-lg transition-colors">+ Add Tool</Link>
+          </div>
+          {toolsLoading
+            ? <div className="text-center py-6"><div className="w-5 h-5 border-2 border-[#D4C4A8] border-t-[#EA580C] rounded-full animate-spin mx-auto" /></div>
+            : tools.length === 0
+              ? <div className="text-center py-6"><APIIcon className="w-10 h-10 mx-auto mb-2 opacity-30" /><p className="text-xs text-gray-500">No tools. <Link href="/connectors" className="text-[#EA580C] font-bold hover:underline">Add one →</Link></p></div>
+              : tools.map(t => (
+                <div key={t.id} className="flex items-center gap-3 p-3 bg-white border border-[#D4C4A8] rounded-xl">
+                  <APIIcon className="w-7 h-7 flex-shrink-0 opacity-60" />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs font-bold text-[#111]">{t.name}</p>
+                    <p className="text-[10px] text-gray-500 truncate">{t.description}</p>
+                  </div>
+                  <span className="text-[9px] px-1.5 py-0.5 bg-emerald-100 text-emerald-700 rounded font-bold uppercase">{t.category}</span>
                 </div>
+              ))
+          }
+        </div>
+      )}
+
+      {/* Slack tab */}
+      {tab === 'slack' && (
+        <div className="space-y-4">
+          <div className="p-3 bg-blue-50 border border-blue-100 rounded-xl">
+            <p className="text-xs font-bold text-blue-900 mb-0.5">Send agent output to Slack</p>
+            <p className="text-[10px] text-blue-700">After a run completes, the output is posted to your Slack channel. Paste your Incoming Webhook URL.</p>
+          </div>
+          <label className="block">
+            <span className="text-[10px] font-bold text-gray-600 uppercase tracking-widest block mb-1">Slack Incoming Webhook URL</span>
+            <input value={slackUrl} onChange={e => setSlackUrl(e.target.value)}
+              placeholder="https://hooks.slack.com/services/T.../B.../..."
+              className="w-full px-3 py-2 text-xs border border-[#D4C4A8] rounded-xl bg-white focus:outline-none focus:border-[#EA580C] font-mono"
+            />
+          </label>
+          <div className="flex items-center gap-2">
+            <button onClick={testSlack} disabled={!slackUrl || slackSaving}
+              className="px-4 py-2 bg-[#EA580C] hover:bg-[#C2410C] disabled:opacity-40 text-white text-xs font-bold rounded-xl transition-colors flex items-center gap-1.5">
+              {slackSaving ? <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" /> : null}
+              Test connection
+            </button>
+            {slackStatus && <span className={`text-xs font-semibold ${slackStatus.startsWith('✓') ? 'text-emerald-600' : 'text-red-600'}`}>{slackStatus}</span>}
+          </div>
+          <p className="text-[10px] text-gray-400">How to get a webhook URL: <a href="https://api.slack.com/messaging/webhooks" target="_blank" rel="noreferrer" className="text-[#EA580C] hover:underline font-bold">Slack Incoming Webhooks guide →</a></p>
+        </div>
+      )}
+
+      {/* Webhook output tab */}
+      {tab === 'webhook' && (
+        <div className="space-y-4">
+          <div className="p-3 bg-purple-50 border border-purple-100 rounded-xl">
+            <p className="text-xs font-bold text-purple-900 mb-0.5">POST output to any URL</p>
+            <p className="text-[10px] text-purple-700">When a run completes, OpenRooms will POST the agent's output as JSON to your URL. Works with Zapier, Make, Discord, or your own backend.</p>
+          </div>
+          <label className="block">
+            <span className="text-[10px] font-bold text-gray-600 uppercase tracking-widest block mb-1">Destination URL</span>
+            <input value={webhookUrl} onChange={e => setWebhookUrl(e.target.value)}
+              placeholder="https://hooks.zapier.com/hooks/catch/..."
+              className="w-full px-3 py-2 text-xs border border-[#D4C4A8] rounded-xl bg-white focus:outline-none focus:border-[#EA580C] font-mono"
+            />
+          </label>
+          <label className="block">
+            <span className="text-[10px] font-bold text-gray-600 uppercase tracking-widest block mb-1">Authorization header (optional)</span>
+            <input value={webhookSecret} onChange={e => setWebhookSecret(e.target.value)}
+              placeholder="Bearer my-secret-token"
+              className="w-full px-3 py-2 text-xs border border-[#D4C4A8] rounded-xl bg-white focus:outline-none focus:border-[#EA580C] font-mono"
+            />
+          </label>
+          <div className="flex items-center gap-2">
+            <button onClick={testWebhook} disabled={!webhookUrl || webhookSaving}
+              className="px-4 py-2 bg-[#EA580C] hover:bg-[#C2410C] disabled:opacity-40 text-white text-xs font-bold rounded-xl transition-colors flex items-center gap-1.5">
+              {webhookSaving ? <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" /> : null}
+              Send test payload
+            </button>
+            {webhookStatus && <span className={`text-xs font-semibold ${webhookStatus.startsWith('✓') ? 'text-emerald-600' : 'text-red-600'}`}>{webhookStatus}</span>}
+          </div>
+        </div>
+      )}
+
+      {/* Schedule tab */}
+      {tab === 'schedule' && (
+        <div className="space-y-4">
+          <div className="p-3 bg-amber-50 border border-amber-100 rounded-xl">
+            <p className="text-xs font-bold text-amber-900 mb-0.5">Run this Room on a schedule</p>
+            <p className="text-[10px] text-amber-700">Set a cron expression and enable the schedule. The room fires automatically at the configured time.</p>
+          </div>
+
+          {/* Quick presets */}
+          <div>
+            <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest block mb-2">Quick presets</span>
+            <div className="flex flex-wrap gap-1.5">
+              {CRON_PRESETS.map(p => (
+                <button key={p.expr} onClick={() => setCronExpr(p.expr)}
+                  className={`px-2.5 py-1 text-[10px] font-bold rounded-lg border transition-all ${cronExpr === p.expr ? 'border-[#EA580C] bg-orange-50 text-[#EA580C]' : 'border-[#D4C4A8] text-gray-500 hover:border-[#EA580C]'}`}>
+                  {p.label}
+                </button>
               ))}
             </div>
-          )}
-          <div>
-            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">Built-in Tools</p>
-            {builtins.map(t => (
-              <div key={t.id} className="flex items-center gap-3 p-3 bg-white border border-[#D4C4A8] rounded-xl mb-2">
-                <APIIcon className="w-8 h-8 flex-shrink-0" />
-                <div><p className="text-xs font-bold text-[#111111]">{t.name}</p><p className="text-[10px] text-gray-500 truncate">{t.description}</p></div>
-              </div>
-            ))}
-            {builtins.length === 0 && connectors.length === 0 && (
-              <div className="text-center py-6">
-                <APIIcon className="w-10 h-10 mx-auto mb-2 opacity-30" />
-                <p className="text-xs text-gray-500">No tools yet. <Link href="/connectors" className="text-[#EA580C] font-bold hover:underline">Add a connector →</Link></p>
-              </div>
-            )}
+          </div>
+
+          <label className="block">
+            <span className="text-[10px] font-bold text-gray-600 uppercase tracking-widest block mb-1">Cron expression</span>
+            <input value={cronExpr} onChange={e => setCronExpr(e.target.value)}
+              placeholder="0 8 * * *  (= every day at 8am)"
+              className="w-full px-3 py-2 text-xs border border-[#D4C4A8] rounded-xl bg-white focus:outline-none focus:border-[#EA580C] font-mono"
+            />
+          </label>
+
+          <label className="flex items-center gap-2 cursor-pointer">
+            <div onClick={() => setCronEnabled(v => !v)}
+              className={`w-9 h-5 rounded-full transition-colors flex items-center px-0.5 ${cronEnabled ? 'bg-[#EA580C]' : 'bg-gray-200'}`}>
+              <div className={`w-4 h-4 bg-white rounded-full shadow transition-transform ${cronEnabled ? 'translate-x-4' : 'translate-x-0'}`} />
+            </div>
+            <span className="text-xs font-semibold text-gray-700">{cronEnabled ? 'Schedule enabled' : 'Schedule disabled'}</span>
+          </label>
+
+          <div className="flex items-center gap-2">
+            <button onClick={saveSchedule} disabled={!cronExpr || cronSaving}
+              className="px-4 py-2 bg-[#EA580C] hover:bg-[#C2410C] disabled:opacity-40 text-white text-xs font-bold rounded-xl transition-colors flex items-center gap-1.5">
+              {cronSaving ? <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" /> : null}
+              Save schedule
+            </button>
+            {cronStatus && <span className={`text-xs font-semibold ${cronStatus.startsWith('✓') ? 'text-emerald-600' : 'text-red-600'}`}>{cronStatus}</span>}
           </div>
         </div>
       )}
@@ -868,6 +1050,99 @@ function PolicyPanel({ agents, onRefresh }: { agents: Agent[]; onRefresh: () => 
   )
 }
 
+// ─── Outputs Panel ────────────────────────────────────────────────────────────
+function OutputsPanel({ roomId, lastRunOutput, runs }: {
+  roomId: string
+  lastRunOutput: { summary: string; goal: string; toolResults: {tool:string; result:unknown}[]; completedAt: string } | null
+  runs: any[]
+}) {
+  const [storedOutput, setStoredOutput] = useState<any>(null)
+  const [loading, setLoading] = useState(false)
+
+  useEffect(() => {
+    if (lastRunOutput) { setStoredOutput(lastRunOutput); return }
+    // Try fetching from memory
+    setLoading(true)
+    fetch(`/api/rooms/${roomId}/memory/__last_run_output`)
+      .then(r => r.ok ? r.json() : null)
+      .then(d => { if (d?.value) setStoredOutput(JSON.parse(d.value)) })
+      .catch(() => {})
+      .finally(() => setLoading(false))
+  }, [roomId, lastRunOutput])
+
+  const output = lastRunOutput ?? storedOutput
+
+  if (loading) return <div className="text-center py-8"><div className="w-5 h-5 border-2 border-[#D4C4A8] border-t-[#EA580C] rounded-full animate-spin mx-auto" /></div>
+
+  if (!output) return (
+    <div className="text-center py-10">
+      <ReportsIcon className="w-12 h-12 mx-auto mb-3 opacity-20" />
+      <p className="text-sm text-gray-500">No output yet.</p>
+      <p className="text-xs text-gray-400 mt-1">Run an agent — results appear here automatically.</p>
+    </div>
+  )
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <p className="text-xs font-bold text-gray-700 mb-0.5">Last Run Output</p>
+          <p className="text-[10px] text-gray-400">{output.completedAt ? new Date(output.completedAt).toLocaleString() : ''}</p>
+        </div>
+        <Link href="/live-runs" className="text-[10px] font-bold text-[#EA580C] hover:underline flex-shrink-0">Full trace →</Link>
+      </div>
+
+      {/* Goal */}
+      <div className="p-3 bg-[#F9F5EF] border border-[#E8E0D0] rounded-xl">
+        <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1">Goal</p>
+        <p className="text-xs text-gray-700 leading-relaxed">{output.goal}</p>
+      </div>
+
+      {/* Summary / Final Reasoning */}
+      {output.summary && (
+        <div className="p-3 bg-purple-50 border border-purple-100 rounded-xl">
+          <p className="text-[10px] font-bold text-purple-500 uppercase tracking-widest mb-1">Agent Reasoning</p>
+          <p className="text-xs text-purple-900 leading-relaxed">{output.summary}</p>
+        </div>
+      )}
+
+      {/* Tool Results */}
+      {output.toolResults?.length > 0 && (
+        <div>
+          <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-2">Tool Outputs</p>
+          <div className="space-y-2">
+            {output.toolResults.map((tr: any, i: number) => (
+              <div key={i} className="p-3 bg-[#0D0F1A] rounded-xl">
+                <p className="text-[10px] font-bold text-orange-400 mb-1 font-mono">⚡ {tr.tool}</p>
+                <pre className="text-[10px] text-emerald-300 font-mono whitespace-pre-wrap break-all leading-relaxed max-h-40 overflow-y-auto">
+                  {typeof tr.result === 'string' ? tr.result : JSON.stringify(tr.result, null, 2)}
+                </pre>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Run history row */}
+      {runs.slice(0, 3).length > 0 && (
+        <div>
+          <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">Recent Runs</p>
+          <div className="space-y-1">
+            {runs.slice(0, 3).map(r => (
+              <Link key={r.id} href={`/live-runs/${r.id}`}
+                className="flex items-center gap-2 p-2 bg-white border border-[#E8E0D0] rounded-lg hover:border-[#EA580C] transition-colors">
+                <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${r.status === 'completed' ? 'bg-emerald-500' : r.status === 'failed' ? 'bg-red-500' : 'bg-blue-500 animate-pulse'}`} />
+                <span className="font-mono text-[10px] text-gray-500 flex-1">{r.id.slice(0, 12)}…</span>
+                <span className="text-[10px] font-bold text-[#EA580C]">trace →</span>
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
 // ─── Workflow Panel ───────────────────────────────────────────────────────────
 function WorkflowPanel({ room }: { room: any }) {
   return (
@@ -918,6 +1193,9 @@ export default function RoomSystemPage() {
   const [lastNotice, setLastNotice] = useState<string | null>(null)
   const [sseConnected, setSseConnected] = useState(false)
   const [lastCompletedRunId, setLastCompletedRunId] = useState<string | null>(null)
+  const [lastRunOutput, setLastRunOutput] = useState<{
+    summary: string; goal: string; toolResults: {tool:string; result:unknown}[]; completedAt: string
+  } | null>(null)
 
   const pushActivity = useCallback((msg: string, type: 'run' | 'agent' | 'event' | 'log' | 'reason' | 'tool' = 'log') => {
     setActivityFeed(prev => [{ time: new Date().toLocaleTimeString(), msg, type }, ...prev].slice(0, 60))
@@ -974,6 +1252,12 @@ export default function RoomSystemPage() {
           } else if (event === 'run.completed') {
             const runId = payload.runId as string
             if (runId) setLastCompletedRunId(runId)
+            // Capture output if present
+            if (data?.output) {
+              setLastRunOutput(data.output as any)
+              // Auto-open outputs panel
+              setActivePanel('outputs')
+            }
             pushActivity(`Run ${runId?.slice(0, 8) || '?'}… completed`, 'run')
             setTimeout(load, 800)
           } else if (event === 'workflow.step') {
@@ -1172,6 +1456,38 @@ export default function RoomSystemPage() {
         <div className="flex-1 overflow-y-auto min-w-0">
           <div className="p-6 md:p-8 space-y-6">
 
+            {/* ── Last Run Output Banner ──────────────────────────── */}
+            {lastRunOutput && (
+              <div className="bg-emerald-50 border-2 border-emerald-300 rounded-2xl p-5 relative">
+                <button onClick={() => setLastRunOutput(null)}
+                  className="absolute top-3 right-3 text-emerald-400 hover:text-emerald-700 font-bold text-sm">✕</button>
+                <div className="flex items-center gap-2 mb-3">
+                  <span className="w-2 h-2 bg-emerald-500 rounded-full" />
+                  <p className="text-xs font-black text-emerald-800 uppercase tracking-widest">Last Run Output</p>
+                  <span className="text-[10px] text-emerald-600 ml-auto">{new Date(lastRunOutput.completedAt).toLocaleTimeString()}</span>
+                </div>
+                <p className="text-sm font-semibold text-emerald-900 mb-3 leading-relaxed">{lastRunOutput.summary}</p>
+                {lastRunOutput.toolResults?.length > 0 && (
+                  <div className="space-y-2">
+                    {lastRunOutput.toolResults.map((tr, i) => (
+                      <div key={i} className="bg-white border border-emerald-200 rounded-xl p-3">
+                        <p className="text-[10px] font-bold text-emerald-700 uppercase tracking-widest mb-1">⚡ {tr.tool}</p>
+                        <pre className="text-[11px] text-gray-600 font-mono whitespace-pre-wrap break-all max-h-24 overflow-y-auto">
+                          {JSON.stringify(tr.result, null, 2).slice(0, 400)}
+                        </pre>
+                      </div>
+                    ))}
+                  </div>
+                )}
+                {lastCompletedRunId && (
+                  <Link href={`/live-runs/${lastCompletedRunId}`}
+                    className="inline-flex items-center gap-1.5 mt-3 text-xs font-bold text-emerald-700 hover:underline">
+                    View full trace →
+                  </Link>
+                )}
+              </div>
+            )}
+
             {/* Capability Grid */}
             <div>
               <p className="text-[10px] font-bold tracking-widest text-gray-400 uppercase mb-3">Capabilities</p>
@@ -1182,7 +1498,8 @@ export default function RoomSystemPage() {
                   const dotColor =
                     id === 'agents' && agents.length > 0 ? 'bg-emerald-400' :
                     id === 'logs' && logs.length > 0 ? 'bg-blue-400' :
-                    id === 'metrics' && runs.length > 0 ? 'bg-purple-400' : null
+                    id === 'metrics' && runs.length > 0 ? 'bg-purple-400' :
+                    id === 'outputs' && lastRunOutput ? 'bg-orange-400' : null
 
                   return (
                     <button
@@ -1250,6 +1567,7 @@ export default function RoomSystemPage() {
                   {activePanel === 'linked' && <LinkedRoomsPanel currentRoomId={roomId} />}
                   {activePanel === 'snapshot' && <SnapshotPanel room={room} agents={agents} />}
                   {activePanel === 'policy' && <PolicyPanel agents={agents} onRefresh={load} />}
+                  {activePanel === 'outputs' && <OutputsPanel roomId={roomId} lastRunOutput={lastRunOutput} runs={runs} />}
                 </div>
               </div>
             )}

@@ -127,69 +127,44 @@ export async function roomRoutes(
     const { id } = request.params;
 
     try {
-      // Preflight + self-heal for legacy workflows with missing nodes
       const room = await container.roomRepository.findById(id);
-      if (!room) {
-        return reply.code(404).send({ error: 'Room not found' });
-      }
+      if (!room) return reply.code(404).send({ error: 'Room not found' });
 
-      const workflow = await container.workflowRepository.findById(room.workflowId);
-      if (!workflow) {
-        return reply.code(404).send({ error: 'Workflow not found for room' });
-      }
+      // Use workflowRunner directly (same path as /webhook) — no dead queue middleman
+      const result = await container.workflowRunner.runWorkflow(room.workflowId, {
+        roomId: id,
+        context: { trigger: 'manual', triggeredAt: new Date().toISOString() },
+      });
 
-      const initialNode = await container.workflowRepository.getNode(workflow.initialNodeId as any);
-      if (!initialNode) {
-        const startNodeId = workflow.initialNodeId;
-        const endNodeId = crypto.randomUUID();
-        const now = new Date().toISOString();
+      // Update room status to RUNNING
+      await container.roomRepository.update(id, { status: 'RUNNING' as RoomStatus });
 
-        await container.db
-          .insertInto('workflow_nodes')
-          .values([
-            {
-              id: crypto.randomUUID(),
-              workflowId: workflow.id,
-              nodeId: startNodeId,
-              type: 'START' as any,
-              name: 'Start',
-              description: 'Auto-recovered start node',
-              config: JSON.stringify({
-                transitions: [{ condition: 'ALWAYS', targetNodeId: endNodeId }],
-              }) as any,
-              createdAt: now as any,
-              updatedAt: now as any,
-            },
-            {
-              id: crypto.randomUUID(),
-              workflowId: workflow.id,
-              nodeId: endNodeId,
-              type: 'END' as any,
-              name: 'End',
-              description: 'Auto-recovered end node',
-              config: JSON.stringify({ transitions: [] }) as any,
-              createdAt: now as any,
-              updatedAt: now as any,
-            },
-          ])
-          .execute();
-      }
-
-      // Add job to queue for async execution
-      await container.jobQueue.addJob('room-execution', 'execute', { roomId: id });
+      // Notify SSE listeners
+      await container.eventBus.emit('workflow.step', result.runId, {
+        workflowId: room.workflowId,
+        roomId: id,
+        step: 'started',
+      });
+      await container.redis.publish(`openrooms:room:${id}`, JSON.stringify({
+        event: 'run.started',
+        runId: result.runId,
+        data: { roomId: id, trigger: 'manual' },
+        timestamp: new Date().toISOString(),
+      }));
 
       return reply.send({
         message: 'Room execution started',
         roomId: id,
+        runId: result.runId,
       });
     } catch (error) {
+      fastify.log.error(error);
       return reply.code(500).send({
         error: 'Failed to start room execution',
         message: error instanceof Error ? error.message : String(error),
       });
     }
   });
-
   // Get Room Status
   fastify.get<{
     Params: { id: string };

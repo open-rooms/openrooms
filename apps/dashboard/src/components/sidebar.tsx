@@ -34,6 +34,7 @@ import {
 // Core platform — only routes with real pages
 const platformNav: NavItem[] = [
   { name: 'Rooms',        href: '/rooms',        Icon: RoomsIcon },
+  { name: 'Automations',  href: '/automations',  Icon: AutomationIcon },
   { name: 'Agents',       href: '/agents',       Icon: AgentIcon },
   { name: 'Workflows',    href: '/workflows',    Icon: WorkflowIcon },
   { name: 'Connectors',   href: '/connectors',   Icon: APIIcon },
