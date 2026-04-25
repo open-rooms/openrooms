@@ -443,28 +443,29 @@ export default function HomePage() {
             </span>
             <h1 className="text-4xl md:text-5xl font-extrabold text-[#111111] mb-5 leading-tight tracking-tight animate-fadeSlideUp"
               style={{ animationDelay: '60ms' }}>
-              Run intelligent systems<br />that act for you.
+              Your AI workers,<br />running 24/7.
             </h1>
             <p className="text-base md:text-lg text-gray-500 mb-8 leading-relaxed animate-fadeSlideUp"
               style={{ animationDelay: '130ms' }}>
-              OpenRooms is a control plane for AI agents, workflows, and real-time automation —
-              across models, APIs, and blockchain.
+              Deploy agents that fetch data, write reports, monitor prices,
+              and send you briefings — automatically, every day.
+              No code. No setup. One click.
             </p>
             <div className="flex flex-col sm:flex-row gap-3 animate-fadeSlideUp" style={{ animationDelay: '200ms' }}>
-              <button
-                onClick={handleStartFree}
+              <Link href="/automations"
                 className="px-6 py-3 text-white font-bold rounded-lg text-sm transition-all inline-flex items-center gap-2"
                 style={{ backgroundColor: CTA }}
                 onMouseEnter={e => (e.currentTarget.style.backgroundColor = CTA_HOVER)}
                 onMouseLeave={e => (e.currentTarget.style.backgroundColor = CTA)}
               >
-                Start for free
-                <ChevronRightIcon className="w-4 h-4" />
+                Deploy an automation →
+              </Link>
+              <button
+                onClick={handleStartFree}
+                className="px-6 py-3 border border-[#D4C9B8] hover:border-[#111111] text-[#111111] font-semibold rounded-lg text-sm transition-colors text-center bg-white"
+              >
+                Build from scratch
               </button>
-              <a href="#features"
-                className="px-6 py-3 border border-[#D4C9B8] hover:border-[#111111] text-[#111111] font-semibold rounded-lg text-sm transition-colors text-center bg-white">
-                Explore features
-              </a>
             </div>
 
             {/* Live stats chips */}
